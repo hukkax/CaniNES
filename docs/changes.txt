@@ -1,0 +1,211 @@
+=============================================================================
+Changelog
+=============================================================================
+2021-09-21:
+- Boxart/screenshot locations can now each contain multiple paths separated
+  by semicolon; Zip archives are also supported
+- The date/time format displayed when selecting a save slot can now be customized
+
+2021-09-20:
+- Files within archives are now extracted straight into memory without using
+  temporary files
+- If an archive only contains one ROM, automatically open it
+- Archives are now colorized in the file browser
+
+2021-09-17:
+- Added support for browsing/loading ROMs from within Zip archives
+- Added a scrollbar to menus when applicable
+- Fixed a memory leak in file browser
+
+2021-09-16:
+- Added Favourites; use menu or Shift-F to (un)favourite, Shift-F2 to list
+- Menus now colourize favourited ROMs and the currently loaded ROM
+- Fixed menu rendering issues with overscan
+
+2021-09-15:
+- Toggling CRT/NTSC filters while paused/in menu now displays proper frame
+- Fixed incorrect overscan bounds calculations
+
+2021-09-14:
+- All GUI colors can now be changed via the configuration file
+
+2021-09-13:
+- Improved OSD for savestate slot selection: shows availability and date
+- Added OSD opacity and timeout settings
+- Added setting to only show pad inputs during movie playback
+- Implemented mappers 115, 193, 521
+
+2021-09-10:
+- Added setting to autoswitch 50/60 Hz display mode in fullscreen
+  (switches to closest match to current desktop resolution)
+- Added overscan settings
+- Added alignment settings for various On-Screen Display elements
+- Implemented mappers 38, 73, 78, 155, 180, 190, 250, 262, 268
+- A CaniNES logo is displayed while the window is (re)initializing
+
+2021-09-09:
+- Fixed Dendy erroneously running at 60 Hz
+
+2021-09-08:
+- Optimized overlay rendering
+- Refactored buggy window initialization/renderer manager code
+
+2021-09-07:
+- Added option to visualize gamepad inputs
+- Refactored font rendering code
+
+2021-09-03:
+- Fixed rendering of alpha channel when using freetype
+
+2021-09-02:
+- Menus can now be operated via the mouse, right click to toggle menu
+
+2021-09-01:
+- Implemented mappers 33, 36, 37, 48, 65, 67, 93, 112, 156, 177, 184,
+  87/101, 80/207, 137/138/139/141,
+  157 (Datach, barcode reader not implemented),
+  168 (Racermate, exercise bike not implemented)
+
+2021-08-31:
+- Implemented mappers 30, 111 (flash storage not implemented)
+
+2021-08-30:
+- Implemented mappers 70, 150, 152, 243, 185, 290
+- Preliminary support for Mesen movies (MMO)
+- Sped up menu generation via caching (improves ROM loading speed)
+
+2021-08-27:
+- You can now type the beginning of a title in a file listing to jump to it
+- Fixed "sticking" with some shortcuts using the Shift key
+- Fixed NTSC filter color burst flickering during Rewind/Fast forward
+- Preliminary internal support for FCEU movies (fm2, fm3)
+
+2021-08-25:
+- Added JPEG support for Boxart/Screenshots
+
+2021-08-24:
+- Implemented Run-ahead to minimize input lag
+- Implemented Freetype font rendering (optionally disabled via compiler switch)
+- Added an option to change the scaling of Boxart/Screenshots
+- Added an option to set the default ROM path to current dir in file browser
+- Added an option to set the Boxart/Screenshot path to current dir in file
+  browser (when current directory contains some png images)
+
+2021-08-23:
+- Added option to restore previous state upon loading ROM
+- Added option to restore previously loaded ROM on startup
+- Added option to pause emulation when in menu
+- Added options related to power-on state
+- Improved heuristics for finding boxart/screenshot images
+- Menu rendering improvements
+- Zapper is now enabled/disabled automatically, unless forced on via settings
+- Fixed broken Zapper emulation
+
+2021-08-21:
+- Added support for Pro Action Rocky cheats
+
+2021-08-20:
+- Added settings for Fast forward maximum speed and frame display interval
+- Added more information and gameplay screenshot to Cartridge info screen
+- Improved and optimized heuristics for finding boxart/screenshot images
+
+2021-08-19:
+- Implemented mappers 172, 173
+- Preliminary implementation of box art support and a Cartridge info screen
+  (images must be PNG, specify directory in [Application]/ImagePath.Boxart)
+
+2021-08-16:
+- Filenames containing special characters that exist in the Latin-9 character
+  set are now displayed correctly
+- Menu font will now be selected and scaled according to window size
+- Implemented recording audio to WAV (saved to config folder by default)
+
+2021-08-15:
+- Added Recent file history
+- Added setting to use the original ROM CRC after auto-patching; enables the
+  use of cheats meant for the original unpatched ROM
+
+2021-08-14:
+- Added Aspect ratio setting
+- Added Filtering mode setting (nearest/linear)
+- Changes to display settings are now applied on the fly
+- Corresponding IPS patch is now automatically applied upon loading a ROM
+  if found in the same directory
+- Made the menu more aesthetically pleasing
+
+2021-08-13:
+- Implemented mapper 85 (VRC7) including OPLL sound emulation
+- Implemented Jaleco mappers 18, 72, 86, 92 (no sound hardware emulation)
+- Improved audio interference CPU usage
+
+2021-08-12:
+- Implemented audio interference (https://github.com/NovaSquirrel/Mesen/pull/42)
+- Sped up the audio mixer
+
+2021-08-11:
+- Improved menu behavior
+- Fixed Cheat code listing not clearing when changing to a ROM without cheats
+- Reworked Fast forwarding to be much smoother
+- Optimization to overlay drawing (don't regenerate texture if not changed)
+- Added more information to the Info box display (mirroring, mapper, system)
+  and extended the display setting to three modes (hidden, small, full)
+
+2021-08-10:
+- Implemented mappers 40,43,49,56,121,132,142,222
+- ROM file browser defaults to the path of last loaded ROM
+
+2021-08-09:
+- Implemented mappers 10,16,21,22,23,25,27,28,32,39,42,46,53,59,60,61,62,83,90,
+  91,117,133,148,149,153,159,187,189,209,211,227,229,230,231,234,241,245,246
+- Fixed power cycling not properly reinitializing the cartridge
+
+2021-08-04:
+- Implemented DMC DMA delay timing improvement from mkwong98's fork
+- Implemented mappers 6/8/17 (Front Fareast Magic Card and various similar)
+- Implemented multicart mappers: 44,45,57,58,225,226,233,235,255
+- Removed an extraneous call to Mapper.Reset which caused the reset routine
+  to run twice each time
+
+2021-08-03:
+- Implemented mapper 52 (MMC3 variant; Mario 7-in-1)
+
+2021-03-03:
+- Implemented FDS disk saves as IPS patches (minimally tested)
+
+2021-02-26:
+- Fixed keybinding issues with the Shift keys
+- Fixed envelope issues with FDS extra sound channel
+- Implemented mappers 19/210 (Namco 129/163), with expansion audio
+- Implemented mapper 68 (Sunsoft-4)
+- Implemented mapper 105 (MMC1 variant)
+
+2021-02-24:
+- Fixed incomplete savestate generation (breaks previous Mapper 4 saves)
+- Implemented mappers 24/26 (VRC6), with expansion audio
+- Implemented mapper 5 (MMC5), with expansion audio
+- Implemented mapper 69 (Sunsoft FME-7), with expansion audio
+- Implemented mapper 13 (Videomation CpRom)
+- Implemented mapper 41 (Caltron 6-in-1)
+- Implemented mapper 47 (Super Spike V'Ball + Nintendo World Cup)
+- Implemented mapper 118 (TxSRom)
+- Implemented mapper 232 (Camerica/Codemasters BF9096)
+
+2021-02-19:
+- Implemented mappers 34, 74, 119, 191, 192, 194, 195
+- Fixed ROMs containing trainers not initializing properly
+- Implemented configurable keyboard/joypad bindings
+
+2021-02-13:
+- Fixed the Cheats menu and added checkboxes
+- Changes to palette settings now take effect immediately
+- Unified normal and NTSC filter palette settings
+- No more console window in Release builds. Logging to file can be done via
+  "canines --debug-log=canines.log" or using the supplied Windows batch file
+- Added Debug Log to main menu
+
+2021-02-12:
+- Fixed corrupted savestates/rewind frames (was missing a function call)
+- Fixed Mapper 114 (was triggering IRQs incorrectly)
+- Implemented support for battery backed RAM loading/saving
+- Menu improvements (font rendering, palette, structuring)
+- Code cleanup

@@ -1,0 +1,1124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General>
+      <Flags>
+        <MainUnitHasUsesSectionForAllUnits Value="False"/>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+        <CompatibilityMode Value="True"/>
+      </Flags>
+      <SessionStorage Value="InIDEConfig"/>
+      <Title Value="CaniNES"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <XPManifest>
+        <TextName Value="CaniNES"/>
+        <TextDesc Value="A FreePascal port of the Mesen NES emulator."/>
+      </XPManifest>
+      <Icon Value="0"/>
+      <Resources Count="10">
+        <Resource_0 FileName="res\database.txt" Type="RCDATA" ResourceName="DATABASE"/>
+        <Resource_1 FileName="res\cheats.ini" Type="RCDATA" ResourceName="CHEATS"/>
+        <Resource_2 FileName="res\default_0.png" Type="RCDATA" ResourceName="FONT_0"/>
+        <Resource_3 FileName="res\default_1.png" Type="RCDATA" ResourceName="FONT_1"/>
+        <Resource_4 FileName="res\titles.txt" Type="RCDATA" ResourceName="TITLES"/>
+        <Resource_5 FileName="res\default_2.png" Type="RCDATA" ResourceName="FONT_2"/>
+        <Resource_6 FileName="res\officecodepro.ttf" Type="RCDATA" ResourceName="FONT"/>
+        <Resource_7 FileName="res\license.txt" Type="RCDATA" ResourceName="FONTLIC"/>
+        <Resource_8 FileName="res\icons.png" Type="RCDATA" ResourceName="ICONS"/>
+        <Resource_9 FileName="res\logo.png" Type="RCDATA" ResourceName="LOGO"/>
+      </Resources>
+    </General>
+    <BuildModes Count="4">
+      <Item1 Name="Release-32bit" Default="True"/>
+      <Item2 Name="Release-64bit">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)\canines"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
+            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetProcessor Value="ATHLON64"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx6060="True" idx6058="True" idx5024="True" idx3123="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-vm6060
+-OoFASTMATH
+-OoLOOPUNROLL
+-OoREMOVEEMPTYPROCS
+-OoUNUSEDPARA
+-OoREGVAR
+-OoSTACKFRAME
+-OoTAILREC
+-OoCSE
+-OoUSELOADMODIFYSTORE
+-OoLOOPUNROLL
+-OpCOREAVX
+-CfAVX
+-Si
+-Sv
+-dAUDIO"/>
+            <OtherDefines Count="1">
+              <Define0 Value="AUDIO"/>
+            </OtherDefines>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)\canines-debug"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
+            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <StackChecks Value="True"/>
+            </Checks>
+            <VerifyObjMethodCallValidity Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+              <TrashVariables Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx6060="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dDEBUG
+-dAUDIO"/>
+            <OtherDefines Count="1">
+              <Define0 Value="AUDIO"/>
+            </OtherDefines>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+      <Item4 Name="Debug64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)\canines-debug"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\gr32;basement\playroutines"/>
+            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\gr32;basement\playroutines"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <StackChecks Value="True"/>
+            </Checks>
+            <VerifyObjMethodCallValidity Value="True"/>
+            <TargetProcessor Value="ATHLON64"/>
+            <TargetCPU Value="x86_64"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+              <TrashVariables Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG
+-dAUDIO"/>
+            <OtherDefines Count="1">
+              <Define0 Value="AUDIO"/>
+            </OtherDefines>
+          </Other>
+        </CompilerOptions>
+      </Item4>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <OpenInFileMan Value="True"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="169">
+      <Unit0>
+        <Filename Value="CaniNES.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="core/mappers/nes.mapper_066.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_066"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="core/mappers/nes.mapper_001.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_001"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="core/mappers/nes.mapper_003.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_003"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="core/nes.cartridge.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Cartridge"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="core/nes.mapper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="core/mappers/nes.mapper_000.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_000"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="core/nes.ppu.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.PPU"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="core/nes.console.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Console"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="core/mappers/nes.mapper_007.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_007"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="core/mappers/nes.mapper_004.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_004"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="core/nes.apu.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="core/mappers/nes.mapper_002.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_002"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="core/nes.apu.channel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.Channel"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="core/nes.apu.mixer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.Mixer"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="core/utility/blip.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Blip"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="core/nes.cheats.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Cheats"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="core/nes.cpu.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.CPU"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="shell/nes.config.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Config"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="core/utility/nes.palette.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Palette"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="core/nes.memoryhandler.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.MemoryHandler"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="core/nes.memorymanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.MemoryManager"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="core/nes.rom.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.ROM"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="core/mappers/nes.mapper_011.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_011"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="core/mappers/nes.mapper_015.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_015"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="core/nes.types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Types"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="core/mappers/nes.mapper_075.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_075"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="core/mappers/nes.mapper_079.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_079"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="core/nes.database.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Database"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="core/nes.rom.header.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.ROM.Header"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="core/mappers/nes.mapper_064.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_064"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="core/mappers/nes.a12watcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.A12Watcher"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="core/mappers/nes.mapper_071.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_071"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="core/nes.savestate.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.SaveState"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="core/mappers/nes.mapper_206.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_206"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="core/mappers/nes.mapper_228.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_228"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="shell/configurationmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ConfigurationManager"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="core/mappers/nes.mapper_009.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_009"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="core/nes.controllers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Controllers"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="basement/basement.renderer.crt.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Renderer.CRT"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="basement/basement.renderer.overlay.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Renderer.Overlay"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="core/utility/nes.ntsc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.NTSC"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="shell/basement.renderer.ntsc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Renderer.NTSC"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="core/nes.audiomanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.AudioManager"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="core/nes.inputmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.InputManager"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="shell/menuhandler.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuHandler"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="shell/mainmenu.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MainMenu"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="shell/mainwindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MainWindow"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="core/nes.rewindmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.RewindManager"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="core/mappers/nes.mapper_fds.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_FDS"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="core/nes.debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Debugger"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="basement/basement.window.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Window"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="basement/basement.renderer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Renderer"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="basement/basement.util.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Util"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="shell/logging.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Logging"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="basement/hkafileutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="hkaFileUtils"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="shell/inputbindings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="InputBindings"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="core/mappers/nes.mapper_034.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_034"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="core/mappers/nes.mapper_005.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_005"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="core/mappers/nes.mapper_vrc6.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_VRC6"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="core/mappers/nes.vrc_irq.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.VRC_IRQ"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="core/mappers/nes.mapper_069.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_069"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="core/mappers/nes.mapper_xxx.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_XXX"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="core/mappers/nes.mapper_232.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_232"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="core/mappers/nes.mapper_041.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_041"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="core/mappers/nes.mapper_013.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_013"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="core/mappers/nes.mapper_118.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_118"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="shell/textoutput.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TextOutput"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="core/mappers/nes.mapper_namco163.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_Namco163"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="core/audioexp/nes.apu.expansionaudio.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.ExpansionAudio"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="core/audioexp/nes.apu.sunsoft5b.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.Sunsoft5B"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="core/audioexp/nes.apu.vrc6.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.VRC6"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="core/audioexp/nes.apu.fds.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.FDS"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="core/audioexp/nes.apu.mmc5.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.MMC5"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="core/audioexp/nes.apu.namco163.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.Namco163"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="core/mappers/nes.mapper_068.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_068"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="core/mappers/nes.mapper_105.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_105"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="core/utility/ipspatcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPSpatcher"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="core/mappers/nes.mapper_006.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_006"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="core/mappers/nes.mapper_226.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_226"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="core/mappers/nes.mapper_225.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_225"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="core/mappers/nes.mapper_235.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_235"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="core/mappers/nes.mapper_057.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_057"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="core/mappers/nes.mapper_058.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_058"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="core/mappers/nes.mapper_028.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_028"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="core/mappers/nes.mapper_059.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_059"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="core/mappers/nes.mapper_053.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_053"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="core/mappers/nes.mapper_062.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_062"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="core/mappers/nes.mapper_230.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_230"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="core/mappers/nes.mapper_234.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_234"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="core/mappers/nes.mapper_jycompany.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_JyCompany"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="core/mappers/nes.mapper_vrc2_4.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_VRC2_4"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="core/mappers/nes.mapper_sachen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_Sachen"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="core/mappers/nes.mapper_042.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_042"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="core/mappers/nes.mapper_083.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_083"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="core/mappers/nes.mapper_010.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_010"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="core/mappers/nes.mapper_246.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_246"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="core/mappers/nes.mapper_231.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_231"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="core/mappers/nes.mapper_229.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_229"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="core/mappers/nes.mapper_061.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_061"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="core/mappers/nes.mapper_060.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_060"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="core/mappers/nes.mapper_046.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_046"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="core/mappers/nes.mapper_227.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_227"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="core/mappers/nes.mapper_032.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_032"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="core/mappers/nes.mapper_117.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_117"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="core/mappers/nes.mapper_bandaifcg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_BandaiFCG"/>
+      </Unit105>
+      <Unit106>
+        <Filename Value="core/mappers/nes.baseeeprom24c0x.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.BaseEeprom24C0X"/>
+      </Unit106>
+      <Unit107>
+        <Filename Value="core/mappers/nes.mapper_ks202.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_KS202"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="core/mappers/nes.mapper_222.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_222"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="core/mappers/nes.mapper_132.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_132"/>
+      </Unit109>
+      <Unit110>
+        <Filename Value="core/mappers/nes.txcchip.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.TXCChip"/>
+      </Unit110>
+      <Unit111>
+        <Filename Value="core/mappers/nes.mapper_040.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_040"/>
+      </Unit111>
+      <Unit112>
+        <Filename Value="core/mappers/nes.mapper_050.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_050"/>
+      </Unit112>
+      <Unit113>
+        <Filename Value="core/mappers/nes.mapper_043.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_043"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="core/mappers/nes.mapper_150.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_150"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="shell/infoboxdisplay.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="InfoBoxDisplay"/>
+      </Unit115>
+      <Unit116>
+        <Filename Value="core/audioexp/nes.apu.interference.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.Interference"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="core/mappers/nes.mapper_vrc7.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_VRC7"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="core/audioexp/nes.apu.vrc7.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.VRC7"/>
+      </Unit118>
+      <Unit119>
+        <Filename Value="core/audioexp/nes.apu.opll.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.APU.OPLL"/>
+      </Unit119>
+      <Unit120>
+        <Filename Value="core/mappers/nes.mapper_072.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_072"/>
+      </Unit120>
+      <Unit121>
+        <Filename Value="core/mappers/nes.mapper_086.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_086"/>
+      </Unit121>
+      <Unit122>
+        <Filename Value="core/mappers/nes.mapper_018.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_018"/>
+      </Unit122>
+      <Unit123>
+        <Filename Value="basement/graphics32.resamplers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Graphics32.Resamplers"/>
+      </Unit123>
+      <Unit124>
+        <Filename Value="shell/menupage.filebrowser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.FileBrowser"/>
+      </Unit124>
+      <Unit125>
+        <Filename Value="shell/menupage.cheatbrowser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.CheatBrowser"/>
+      </Unit125>
+      <Unit126>
+        <Filename Value="shell/menupage.cartinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.CartInfo"/>
+      </Unit126>
+      <Unit127>
+        <Filename Value="shell/menupage.bindingseditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.BindingsEditor"/>
+      </Unit127>
+      <Unit128>
+        <Filename Value="shell/menupage.mrubrowser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.MRUBrowser"/>
+      </Unit128>
+      <Unit129>
+        <Filename Value="shell/menupage.debuglog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.DebugLog"/>
+      </Unit129>
+      <Unit130>
+        <Filename Value="basement/graphics32.jpg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Graphics32.JPG"/>
+      </Unit130>
+      <Unit131>
+        <Filename Value="core/nes.moviemanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.MovieManager"/>
+      </Unit131>
+      <Unit132>
+        <Filename Value="core/mappers/nes.mapper_290.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_290"/>
+      </Unit132>
+      <Unit133>
+        <Filename Value="core/mappers/nes.mapper_152.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_152"/>
+      </Unit133>
+      <Unit134>
+        <Filename Value="core/mappers/nes.mapper_030.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_030"/>
+      </Unit134>
+      <Unit135>
+        <Filename Value="core/mappers/nes.mapper_111.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_111"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="core/mappers/nes.flash.sst39sf040.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Flash.SST39SF040"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="core/mappers/nes.mapper_140.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_140"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="core/mappers/nes.mapper_sachen8259.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_Sachen8259"/>
+      </Unit138>
+      <Unit139>
+        <Filename Value="core/mappers/nes.mapper_036.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_036"/>
+      </Unit139>
+      <Unit140>
+        <Filename Value="core/mappers/nes.mapper_087.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_087"/>
+      </Unit140>
+      <Unit141>
+        <Filename Value="core/mappers/nes.mapper_033.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_033"/>
+      </Unit141>
+      <Unit142>
+        <Filename Value="core/mappers/nes.mapper_080.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_080"/>
+      </Unit142>
+      <Unit143>
+        <Filename Value="core/mappers/nes.mapper_112.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_112"/>
+      </Unit143>
+      <Unit144>
+        <Filename Value="core/mappers/nes.mapper_048.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_048"/>
+      </Unit144>
+      <Unit145>
+        <Filename Value="core/mappers/nes.mapper_168.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_168"/>
+      </Unit145>
+      <Unit146>
+        <Filename Value="core/mappers/nes.mapper_184.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_184"/>
+      </Unit146>
+      <Unit147>
+        <Filename Value="core/mappers/nes.mapper_156.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_156"/>
+      </Unit147>
+      <Unit148>
+        <Filename Value="core/mappers/nes.mapper_177.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_177"/>
+      </Unit148>
+      <Unit149>
+        <Filename Value="core/mappers/nes.mapper_037.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_037"/>
+      </Unit149>
+      <Unit150>
+        <Filename Value="core/mappers/nes.mapper_093.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_093"/>
+      </Unit150>
+      <Unit151>
+        <Filename Value="core/mappers/nes.mapper_067.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_067"/>
+      </Unit151>
+      <Unit152>
+        <Filename Value="core/mappers/nes.mapper_065.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_065"/>
+      </Unit152>
+      <Unit153>
+        <Filename Value="basement/basement.font.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Font"/>
+      </Unit153>
+      <Unit154>
+        <Filename Value="basement/basement.timing.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.Timing"/>
+      </Unit154>
+      <Unit155>
+        <Filename Value="basement/graphics32.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Graphics32"/>
+      </Unit155>
+      <Unit156>
+        <Filename Value="basement/graphics32.lowlevel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Graphics32.LowLevel"/>
+      </Unit156>
+      <Unit157>
+        <Filename Value="core/mappers/nes.mapper_268.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_268"/>
+      </Unit157>
+      <Unit158>
+        <Filename Value="core/mappers/nes.mapper_038.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_038"/>
+      </Unit158>
+      <Unit159>
+        <Filename Value="core/mappers/nes.mapper_073.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_073"/>
+      </Unit159>
+      <Unit160>
+        <Filename Value="core/mappers/nes.mapper_078.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_078"/>
+      </Unit160>
+      <Unit161>
+        <Filename Value="core/mappers/nes.mapper_190.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_190"/>
+      </Unit161>
+      <Unit162>
+        <Filename Value="core/mappers/nes.mapper_180.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_180"/>
+      </Unit162>
+      <Unit163>
+        <Filename Value="core/mappers/nes.mapper_521.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit163>
+      <Unit164>
+        <Filename Value="core/mappers/nes.mapper_193.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit164>
+      <Unit165>
+        <Filename Value="shell/bookmarkmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="BookmarkManager"/>
+      </Unit165>
+      <Unit166>
+        <Filename Value="shell/menupage.bookmarkbrowser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.BookmarkBrowser"/>
+      </Unit166>
+      <Unit167>
+        <Filename Value="basement/basement.unzip.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.UnZip"/>
+      </Unit167>
+      <Unit168>
+        <Filename Value="basement/basement.filecollection.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Basement.FileCollection"/>
+      </Unit168>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="..\bin\$(TargetCPU)\canines"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
+      <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
+      <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="Delphi"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <TargetProcessor Value="pentiumm"/>
+      <TargetCPU Value="i386"/>
+      <TargetOS Value="win32"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerMessages>
+        <IgnoredMessages idx5091="True" idx5057="True" idx5024="True"/>
+      </CompilerMessages>
+      <CustomOptions Value="-vm6060
+-OoFASTMATH
+-OoLOOPUNROLL
+-OoREMOVEEMPTYPROCS
+-OoUNUSEDPARA
+-OoREGVAR
+-OoSTACKFRAME
+-OoTAILREC
+-OoCSE
+-OoUSELOADMODIFYSTORE
+-OoLOOPUNROLL
+-CfSSE2
+-Si
+-Sv
+-dAUDIO"/>
+      <OtherDefines Count="1">
+        <Define0 Value="AUDIO"/>
+      </OtherDefines>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="5">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+      <Item4>
+        <Name Value="RunError(201)"/>
+      </Item4>
+      <Item5>
+        <Name Value="EReadError"/>
+      </Item5>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

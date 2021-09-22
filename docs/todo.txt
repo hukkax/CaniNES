@@ -1,0 +1,31 @@
+=============================================================================
+CaniNES TODO
+=============================================================================
+
+Bugs:
+- Investigate: had noise/drums channel cutting off in Duck Tales (U) once
+
+Mappers:
+- Missing a number of uncommon Asian mappers that Mesen supports
+- Expansion audio missing for Jaleco mappers (in Mesen too)
+- Missing 24C01/24C02 EEPROM implementations used by Bandai FCG mapper
+- VRC7 OPLL audio implementation has an unidentified bug that might cause 
+  noisy audio on occasion
+
+Missing features:
+- Manually change/turn FDS disks
+- NSF player
+- Patches in other formats than IPS
+- Manual patching of ROMs; only automatic for now
+- Support for loading ROMs from inside archives
+- Support for more exotic hardware such as paddles/mice, only Zapper
+- Support for NES-based arcade machines
+- Screenshotting
+- Movie capture
+
+No plans to implement:
+- Savestates are incompatible with Mesen
+- All the debugging functionality from Mesen (no point in replicating)
+- HD pack support
+- Video recording
+- FCEU movie playback tends to desync (in Mesen too, probably unfixable)

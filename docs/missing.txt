@@ -1,0 +1,59 @@
+=============================================================================
+CaniNES known nonworking ROMs
+=============================================================================
+
+[Broken in Mesen]
+
+030 Twin Dragons (World) (Aftermarket) (Unl).nes
+116 AV Kyuukyoku Mahjong 2 (Asia) (Ja) (Ge De) (Unl).nes
+176 Xing He Zhan Shi (Asia) (Unl).nes
+
+[Unsupported by Mesen]
+
+355 3D Block (Asia) (En) (Hwang Shinwei) (Unl).nes
+389 Caltron - 9 in 1 (USA) (Proto) (Unl).nes
+512 Zhongguo Daheng (Asia) (Unl).nes
+515 Family Noraebang (Korea) (Unl).nes
+516 Brilliant Com Cocoma Pack 1 (Korea) (Unl).nes
+516 Brilliant Com Cocoma Pack 2 (Korea) (Unl).nes
+517 Kkachi-wa Norae Chingu (Korea) (Unl).nes
+533 Dong Dong Nao II - Guo Zhong Ying Wen (Yi) (Asia) (Ja) (Unl).nes
+547 Idemitsu - Space College - Kikenbutsu no Yasashii Butsuri to Kagaku (Japan).nes
+547 NHK Gakuen - Space School - Sansu 5 Nen (Jou) (Japan).nes
+547 NHK Gakuen - Space School - Sansu 6 Nen (Ge) (Japan).nes
+547 NHK Gakuen - Space School - Sansu 6 Nen (Jou) (Japan).nes
+553 Dong Dong Nao 1 (Asia) (Ja) (Unl).nes
+??? Final Fantasy (Japan) (Rev 1) (3DS Virtual Console).nes
+??? Final Fantasy II (Japan) (3DS Virtual Console).nes
+??? Final Fantasy III (Japan) (3DS Virtual Console).nes
+
+[Unimplemented in CaniNES]
+
+077 Napoleon Senki (Japan).nes
+082 Kyuukyoku Harikiri Koushien (Japan).nes
+082 Kyuukyoku Harikiri Stadium - Heisei Gannen Ban (Japan).nes
+082 Kyuukyoku Harikiri Stadium III (Japan).nes
+082 SD Keiji - Blader (Japan).nes
+089 Tenka no Goikenban - Mito Koumon (Japan).nes
+094 Senjou no Ookami (Japan).nes
+096 Oeka Kids - Anpanman no Hiragana Daisuki (Japan).nes
+096 Oeka Kids - Anpanman to Oekaki Shiyou!! (Japan).nes
+097 Kaiketsu Yancha Maru (Japan).nes
+116 AV Mei Shao Nv Zhan Shi (Asia) (Unl).nes
+136 Mahjang Companion (Japan) (Hacker) (SA-002 3011 PCB) (Unl).nes
+136 Mahjong Trap - Si Cuan Ma Que (Asia) (Ja) (Unl).nes
+136 Wei Lai Xiao Zi - Joy Van Kid (Asia) (En) (Unl).nes
+143 Dancing Blocks (Asia) (Ja) (PAL) (Unl).nes
+143 Magical Mathematics (Asia) (Ja) (NTSC) (Unl).nes
+145 Sidewinder (Asia) (Ja) (Unl).nes
+147 Challenge of the Dragon (Asia) (Ja) (Sachen) (Unl).nes
+147 Chinese KungFu (Asia) (Ja) (Unl).nes
+176 Zhi Li Xiao Zhuang Yuan (Asia) (Unl).nes
+178 San Guo Zhong Lie Zhuan (Asia) (Unl).nes
+188 Karaoke Studio (Japan).nes
+188 Karaoke Studio Senyou Cassette Vol. 1 (Japan).nes
+188 Karaoke Studio Senyou Cassette Vol. 2 (Japan).nes
+216 Magic Jewelry 2 (Asia) (Ja) (Unl).nes
+240 Sheng Huo Lie Zhuan (Asia) (Ja) (Unl).nes
+242 Wai Xing Zhan Shi (Asia) (Unl).nes
+244 Decathlon (Asia) (Ja) (Unl).nes
