@@ -78,7 +78,7 @@ type
 		procedure	SetX(NewX: Integer);
 		procedure	SetY(NewY: Integer);
 		procedure	SetAlignment(AAlignment: TLayerAlignment);
-		procedure SetActiveArea(Value: TRect);
+		procedure	SetActiveArea(Value: TRect);
 	public
 		Scale:           Byte;
 		ScaleWithWindow: Boolean;

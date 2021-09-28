@@ -188,6 +188,7 @@ implementation
 
 uses
 	Basement.Util, Math, StrUtils, TextOutput,
+	Graphics32.Extra,
 	MainWindow, MainMenu, Basement.Renderer.Overlay,
 	NES.Config, NES.Types, NES.Console, BookmarkManager,
 	SDL2;
@@ -552,45 +553,6 @@ var
 	Buffer: TBitmap32;
 	OL: TOverlayRenderer;
 
-	procedure DropShadow(const R: TRect; Color: Cardinal; ShadowDistance: Byte = 3);
-	begin
-		Buffer.FillRectS(R.Left + ShadowDistance, R.Bottom,
-			R.Right + ShadowDistance, R.Bottom + ShadowDistance, Color);
-		Buffer.FillRectS(R.Right, R.Top + ShadowDistance,
-			R.Right + ShadowDistance, R.Bottom + ShadowDistance, Color);
-	end;
-
-	procedure FillBox(SR: TRect; Color: Cardinal; Contrast: Integer; Gradient: Integer);
-	var
-		Col: Cardinal;
-		A, Y: Integer;
-	begin
-		OL.FrameBuffer.FillRectS(SR, Color);
-
-		if Gradient <> 0 then
-		begin
-			A := 0;
-			for Y := SR.Top to SR.Bottom-1 do
-			begin
-				Col := Lighten(Color, A);
-				OL.FrameBuffer.HorzLineS(SR.Left, Y, SR.Right, Col);
-				Inc(A, Gradient);
-			end;
-		end;
-
-		if Contrast <> 0 then
-		begin
-			Col := Lighten(Color, +Contrast);
-			OL.FrameBuffer.LineS(SR.Left, SR.Top, SR.Right, SR.Top,    Col, True);
-			OL.FrameBuffer.LineS(SR.Left, SR.Top, SR.Left,  SR.Bottom, Col, True);
-			Col := Lighten(Color, -Contrast);
-			SR.Bottom := SR.Bottom - 1;
-			OL.FrameBuffer.LineS(SR.Left,  SR.Bottom, SR.Right, SR.Bottom, Col, True);
-			OL.FrameBuffer.LineS(SR.Right, SR.Top,    SR.Right, SR.Bottom, Col, True);
-		end;
-	end;
-
-var
 	i, HY, Y, X1, X2, Y1, Y2, W, GW, GH, OSY, IX, IY: Integer;
 	R, SR: TRect;
 	Item: TMenuEntry;
@@ -622,7 +584,7 @@ begin
 	begin
 		Buffer.Clear(0);
 
-		FillBox(Rect(0, 0, W-1, GH+3), Palette[COLOR_MENU_HEADER], 0, -1);
+		Buffer.FillBox(Rect(0, 0, W-1, GH+3), Palette[COLOR_MENU_HEADER], 0, -1);
 		OL.Font.DrawStringCentered(Buffer, 2, CurrentPage.HeaderCaption, Palette[COLOR_MENU_HEADING]);
 
 		X1 := (W - CurrentPage.Width) div 2;
@@ -638,7 +600,7 @@ begin
 		CurrentPage.Area := Buffer.BoundsRect;
 
 		Y := Buffer.Height - (CurrentPage.RowsVisible * GH);
-		FillBox(Rect(0, 0, W-1, Y), Palette[COLOR_MENU_HEADER], 0, -1);
+		Buffer.FillBox(Rect(0, 0, W-1, Y), Palette[COLOR_MENU_HEADER], 0, -1);
 		OL.Font.DrawStringCentered(Buffer, 0, CurrentPage.HeaderCaption, Palette[COLOR_MENU_HEADING]);
 
 		X1 := 0;
@@ -662,7 +624,7 @@ begin
 		begin
 			HY := Y - 2;
 			Item.Area := Rect(X1-1, HY, X2, Y+GH-1);
-			FillBox(Item.Area, Palette[COLOR_MENU_HEADER], 40, -1);
+			Buffer.FillBox(Item.Area, Palette[COLOR_MENU_HEADER], 40, -1);
 			OL.Font.DrawStringCentered(Buffer, Max(0, Y)-2, Item.Caption, Item.Color);
 		end
 		else
@@ -697,7 +659,7 @@ begin
 					Buffer.FrameRect(SR, Palette[COLOR_MENU_SHADOW]);
 			end;
 
-			DropShadow(SR, Palette[COLOR_MENU_SHADOW], 3);
+			Buffer.DropShadow(SR, Palette[COLOR_MENU_SHADOW], 3);
 			//Inc(Y, Item.Image.Height + 4);
 			Dec(Y, GH);
 		end
@@ -710,7 +672,7 @@ begin
 			Item.Area := SR;
 
 			if Item = CurrentEntry then
-				FillBox(SR, Lighten(Palette[COLOR_MENU_SELECTION], -20), 50, 2)
+				Buffer.DrawSelection(SR, Palette[COLOR_MENU_SELECTION])
 			else
 			if not CurrentPage.FullScreen then
 				Buffer.FillRectS(SR, Palette[COLOR_MENU_BACKGROUND]);
@@ -741,8 +703,7 @@ begin
 						if Item.IsFavourited then
 						begin
 							if Item <> CurrentEntry then
-								//OL.FrameBuffer.FillRectS(SR, Palette[COLOR_FILE_FAVOURITED]);
-								FillBox(SR, Lighten(Palette[COLOR_FILE_FAVOURITED], -20), 50, 1);
+								Buffer.FillBox(SR, Lighten(Palette[COLOR_FILE_FAVOURITED], -20), 50, 1);
 							//OL.DrawString(-(X2-GW-2), -(Y+OSY), '❤', $FFFF4433, X2-X1);
 						end;
 						if Item.IsLoaded then
@@ -775,7 +736,7 @@ begin
 		Buffer.FrameRect(R, Palette[COLOR_MENU_HEADER]);
 		R.Inflate(1, 1);
 		Buffer.FrameRect(R, Palette[COLOR_MENU_BACKGROUND]);
-		DropShadow(R, Palette[COLOR_MENU_SHADOW], 3);
+		Buffer.DropShadow(R, Palette[COLOR_MENU_SHADOW], 3);
 	end;
 
 	// Scrollbar
