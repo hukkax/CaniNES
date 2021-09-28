@@ -29,6 +29,7 @@ type
 		GlyphHeight: Byte;
 
 		function  LoadFromFile(const Filename: String): Boolean; virtual; abstract;
+		function  TextWidth(const Text: String): Word; virtual; abstract;
 
 		procedure DrawGlyph(Buffer: TBitmap32; G: Char; X, Y: Word; Col: TColor32); virtual; abstract;
 		procedure DrawString(Buffer: TBitmap32; X, Y: Integer; const S: String; Col: TColor32; MaxWidth: Integer = -1); virtual; abstract;
@@ -46,6 +47,7 @@ type
 		Font:      TBitmap32;
 
 		function  LoadFromFile(const Filename: String): Boolean; override;
+		function  TextWidth(const Text: String): Word; override;
 
 		procedure DrawGlyph(Buffer: TBitmap32; G: Char; X, Y: Word; Col: TColor32); override;
 		procedure DrawString(Buffer: TBitmap32; X, Y: Integer; const S: String; Col: TColor32; MaxWidth: Integer = -1); override;
@@ -65,6 +67,7 @@ type
 		FontKerning: Integer;
 
 		function  LoadFromFile(const Filename: String): Boolean; override;
+		function  TextWidth(const Text: String): Word; override;
 
 		procedure DrawGlyph(Buffer: TBitmap32; G: Char; X, Y: Word; Col: TColor32); override;
 		procedure DrawString(Buffer: TBitmap32; X, Y: Integer; const S: String; Col: TColor32; MaxWidth: Integer = -1); override;
@@ -338,6 +341,11 @@ procedure TRendererFontFreeType.DrawStringCentered(Buffer: TBitmap32; Y: Word; c
 begin
 	if Buffer <> nil then
 		Font.DrawTextRect(Buffer, S, 0, Y, Buffer.Width-1, Y+GlyphHeight, Col, [ftaCenter, ftaVerticalCenter]);
+end;
+
+function TRendererFontFreeType.TextWidth(const Text: String): Word;
+begin
+	Result := Length(Text) * GlyphWidth; //!!! Round(Font.TextWidth(Text));
 end;
 
 {$ENDIF}
