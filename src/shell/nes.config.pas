@@ -12,11 +12,33 @@ uses
 const
 	MRUcount = 20;
 
+	cfgDefault				= 0;
+	cfgInitWindow			= 10; // ReinitWindow()
+	cfgFullScreen			= 11;
+	cfgGUI					= 15;
+	cfgGUIAlign				= 16;
+	cfgRenderer				= 20;
+	cfgRendererCRT			= 25;
+	cfgRendererCRTReinit	= 26;
+	cfgRendererNTSC			= 27;
+	cfgRendererPalette		= 29;
+	cfgAudio				= 30;
+	cfgEmulation			= 50;
+	cfgEmulationFDS			= 60;
+	cfgEmulationPPU			= 70;
+	cfgEmulationAPU			= 80;
+	cfgEmulationAPUVolume	= 81;
+	cfgEmulationAPUPanning	= 82;
+	cfgInput				= 90;
+	cfgInputVis				= 91;
+	cfgInputZapper			= 92;
+
 type
 	TGUIColor = (
 		COLOR_MESSAGE_FG,			COLOR_MESSAGE_BG,
 
-		COLOR_MENU_BACKGROUND,		COLOR_MENU_SHADOW,
+		COLOR_MENU_BACKGROUND,		COLOR_MENU_BORDER,
+		COLOR_MENU_SHADOW,
 		COLOR_MENU_SELECTION,		COLOR_MENU_HEADER,
 		COLOR_MENU_NORMAL,			COLOR_MENU_SETTING,
 		COLOR_MENU_HEADING,			COLOR_MENU_BACKBUTTON,
@@ -65,6 +87,7 @@ type
 
 	TWindowConfig = record
 		X, Y:        Integer;
+		FullScreen:  Boolean;
 		AspectRatio: Byte;
 		MaxScale:    Byte;
 	end;
@@ -246,16 +269,21 @@ type
 		Path:       String;
 
 		procedure Init(const FilePath: String);
+
+		function  FindBool(B: PBoolean): TConfigItemBoolean;
+		procedure BoolChanged(B: PBoolean);
+		procedure SetBool(B: PBoolean; Value: Boolean);
+		function  ToggleBool(B: PBoolean): Boolean;
 	end;
 
 
 	procedure WriteResource(const ResourceName, Filename: String);
 
-
 var
 	//StoredConfiguration,
 	Configuration: TCaniNESConfig;
 	ConfigManager: TConfigurationManager;
+
 
 implementation
 
@@ -263,6 +291,7 @@ uses
 	{$IFDEF WINDOWS} Windows, {$ENDIF} // for RT_RCDATA
 	Basement.Util,
 	Basement.Renderer.Overlay;
+
 
 procedure WriteResource(const ResourceName, Filename: String);
 var
@@ -315,6 +344,7 @@ begin
 	SetPalette(COLOR_MESSAGE_BG,		$88000000);
 
 	SetPalette(COLOR_MENU_BACKGROUND,	$E9111C20);	// background
+	SetPalette(COLOR_MENU_BORDER,		$EE225577);	// border for menubar submenus
 	SetPalette(COLOR_MENU_SHADOW,		$FF111111);	// shadow
 	SetPalette(COLOR_MENU_SELECTION,	$FF883322);	// selection background
 	SetPalette(COLOR_MENU_HEADER,		$EE225577);	// header background
@@ -368,22 +398,22 @@ begin
 	Cfg.AddString(Sect, 'ImagePath.Titles', @Application.ImagePath_Titles);
 
 	Cfg.AddBoolean(Sect, 'HighPriority', @Application.HighPriority, False)
-	{$IFDEF WINDOWS}.SetInfo('Application task priority', 0, 1, ['Normal', 'High']){$ENDIF};
+	{$IFDEF WINDOWS}.SetInfo('Application task priority', cfgDefault, 0, 1, ['Normal', 'High']){$ENDIF};
 
 	Cfg.AddBoolean(Sect, 'RestoreROMOnStartup', @Application.RestoreROMOnStartup, False)
-	.SetInfo('Restore last ROM on startup', 0, 1, ['No', 'Yes']);
+	.SetInfo('Restore last ROM on startup', cfgDefault, 0, 1, ['No', 'Yes']);
 
 	Cfg.AddBoolean(Sect, 'RestoreROMState', @Application.RestoreROMState, False)
-	.SetInfo('Restore ROM state on load', 0, 1, ['No', 'Yes']);
+	.SetInfo('Restore ROM state on load', cfgDefault, 0, 1, ['No', 'Yes']);
 
 	Cfg.AddBoolean(Sect, 'EnableDatabase', @Application.EnableDatabase, True)
-	.SetInfo('Built-in game database', 0, 1, ['Disabled', 'Enabled']);
+	.SetInfo('Built-in game database', cfgDefault, 0, 1, ['Disabled', 'Enabled']);
 
 	Cfg.AddByte(Sect, 'AutoPatching', @Application.IPSAutoPatch, 2)
-	.SetInfo('Auto-apply IPS patches', 0, 2, ['No', 'Yes', 'Yes, use old CRC']);
+	.SetInfo('Auto-apply IPS patches', cfgDefault, 0, 2, ['No', 'Yes', 'Yes, use old CRC']);
 
 	Cfg.AddByte(Sect, 'ShowFrameTime', @Application.ShowFrameTime, 0)
-	.SetInfo('Info display', 0, 2, ['Hidden', 'Small', 'Full']);
+	.SetInfo('Info display', cfgDefault, 0, 2, ['Hidden', 'Small', 'Full']);
 
 	// -------------------------------------------------------
 
@@ -399,70 +429,71 @@ begin
 	Cfg.AddInteger(Sect, 'X', @Display.Window.X, WINDOWPOS_DEFAULT);
 	Cfg.AddInteger(Sect, 'Y', @Display.Window.Y, WINDOWPOS_DEFAULT);
 	Cfg.AddByte(Sect, 'AspectRatio', @Display.Window.AspectRatio, 0)
-	.SetInfo('Aspect ratio', Ord(arNoStretching), Ord(arWidescreen), AspectRatioNames );
+	.SetInfo('Aspect ratio', cfgInitWindow, Ord(arNoStretching), Ord(arWidescreen), AspectRatioNames );
 	Cfg.AddByte(Sect, 'MaxScale', @Display.Window.MaxScale, 5)
-	.SetInfo('Window size', 2, 99, [], nil, '%dx');
+	.SetInfo('Window size', cfgInitWindow, 2, 99, [], nil, '%dx');
+	Cfg.AddBoolean(Sect, 'FullScreen', @Display.Window.FullScreen).ID := cfgFullScreen;
 
 	// -------------------------------------------------------
 
 	Sect := 'GUI';
 	Cfg.AddByte(Sect, 'Scale', @Display.GUI.Scale, 1);
-	//.SetInfo('GUI scale factor', 0, 9, ['Default']);
+	//.SetInfo('GUI scale factor', cfgInitWindow, 0, 9, ['Default']);
 
 	Cfg.AddString(Sect, 'Font', @Display.GUI.FontName, 'default', False);
 
 	Cfg.AddBoolean(Sect, 'BoxArtUpscale', @Display.GUI.BoxArtUpscale, False)
-	.SetInfo('Box art upscaling', 0, 1, ['Pixel double', 'Full']);
+	.SetInfo('Box art upscaling', cfgGUI, 0, 1, ['Pixel double', 'Full']);
 
 	L := Ord(Low(TLayerAlignment));
 	H := Ord(High(TLayerAlignment));
 
 	Cfg.AddByte(Sect, 'OSD.Timeout', @Display.GUI.OSD.Timeout, 5)
-	.SetInfo('Messages Timeout', 1, 30, [], nil, '%d seconds');
+	.SetInfo('Messages Timeout', cfgGUI, 1, 30, [], nil, '%d seconds');
 
 	Cfg.AddFloat(Sect, 'OSD.Opacity', @Display.GUI.OSD.Opacity, 1.0)
-	.SetInfo('Messages Opacity', 0.1, 1.0, 0.05);
+	.SetInfo('Messages Opacity', cfgGUI, 0.1, 1.0, 0.05);
 
 	Cfg.AddFloat(Sect, 'OSD.PadsOpacity', @Display.GUI.OSD.PadsOpacity, 0.6)
-	.SetInfo('Pads Opacity', 0.1, 1.0, 0.05);
+	.SetInfo('Pads Opacity', cfgGUI, 0.1, 1.0, 0.05);
 
 	Cfg.AddByte(Sect, 'Align.Margin', @Display.GUI.OSD.Alignments.Margin, 4)
-	.SetInfo('Edge margin', 0, 50, []);
+	.SetInfo('Edge margin', cfgGUIAlign, 0, 50, []);
 
 	Cfg.AddByte(Sect, 'Align.Messages', @Display.GUI.OSD.Alignments.Messages, Ord(laBottomLeft))
-	.SetInfo('Messages', L, H, LayerAlignmentNames);
+	.SetInfo('Messages', cfgGUIAlign, L, H, LayerAlignmentNames);
 
 	Cfg.AddByte(Sect, 'Align.Icons', @Display.GUI.OSD.Alignments.Icons, Ord(laBottomRight))
-	.SetInfo('Icons', L, H, LayerAlignmentNames);
+	.SetInfo('Icons', cfgGUIAlign, L, H, LayerAlignmentNames);
 
 	Cfg.AddByte(Sect, 'Align.Pads', @Display.GUI.OSD.Alignments.Pads, Ord(laTopRight))
-	.SetInfo('Pads', L, H, LayerAlignmentNames);
+	.SetInfo('Pads', cfgGUIAlign, L, H, LayerAlignmentNames);
 
 	Cfg.AddByte(Sect, 'Align.InfoBox', @Display.GUI.OSD.Alignments.InfoBox, Ord(laTopLeft))
-	.SetInfo('InfoBox', L, H, LayerAlignmentNames);
+	.SetInfo('InfoBox', cfgGUIAlign, L, H, LayerAlignmentNames);
 
 	// -------------------------------------------------------
 
 	Sect := 'Input';
 
 	Cfg.AddBoolean(Sect, 'AllowInvalidInput', @Input.AllowInvalidInput, False)
-	.SetInfo('Allow invalid input');
+	.SetInfo('Allow invalid input', cfgInput);
 
 	Cfg.AddBoolean(Sect, 'FourScore', @Input.FourScore, False)
-	.SetInfo('Enable FourScore');
+	.SetInfo('Enable FourScore', cfgInput);
 
 	Cfg.AddByte(Sect, 'PadVisual.Count', @Input.PadVisual.ControllerCount, 0)
-	.SetInfo('Show pad inputs', 0, 4, ['Disabled', '1 pad', '2 pads', '3 pads', '4 pads']);
+	.SetInfo('Show pad inputs', cfgInputVis, 0, 4, ['Disabled', '1 pad', '2 pads', '3 pads', '4 pads']);
 
 	Cfg.AddBoolean(Sect, 'PadVisual.MoviesOnly', @Input.PadVisual.MoviesOnly, False)
-	.SetInfo('When to display', 0, 1, ['Always', 'During movies only']);
+	.SetInfo('When to display', cfgInputVis, 0, 1, ['Always', 'During movies only']);
 
 	Cfg.AddBoolean(Sect, 'Zapper.Enabled',      @Input.Zapper.Enabled, False)
-	.SetInfo('Force enable Zapper');
+	.SetInfo('Force enable Zapper', cfgInputZapper);
 	Cfg.AddBoolean(Sect, 'Zapper.HidePointer',  @Input.Zapper.HidePointer, False)
-	.SetInfo('Hide mouse cursor when using Zapper');
+	.SetInfo('Hide mouse cursor when using Zapper', cfgInputZapper);
 	Cfg.AddByte(Sect, 'Zapper.DetectionRadius', @Input.Zapper.DetectionRadius, 0)
-	.SetInfo('Zapper detection radius');
+	.SetInfo('Zapper detection radius', cfgInputZapper);
 
 	// -------------------------------------------------------
 
@@ -477,24 +508,24 @@ begin
 	.SetInfo('Audio sampling rate');
 
 	Cfg.AddWord(Sect, 'Latency', @Audio.Latency, 60)
-	.SetInfo('Audio latency');
+	.SetInfo('Audio latency', cfgAudio);
 
 	Cfg.AddFloat(Sect, 'Volume', @Audio.MixingVolume, 6.6)
-	.SetInfo('Master volume', 0.0, 9.9, 0.1);
+	.SetInfo('Master volume', cfgAudio, 0.0, 9.9, 0.1);
 
 	Cfg.AddBoolean(Sect, 'DynamicRate', @Audio.DynamicRate, True)
-	.SetInfo('Dynamic sampling rate');
+	.SetInfo('Dynamic sampling rate', cfgAudio);
 
 	// -------------------------------------------------------
 
 	Sect := 'Renderer';
 
 	Cfg.AddByte(Sect, 'Vsync', @Display.Renderer.VSyncMode, VSYNC_AUTO)
-	.SetInfo('Vertical sync', VSYNC_AUTO, VSYNC_OFF, ['Auto', 'Force On', 'Off']);
+	.SetInfo('Vertical sync', cfgRenderer, VSYNC_AUTO, VSYNC_OFF, ['Auto', 'Force On', 'Off']);
 	Cfg.AddBoolean(Sect, 'ScalingMethod', @Display.Renderer.ScalingQuality, False)
-	.SetInfo('Scaling quality', 0, 1, ['Nearest', 'Linear']);
+	.SetInfo('Scaling quality', cfgRenderer, 0, 1, ['Nearest', 'Linear']);
 	Cfg.AddBoolean(Sect, 'AutoswitchResolution', @Display.Renderer.AutoswitchResolution, False)
-	.SetInfo('Autoswitch fullscreen 50/60 Hz', 0, 1, ['No', 'Yes']);
+	.SetInfo('Autoswitch fullscreen 50/60 Hz', cfgRenderer, 0, 1, ['No', 'Yes']);
 
 	Cfg.AddString(Sect, 'Backend', @Display.Renderer.Backend, '');
 	//.SetInfo('Renderer backend');
@@ -502,45 +533,45 @@ begin
 	// -------------------------------------------------------
 
 	Sect := 'Overscan';
-	Cfg.AddByte(Sect, 'Top',    @Display.Renderer.Overscan.U, 0).SetInfo('', 0, 99, []);
-	Cfg.AddByte(Sect, 'Bottom', @Display.Renderer.Overscan.D, 0).SetInfo('', 0, 99, []);
-	Cfg.AddByte(Sect, 'Left',   @Display.Renderer.Overscan.L, 0).SetInfo('', 0, 99, []);
-	Cfg.AddByte(Sect, 'Right',  @Display.Renderer.Overscan.R, 0).SetInfo('', 0, 99, []);
+	Cfg.AddByte(Sect, 'Top',    @Display.Renderer.Overscan.U, 0).SetInfo('', cfgInitWindow, 0, 99, []);
+	Cfg.AddByte(Sect, 'Bottom', @Display.Renderer.Overscan.D, 0).SetInfo('', cfgInitWindow, 0, 99, []);
+	Cfg.AddByte(Sect, 'Left',   @Display.Renderer.Overscan.L, 0).SetInfo('', cfgInitWindow, 0, 99, []);
+	Cfg.AddByte(Sect, 'Right',  @Display.Renderer.Overscan.R, 0).SetInfo('', cfgInitWindow, 0, 99, []);
 
 	// -------------------------------------------------------
 
 	Sect := 'Filter.CRT';
 
 	Cfg.AddBoolean(Sect, 'Enabled',            @Display.CRT.Enabled,            False)
-	.SetInfo('Enable filter');
+	.SetInfo('Enable filter', cfgRendererCRT);
 
 	Cfg.AddBoolean(Sect, 'ScanlinesEnabled',   @Display.CRT.ScanlinesEnabled,   True)
-	.SetInfo('Enable scanlines');
+	.SetInfo('Enable scanlines', cfgRendererCRT);
 	Cfg.AddFloat(Sect,   'ScanlineBrightness', @Display.CRT.ScanlineBrightness, 1.3)
-	.SetInfo('Scanline brightness', 0.0, 2.0, 0.1);
+	.SetInfo('Scanline brightness', cfgRendererCRTReinit, 0.0, 2.0, 0.1);
 	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom,      1.0)
-	.SetInfo('Scanline bloom', 0.0, 2.0, 0.1);
+	.SetInfo('Scanline bloom', cfgRendererCRT, 0.0, 2.0, 0.1);
 	Cfg.AddBoolean(Sect, 'MaskEnabled',        @Display.CRT.MaskEnabled,        True)
-	.SetInfo('Enable mask');
+	.SetInfo('Enable mask', cfgRendererCRT);
 	Cfg.AddFloat(Sect,   'MaskBrightness',     @Display.CRT.MaskBrightness,     1.5)
-	.SetInfo('Mask brightness', 0.0, 5.0, 0.1);
+	.SetInfo('Mask brightness', cfgRendererCRTReinit, 0.0, 5.0, 0.1);
 	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 2)
-	.SetInfo('Enlarge mask at zoom level');
+	.SetInfo('Enlarge mask at zoom level', cfgRendererCRTReinit);
 	Cfg.AddFloat(Sect,   'DotCrawlSpeed',      @Display.CRT.DotCrawlSpeed,      0.5)
-	.SetInfo('Dot crawl speed', 0.0, 5.0, 0.1);
+	.SetInfo('Dot crawl speed', cfgRendererCRT, 0.0, 5.0, 0.1);
 	Cfg.AddFloat(Sect,   'BrightAndSharp',     @Display.CRT.BrightAndSharp,     1.0)
-	.SetInfo('Brightness/sharpness modifier', 0.0, 1.0, 0.1);
+	.SetInfo('Brightness/sharpness modifier', cfgRendererCRT, 0.0, 1.0, 0.1);
 	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,      60)
-	.SetInfo('Extra contrast');
+	.SetInfo('Extra contrast', cfgRendererCRT);
 	Cfg.AddByte(Sect,    'HorizontalBlur',     @Display.CRT.HorizontalBlur,     1)
-	.SetInfo('Horizontal blurring');
+	.SetInfo('Horizontal blurring', cfgRendererCRT);
 
 	// -------------------------------------------------------
 
 	Sect := 'Filter.NTSC';
 
 	Cfg.AddBoolean(Sect,'Enabled',     @Display.NTSC.Enabled, False)
-	.SetInfo('Enable filter');
+	.SetInfo('Enable filter', cfgRendererNTSC);
 
 {
 	Cfg.AddFloat(Sect,  'Hue',         @Display.NTSC.Hue,         0).SetInfo('', -1, 2, 0.02);
@@ -551,87 +582,87 @@ begin
 }
 
 	Cfg.AddFloat(Sect,  'Sharpness',   @Display.NTSC.Sharpness,   0)
-	.SetInfo('', 0.0, 2.0, 0.1);
+	.SetInfo('', cfgRendererNTSC, 0.0, 2.0, 0.1);
 	Cfg.AddFloat(Sect,  'Resolution',  @Display.NTSC.Resolution,  0)
-	.SetInfo('', 0.0, 2.0, 0.1);
+	.SetInfo('', cfgRendererNTSC, 0.0, 2.0, 0.1);
 	Cfg.AddFloat(Sect,  'Artifacts',   @Display.NTSC.Artifacts,   0)
-	.SetInfo('', 0.0, 2.0, 0.1);
+	.SetInfo('', cfgRendererNTSC, 0.0, 2.0, 0.1);
 	Cfg.AddFloat(Sect,  'Fringing',    @Display.NTSC.Fringing,    0)
-	.SetInfo('Color fringing', 0.0, 2.0, 0.1);
+	.SetInfo('Color fringing', cfgRendererNTSC, 0.0, 2.0, 0.1);
 	Cfg.AddFloat(Sect,  'Bleed',       @Display.NTSC.Bleed,       0)
-	.SetInfo('Color bleed', 0.0, 2.0, 0.1);
+	.SetInfo('Color bleed', cfgRendererNTSC, 0.0, 2.0, 0.1);
 	Cfg.AddBoolean(Sect,'MergeFields', @Display.NTSC.MergeFields, False)
-	.SetInfo('Merge fields');
+	.SetInfo('Merge fields', cfgRendererNTSC);
 
 	// -------------------------------------------------------
 
 	Sect := 'Palette.NTSC';
 
 	Cfg.AddString(Sect, 'PaletteFile', @Display.Palette.Filename,   '');
-	Cfg.AddFloat(Sect,  'Brightness',  @Display.Palette.Brightness, 0.94).SetInfo('', 0.0, 3.0, 0.02);
-	Cfg.AddFloat(Sect,  'Contrast',    @Display.Palette.Contrast,   0.92).SetInfo('', 0.0, 3.0, 0.02);
-	Cfg.AddFloat(Sect,  'Gamma',       @Display.Palette.Gamma,      1.80).SetInfo('', 0.0, 3.0, 0.02);
-	Cfg.AddFloat(Sect,  'Saturation',  @Display.Palette.Saturation, 1.26).SetInfo('', 0.0, 3.0, 0.02);
-	Cfg.AddFloat(Sect,  'HueShift',    @Display.Palette.HueShift,  -0.10).SetInfo('', -10.0, +10.0, 0.02);
+	Cfg.AddFloat(Sect,  'Brightness',  @Display.Palette.Brightness, 0.94).SetInfo('', cfgRendererPalette, 0.0, 3.0, 0.02);
+	Cfg.AddFloat(Sect,  'Contrast',    @Display.Palette.Contrast,   0.92).SetInfo('', cfgRendererPalette, 0.0, 3.0, 0.02);
+	Cfg.AddFloat(Sect,  'Gamma',       @Display.Palette.Gamma,      1.80).SetInfo('', cfgRendererPalette, 0.0, 3.0, 0.02);
+	Cfg.AddFloat(Sect,  'Saturation',  @Display.Palette.Saturation, 1.26).SetInfo('', cfgRendererPalette, 0.0, 3.0, 0.02);
+	Cfg.AddFloat(Sect,  'HueShift',    @Display.Palette.HueShift,  -0.10).SetInfo('', cfgRendererPalette, -10.0, +10.0, 0.02);
 
 	// -------------------------------------------------------
 
 	Sect := 'Emulation';
 
 	Cfg.AddByte(Sect, 'ConsoleModel', @Emulator.NESModel, Ord(nesAuto))
-	.SetInfo('NES model', Ord(Low(TNESModel)), Ord(High(TNESModel)), NESModelNames);
+	.SetInfo('NES model', cfgEmulation, Ord(Low(TNESModel)), Ord(High(TNESModel)), NESModelNames);
 
 	Cfg.AddBoolean(Sect, 'AltMMC3Behavior', @Emulator.AltMMC3Behavior, False)
-	.SetInfo('Alternative MMC3 behavior');
+	.SetInfo('Alternative MMC3 behavior', cfgEmulation);
 
 	Cfg.AddBoolean(Sect, 'IntegerFpsMode', @Emulator.IntegerFpsMode, True)
-	.SetInfo('Integer FPS mode');
+	.SetInfo('Integer FPS mode', cfgEmulation);
 
 	Cfg.AddBoolean(Sect, 'PauseInMenu', @Emulator.PauseInMenu, True)
-	.SetInfo('Pause when in menu');
+	.SetInfo('Pause when in menu', cfgEmulation);
 
 
 	Cfg.AddByte(Sect, 'RunAhead', @Emulator.RunAheadFrames, 0)
-	.SetInfo('Runahead frames', 0, 10, [], nil);
+	.SetInfo('Runahead frames', cfgEmulation, 0, 10, [], nil);
 
 	Cfg.AddWord(Sect, 'RewindBuffer', @Emulator.RewindBufferSize, 0)
-	.SetInfo('Rewind buffer length', 0, 600, ['Disabled', ''], nil, '%d seconds', 5, 10);
+	.SetInfo('Rewind buffer length', cfgEmulation, 0, 600, ['Disabled', ''], nil, '%d seconds', 5, 10);
 
 	Cfg.AddByte(Sect, 'RewindSnapshotInterval', @Emulator.RewindSnapshotInterval, 2)
-	.SetInfo('Rewind speed', 1, 100, [], nil, '%d00%%');
+	.SetInfo('Rewind speed', cfgEmulation, 1, 100, [], nil, '%d00%%');
 
 	Cfg.AddByte(Sect, 'FastForwardSpeed', @Emulator.FastForwardSpeed, 1)
-	.SetInfo('Fast forward speed', 1, 10,
+	.SetInfo('Fast forward speed', cfgEmulation, 1, 10,
 		['Unlimited', '200%', '300%', '400%', '500%', '600%', '700%', '800%', '900%', '1000%'], nil);
 
 	Cfg.AddByte(Sect, 'FastForwardInterval', @Emulator.FastForwardInterval, 1)
-	.SetInfo('Fast forward frame update interval', 1, 50, [], nil);
+	.SetInfo('Fast forward frame update interval', cfgEmulation, 1, 50, [], nil);
 
 	// -------------------------------------------------------
 
 	Sect := 'Emulation.PowerOnState';
 
 	Cfg.AddByte(Sect, 'DefaultRAMState', @Emulator.PowerOnState.DefaultRAMState, 0)
-	.SetInfo('Initialize RAM with', 0, 2, ['Zeroes', 'Ones', 'Random'], nil);
+	.SetInfo('Initialize RAM with', cfgEmulation, 0, 2, ['Zeroes', 'Ones', 'Random'], nil);
 
 	Cfg.AddBoolean(Sect, 'RandomizeForMappers', @Emulator.PowerOnState.RandomizeForMappers, False)
-	.SetInfo('Randomize for mappers');
+	.SetInfo('Randomize for mappers', cfgEmulation);
 
 	Cfg.AddBoolean(Sect, 'RandomizeAlignment', @Emulator.PowerOnState.RandomizeAlignment, False)
-	.SetInfo('Randomize CPU/PPU alignment');
+	.SetInfo('Randomize CPU/PPU alignment', cfgEmulation);
 
 	// -------------------------------------------------------
 
 	Sect := 'Emulation.FDS';
 
 	Cfg.AddBoolean(Sect, 'AutoInsertDisk', @Emulator.FDS.AutoInsertDisk, True)
-	.SetInfo('Automatically insert disk 1 side A');
+	.SetInfo('Automatically insert disk 1 side A', cfgEmulationFDS);
 
 	Cfg.AddBoolean(Sect, 'AutoLoadDisk', @Emulator.FDS.AutoLoadDisk, False)
-	.SetInfo('Automatically switch disks');
+	.SetInfo('Automatically switch disks', cfgEmulationFDS);
 
 	Cfg.AddBoolean(Sect, 'FastForwardOnLoad', @Emulator.FDS.FastForwardOnLoad, False)
-	.SetInfo('Automatically fast forward on load');
+	.SetInfo('Automatically fast forward on load', cfgEmulationFDS);
 
 	// -------------------------------------------------------
 
@@ -640,37 +671,37 @@ begin
 	with Emulator.PPU do
 	begin
 		Cfg.AddByte   (Sect, 'Model',                      @PPUModel, 0)
-		.SetInfo('PPU model', Ord(Low(TPPUModel)), Ord(High(TPPUModel)), PPUModelNames);
+		.SetInfo('PPU model', cfgEmulationPPU, Ord(Low(TPPUModel)), Ord(High(TPPUModel)), PPUModelNames);
 
 		Cfg.AddBoolean(Sect, 'RemoveSpriteLimit',          @RemoveSpriteLimit, False)
-		.SetInfo('Remove sprite limit');
+		.SetInfo('Remove sprite limit', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'AdaptiveSpriteLimit',        @AdaptiveSpriteLimit, False)
-		.SetInfo('Adaptive sprite limit');
+		.SetInfo('Adaptive sprite limit', cfgEmulationPPU);
 
 		Cfg.AddBoolean(Sect, 'ForceBackgroundFirstColumn', @ForceBackgroundFirstColumn, False)
-		.SetInfo('Force bg tiles in first column');
+		.SetInfo('Force bg tiles in first column', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'ForceSpritesFirstColumn',    @ForceSpritesFirstColumn, False)
-		.SetInfo('Force sprites in first column');
+		.SetInfo('Force sprites in first column', cfgEmulationPPU);
 
 		Cfg.AddBoolean(Sect, 'DisablePaletteRead',         @DisablePaletteRead, False)
-		.SetInfo('Disable palette reads');
+		.SetInfo('Disable palette reads', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'DisableOamAddrBug',          @DisableOamAddrBug, False)
-		.SetInfo('Disable OAM addressing bug');
+		.SetInfo('Disable OAM addressing bug', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'DisablePpu2004Reads',        @DisablePpu2004Reads, False)
-		.SetInfo('Disable PPU 2004 reads');
+		.SetInfo('Disable PPU 2004 reads', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'EnablePpu2000ScrollGlitch',  @EnablePpu2000ScrollGlitch, False)
-		.SetInfo('Emulate PPU2000 scroll glitch');
+		.SetInfo('Emulate PPU2000 scroll glitch', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'EnablePpu2006ScrollGlitch',  @EnablePpu2006ScrollGlitch, False)
-		.SetInfo('Emulate PPU2006 scroll glitch');
+		.SetInfo('Emulate PPU2006 scroll glitch', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'EnablePpuOamRowCorruption',  @EnablePpuOamRowCorruption, False)
-		.SetInfo('Emulate PPU OAM row corruption');
+		.SetInfo('Emulate PPU OAM row corruption', cfgEmulationPPU);
 		Cfg.AddBoolean(Sect, 'EnableOamDecay',             @EnableOamDecay, False)
-		.SetInfo('Emulate OAM decay');
+		.SetInfo('Emulate OAM decay', cfgEmulationPPU);
 
 		Cfg.AddWord(Sect, 'ExtraScanlinesBeforeNmi',    @ExtraScanlinesBeforeNmi, 0)
-		.SetInfo('Extra scanlines before NMI', 0, 2000, [], nil, '', 10, 20);
+		.SetInfo('Extra scanlines before NMI', cfgEmulationPPU, 0, 2000, [], nil, '', 10, 20);
 		Cfg.AddWord(Sect, 'ExtraScanlinesAfterNmi',     @ExtraScanlinesAfterNmi,  0)
-		.SetInfo('Extra scanlines after NMI', 0, 2000, [], nil, '', 10, 20);
+		.SetInfo('Extra scanlines after NMI', cfgEmulationPPU, 0, 2000, [], nil, '', 10, 20);
 	end;
 
 	// -------------------------------------------------------
@@ -678,10 +709,10 @@ begin
 	Sect := 'Emulation.APU';
 
 	Cfg.AddBoolean(Sect, 'ReduceDmcPopping', @Emulator.APU.ReduceDmcPopping, True)
-	.SetInfo('Reduce popping on DMC channel');
+	.SetInfo('Reduce popping on DMC channel', cfgEmulationAPU);
 
 	Cfg.AddBoolean(Sect, 'SilenceTriangleHighFreq', @Emulator.APU.SilenceTriangleHighFreq, True)
-	.SetInfo('Reduce popping on triangle channel');
+	.SetInfo('Reduce popping on triangle channel', cfgEmulationAPU);
 
 	// -------------------------------------------------------
 
@@ -691,14 +722,14 @@ begin
 	begin
 		Cfg.AddFloat(Sect, IntToStr(i) + '.Volume',
 			@Emulator.APU.Channels[i].Volume, 1.0)
-			.SetInfo(APUChannelNames[i] + ' volume', 0.0, 2.0, 0.05);
+			.SetInfo(APUChannelNames[i] + ' volume', cfgEmulationAPUVolume, 0.0, 2.0, 0.05);
 	end;
 
 	for i := 0 to MaxChannelCount do
 	begin
 		Cfg.AddFloat(Sect, IntToStr(i) + '.Panning',
 			@Emulator.APU.Channels[i].Panning, 0.0)
-			.SetInfo(APUChannelNames[i] + ' panning', -1.0, +1.0, 0.01);
+			.SetInfo(APUChannelNames[i] + ' panning', cfgEmulationAPUPanning, -1.0, +1.0, 0.01);
 	end;
 
 	// -------------------------------------------------------
@@ -711,6 +742,51 @@ begin
 		Log('Configuration loaded from ' + Filename + '.')
 	else
 		Log('Failed to load configuration from ' + Filename + '!')
+end;
+
+function TCaniNESConfig.FindBool(B: PBoolean): TConfigItemBoolean;
+var
+	I: TConfigItem;
+	BI: TConfigItemBoolean;
+begin
+	for I in ConfigManager.Items do
+		if I is TConfigItemBoolean then
+		begin
+			BI := I as TConfigItemBoolean;
+			if BI.Value = B then
+				Exit(BI);
+		end;
+	Result := nil;
+end;
+
+procedure TCaniNESConfig.SetBool(B: PBoolean; Value: Boolean);
+var
+	BI: TConfigItemBoolean;
+begin
+	BI := FindBool(B);
+	if BI <> nil then
+	begin
+		if BI.Value^ <> Value then
+		begin
+			BI.Value^ := Value;
+			BI.CallCallback;
+		end;
+	end;
+end;
+
+function TCaniNESConfig.ToggleBool(B: PBoolean): Boolean;
+begin
+	Result := not B^;
+	SetBool(B, Result);
+end;
+
+procedure TCaniNESConfig.BoolChanged(B: PBoolean);
+var
+	BI: TConfigItemBoolean;
+begin
+	BI := FindBool(B);
+	if BI <> nil then
+		BI.CallCallback;
 end;
 
 

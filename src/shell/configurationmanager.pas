@@ -23,21 +23,21 @@ type
 		Min, Max:		Int64;
 		Step,
 		LargeStep:		Integer;
-
+		ID:				Integer;
 		Callback:		TSettingChangeCallback;
 
-		procedure 		SetInfo(const aCaption: AnsiString); overload;
-		procedure 		SetInfo(const aCaption: AnsiString; aMin, aMax: Integer;
+		procedure 		SetInfo(const aCaption: AnsiString; aID : Integer = 0); overload;
+		procedure 		SetInfo(const aCaption: AnsiString; aID, aMin, aMax: Integer;
 						const aValueNames: array of AnsiString;
 						const aCallback: TSettingChangeCallback = nil;
 						const aFormatString: AnsiString = '';
 						aStep: Integer = 1; aLargeStep: Integer = 5); overload;
-		procedure 		SetInfo(const aCaption: AnsiString; aMin, aMax: Integer;
+		procedure 		SetInfo(const aCaption: AnsiString; aID, aMin, aMax: Integer;
 						const aValueNames: TStrings;
 						const aCallback: TSettingChangeCallback = nil;
 						const aFormatString: AnsiString = '';
 						aStep: Integer = 1; aLargeStep: Integer = 5); overload;
-		procedure 		SetInfoFromDir(const aCaption: AnsiString;
+		procedure 		SetInfoFromDir(const aCaption: AnsiString; aID: Integer;
 						const Dir, Extensions: String;
 						const aCallback: TSettingChangeCallback = nil);
 		procedure		ModifyValue(Amount: Integer); virtual;
@@ -45,6 +45,7 @@ type
 		function		ValueToString: AnsiString; virtual;
 		function 		GetValueName(i: Integer): AnsiString;
 		function		ListValues(const sl: TStrings): Integer; virtual;
+		procedure 		CallCallback;
 
 		procedure		Load(const Ini: TIniFile); virtual;
 		procedure		Save(const Ini: TIniFile); virtual;
@@ -123,7 +124,8 @@ type
 		FStep,
 		FMin, FMax:		Double;
 
-		procedure 		SetInfo(const aCaption: AnsiString; aMin, aMax, aStep: Double); overload;
+		procedure 		SetInfo(const aCaption: AnsiString; aID: Integer;
+						aMin, aMax, aStep: Double); overload;
 
 		procedure		ModifyValue(Amount: Integer); override;
 		function		GetValue: Double;
@@ -355,21 +357,22 @@ begin
 	inherited Destroy;
 end;
 
-procedure TConfigItem.SetInfo(const aCaption: AnsiString);
+procedure TConfigItem.SetInfo(const aCaption: AnsiString; aID: Integer = 0);
 begin
 	if (Self is TConfigItemBoolean) then
-		SetInfo(aCaption, Min, Max, CN_YESNO)
+		SetInfo(aCaption, aID, Min, Max, CN_YESNO)
 	else
-		SetInfo(aCaption, Min, Max, []);
+		SetInfo(aCaption, aID, Min, Max, []);
 end;
 
-procedure TConfigItem.SetInfo(const aCaption: AnsiString; aMin, aMax: Integer;
+procedure TConfigItem.SetInfo(const aCaption: AnsiString; aID, aMin, aMax: Integer;
 	const aValueNames: array of AnsiString;
 	const aCallback: TSettingChangeCallback; const aFormatString: AnsiString;
 	aStep: Integer; aLargeStep: Integer);
 var
 	i, os: Integer;
 begin
+	ID := aID;
 	if aCaption = '' then
 		Caption := Name
 	else
@@ -386,7 +389,7 @@ begin
 	Callback := aCallback;
 end;
 
-procedure TConfigItem.SetInfo(const aCaption: AnsiString; aMin, aMax: Integer;
+procedure TConfigItem.SetInfo(const aCaption: AnsiString; aID, aMin, aMax: Integer;
 	const aValueNames: TStrings;
 	const aCallback: TSettingChangeCallback; const aFormatString: AnsiString;
 	aStep: Integer; aLargeStep: Integer);
@@ -397,11 +400,11 @@ begin
 	SetLength(NameArr, aValueNames.Count);
 	for i := 0 to aValueNames.Count-1 do
 		NameArr[i] := aValueNames[i];
-	SetInfo(aCaption, aMin, aMax, NameArr,
+	SetInfo(aCaption, aID, aMin, aMax, NameArr,
 		aCallback, aFormatString, aStep, aLargeStep);
 end;
 
-procedure TConfigItem.SetInfoFromDir(const aCaption: AnsiString;
+procedure TConfigItem.SetInfoFromDir(const aCaption: AnsiString; aID: Integer;
 	const Dir, Extensions: String;
 	const aCallback: TSettingChangeCallback = nil);
 var
@@ -416,7 +419,7 @@ begin
 	for i := 0 to Sl.Count-1 do
 		Filelist[i] := ChangeFileExt(ExtractFilename(Sl[i]), '');
 
-	SetInfo(aCaption, 0, Sl.Count-1, Filelist, aCallback);
+	SetInfo(aCaption, aID, 0, Sl.Count-1, Filelist, aCallback);
 
 	if (Self is TConfigItemString) then
 	with (Self as TConfigItemString) do
@@ -458,13 +461,18 @@ begin
 	Result := -1;
 end;
 
-procedure TConfigItem.ModifyValue(Amount: Integer);
+procedure TConfigItem.CallCallback;
 begin
 	if Assigned(Callback) then
 		Callback(Self)
 	else
 	if Assigned(DefaultConfigItemCallback) then
 		DefaultConfigItemCallback(Self);
+end;
+
+procedure TConfigItem.ModifyValue(Amount: Integer);
+begin
+	CallCallback;
 end;
 
 procedure TConfigItem.SetValue(NewValue: Integer);
@@ -475,6 +483,7 @@ begin
 	if Assigned(DefaultConfigItemCallback) then
 		DefaultConfigItemCallback(Self);
 end;
+
 
 { TConfigItemString }
 
@@ -570,12 +579,13 @@ begin
 end;
 
 procedure TConfigItemFloat.SetInfo(const aCaption: AnsiString;
-	aMin, aMax, aStep: Double);
+	aID: Integer; aMin, aMax, aStep: Double);
 begin
 	if aCaption = '' then
 		Caption := Name
 	else
 		Caption := aCaption;
+	ID := aID;
 	FMin := aMin;
 	FMax := aMax;
 	FStep := aStep;
