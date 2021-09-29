@@ -1828,6 +1828,8 @@ begin
 	gdiv := cG - Col2.G;
 	bdiv := cB - Col2.B;
 
+	C.A := 255;
+
 	if Horizontal then
 	begin
 		W := R.Width-1;
