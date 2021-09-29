@@ -118,6 +118,8 @@ type
 		procedure 	SaveToFile(const Filename: String);
 
 		function	SaneCoords(X1, Y1, X2, Y2: Integer): Boolean; inline;
+		function	ValidCoords(X, Y: Integer): Boolean; inline;
+		procedure	ValidateRect(var R: TRect); inline;
 		function	ValidateCoords(var X1, Y1, X2, Y2: Integer): Boolean; inline;
 		function 	ValidateX(var X: Integer): Boolean; inline;
 		function 	ValidateY(var Y: Integer): Boolean; inline;
@@ -136,21 +138,30 @@ type
 		procedure 	FillRect(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
         procedure 	FillRectS(R: TRect; Value: TColor32); overload;
 		procedure 	FillRectS(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
+		procedure 	FillRectT(X1, Y1, X2, Y2: Integer; Value: TColor32);
+        procedure 	FillRectTS(R: TRect; Value: TColor32); overload;
+		procedure 	FillRectTS(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
 		procedure 	FrameRect(R: TRect; Value: TColor32); overload;
 		procedure 	FrameRect(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
 		procedure 	ThickFrameRect(R: TRect; Thickness: Integer; Value: TColor32);
 		procedure 	Clear(FillColor: TColor32);
 		procedure 	HorzLine(X1, Y, X2: Integer; Value: TColor32);
 		procedure 	HorzLineS(X1, Y, X2: Integer; Value: TColor32);
+		procedure 	HorzLineT(X1, Y, X2: Integer; Value: TColor32);
+		procedure 	HorzLineTS(X1, Y, X2: Integer; Value: TColor32);
 		procedure 	VertLine(X, Y1, Y2: Integer; Value: TColor32);
 		procedure 	VertLineS(X, Y1, Y2: Integer; Value: TColor32);
+		procedure 	VertLineT(X, Y1, Y2: Integer; Value: TColor32);
+		procedure 	VertLineTS(X, Y1, Y2: Integer; Value: TColor32);
 		procedure 	Line(X1, Y1, X2, Y2: Integer; Value: TColor32; L: Boolean);
 		procedure 	LineS(X1, Y1, X2, Y2: Integer; Value: TColor32; L: Boolean);
 		procedure 	LineTo(X, Y: Integer; PenColor: TColor32);
 		procedure 	LineToS(X, Y: Integer; PenColor: TColor32);
 
+		procedure	GradientRectT(R: TRect; Color1, Color2: TColor32; Horizontal: Boolean);
+		procedure	GradientRect(R: TRect; Color1, Color2: TColor32; Horizontal: Boolean);
 		function	FloodFill(X, Y: Integer; FillColor: TColor32): Cardinal;
-		function 	ReplaceColor(ColorSource, ColorDest: TColor32): Cardinal;
+		function	ReplaceColor(ColorSource, ColorDest: TColor32): Cardinal;
 
 		procedure	SetPixel(X, Y: Integer; Value: TColor32); inline;
 		procedure	SetPixelS(X, Y: Integer; Value: TColor32); inline;
@@ -684,10 +695,15 @@ begin
 	Bits[X + Y * Width] := Value;
 end;
 
+function TBitmap32.ValidCoords(X, Y: Integer): Boolean;
+begin
+	Result := (X >= ClipRect.Left) and (X < ClipRect.Right) and
+		(Y >= ClipRect.Top) and (Y < ClipRect.Bottom);
+end;
+
 function TBitmap32.GetPixelS(X, Y: Integer): TColor32;
 begin
-	if (X >= ClipRect.Left) and (X < ClipRect.Right) and
-		(Y >= ClipRect.Top) and (Y < ClipRect.Bottom) then
+	if ValidCoords(X, Y) then
 		Result := Bits[X + Y * Width]
 	else
 		Result := 0;//OuterColor;
@@ -695,8 +711,7 @@ end;
 
 procedure TBitmap32.SetPixelS(X, Y: Integer; Value: TColor32);
 begin
-  if (X >= ClipRect.Left) and (X < ClipRect.Right) and
-	(Y >= ClipRect.Top) and (Y < ClipRect.Bottom) then
+	if ValidCoords(X, Y) then
 	begin
 		Bits[X + Y * Width] := Value;
 		Changed;
@@ -737,26 +752,20 @@ begin
 		Result := True;
 end;
 
+procedure TBitmap32.ValidateRect(var R: TRect);
+begin
+	if R.Left   < ClipRect.Left   then R.Left   := ClipRect.Left;
+	if R.Top    < ClipRect.Top    then R.Top    := ClipRect.Top;
+	if R.Right  > ClipRect.Right  then R.Right  := ClipRect.Right;
+	if R.Bottom > ClipRect.Bottom then R.Bottom := ClipRect.Bottom;
+end;
+
 function TBitmap32.ValidateCoords(var X1, Y1, X2, Y2: Integer): Boolean;
-{var
-	Z: Integer;}
 begin
 	if X1 < ClipRect.Left   then X1 := ClipRect.Left;
 	if Y1 < ClipRect.Top    then Y1 := ClipRect.Top;
 	if X2 > ClipRect.Right  then X2 := ClipRect.Right;
 	if Y2 > ClipRect.Bottom then Y2 := ClipRect.Bottom;
-{	if X1 > X2 then
-	begin
-		Z := X1;
-		X1 := X2;
-		X2 := Z;
-	end;
-	if Y1 > Y2 then
-	begin
-		Z := Y1;
-		Y1 := Y2;
-		Y2 := Z;
-	end;}
 	Result := (X1 < X2) and (Y1 < Y2);
 end;
 
@@ -1060,10 +1069,10 @@ end;
 
 procedure TBitmap32.FillRect(X1, Y1, X2, Y2: Integer; Value: TColor32);
 var
-	y: Integer;
+	Y: Integer;
 begin
 	if (Width < 1) or (Height < 1) then Exit;
-	for y := Y1 to Y2-1 do
+	for Y := Y1 to Y2-1 do
 		FillLongWord(Bits[y * Width + x1], X2 - X1, Value);
 	Changed;
 end;
@@ -1071,6 +1080,33 @@ end;
 procedure TBitmap32.FillRect(R: TRect; Value: TColor32);
 begin
 	FillRectS(R.Left, R.Top, R.Right, R.Bottom, Value);
+end;
+
+procedure TBitmap32.FillRectT(X1, Y1, X2, Y2: Integer; Value: TColor32);
+var
+	Y: Integer;
+begin
+	if (Width < 1) or (Height < 1) then Exit;
+	for Y := Y1 to Y2-1 do
+		HorzLineT(X1, Y, X2, Value);
+	Changed;
+end;
+
+procedure TBitmap32.FillRectTS(X1, Y1, X2, Y2: Integer; Value: TColor32);
+begin
+	if (X2 > X1) and (Y2 > Y1) and (X1 < ClipRect.Right) and (Y1 < ClipRect.Bottom) then
+		if ValidateCoords(X1, Y1, X2, Y2) then
+		begin
+			if AlphaComponent(Value) < 255 then
+				FillRectT(X1, Y1, X2, Y2, Value)
+			else
+				FillRect(X1, Y1, X2, Y2, Value);
+		end;
+end;
+
+procedure TBitmap32.FillRectTS(R: TRect; Value: TColor32);
+begin
+	FillRectTS(R.Left, R.Top, R.Right, R.Bottom, Value);
 end;
 
 procedure TBitmap32.ThickFrameRect(R: TRect; Thickness: Integer; Value: TColor32);
@@ -1128,6 +1164,29 @@ begin
 			HorzLine(X1, Y, X2, Value);
 end;
 
+procedure TBitmap32.HorzLineT(X1, Y, X2: Integer; Value: TColor32);
+var
+	X: Integer;
+	P: PColor32;
+begin
+	P := PixelPtr[X1, Y];
+	for X := X1 to X2 do
+	begin
+		P^ := BlendColors(Value, P^);
+		Inc(P);
+	end;
+	Changed;
+end;
+
+procedure TBitmap32.HorzLineTS(X1, Y, X2: Integer; Value: TColor32);
+begin
+	if ValidateY(Y) then
+	begin
+		ValidateX(X1); ValidateX(X2);
+		HorzLineT(X1, Y, X2, Value);
+	end;
+end;
+
 procedure TBitmap32.VertLine(X, Y1, Y2: Integer; Value: TColor32);
 var
 	I, NH, NL: Integer;
@@ -1161,6 +1220,29 @@ begin
 	if (X >= ClipRect.Left) and (X < ClipRect.Right) and
 		TestClip(Y1, Y2, ClipRect.Top, ClipRect.Bottom) then
 			VertLine(X, Y1, Y2, Value);
+end;
+
+procedure TBitmap32.VertLineT(X, Y1, Y2: Integer; Value: TColor32);
+var
+	Y: Integer;
+	P: PColor32;
+begin
+	P := PixelPtr[X, Y1];
+	for Y := Y1 to Y2 do
+	begin
+		P^ := BlendColors(Value, P^);
+		Inc(P, Width);
+	end;
+	Changed;
+end;
+
+procedure TBitmap32.VertLineTS(X, Y1, Y2: Integer; Value: TColor32);
+begin
+	if ValidateX(X) then
+	begin
+		ValidateY(Y1); ValidateY(Y2);
+		VertLineT(X, Y1, Y2, Value);
+	end;
 end;
 
 procedure TBitmap32.Line(X1, Y1, X2, Y2: Integer; Value: TColor32; L: Boolean);
@@ -1708,6 +1790,124 @@ begin
 	P := Scale(Width, Height, NewWidth, NewHeight, AllowUpscale);
 	if (P.X <> Width) or (P.Y <> Height) then
 		Resize(P.X, P.Y, rfCosine);
+end;
+
+procedure TBitmap32.GradientRect(R: TRect; Color1, Color2: TColor32; Horizontal: Boolean);
+var
+	Col1: TColor32Entry absolute Color1;
+	Col2: TColor32Entry absolute Color2;
+	C: TColor32Entry;
+	X, Y, W, H, cR, cG, cB,
+	rdiv, gdiv, bdiv: Integer;
+	Z: Single;
+begin
+	if Color1 = Color2 then
+	begin
+		FillRectS(R, Color1);
+		Exit;
+	end
+	else
+	if (AlphaComponent(Color1) < 255) or (AlphaComponent(Color2) < 255) then
+	begin
+		GradientRectT(R, Color1, Color2, Horizontal);
+		Exit;
+	end;
+
+	ValidateRect(R);
+
+	cR := Col1.R;
+	cG := Col1.G;
+	cB := Col1.B;
+
+	rdiv := cR - Col2.R;
+	gdiv := cG - Col2.G;
+	bdiv := cB - Col2.B;
+
+	if Horizontal then
+	begin
+		W := R.Width-1;
+		for X := R.Left to R.Right-1 do
+		begin
+			Z := (X - R.Left) / W;
+			C.R := cR - Round(Z * bdiv);
+			C.G := cG - Round(Z * gdiv);
+			C.B := cB - Round(Z * rdiv);
+			VertLine(X, R.Top, R.Bottom-1, C.ARGB);
+		end;
+	end
+	else
+	begin
+		H := R.Height-1;
+		for Y := R.Top to R.Bottom-1 do
+		begin
+			Z := (Y - R.Top) / H;
+			C.R := cR - Round(Z * bdiv);
+			C.G := cG - Round(Z * gdiv);
+			C.B := cB - Round(Z * rdiv);
+			HorzLine(R.Left, Y, R.Right-1, C.ARGB);
+		end;
+	end;
+end;
+
+procedure TBitmap32.GradientRectT(R: TRect; Color1, Color2: TColor32; Horizontal: Boolean);
+var
+	Col1: TColor32Entry absolute Color1;
+	Col2: TColor32Entry absolute Color2;
+	C: TColor32Entry;
+	X, Y, W, H, cR, cG, cB, cA,
+	rdiv, gdiv, bdiv, adiv: Integer;
+	Z: Single;
+begin
+	if Color1 = Color2 then
+	begin
+		FillRectTS(R, Color1);
+		Exit;
+	end
+	else
+	if (AlphaComponent(Color1) = 255) and (AlphaComponent(Color2) = 255) then
+	begin
+		GradientRect(R, Color1, Color2, Horizontal);
+		Exit;
+	end;
+
+	ValidateRect(R);
+
+	cR := Col1.R;
+	cG := Col1.G;
+	cB := Col1.B;
+	cA := Col1.A;
+
+	rdiv := cR - Col2.R;
+	gdiv := cG - Col2.G;
+	bdiv := cB - Col2.B;
+	adiv := cA - Col2.A;
+
+	if Horizontal then
+	begin
+		W := R.Width-1;
+		for X := R.Left to R.Right-1 do
+		begin
+			Z := (X - R.Left) / W;
+			C.R := cR - Round(Z * bdiv);
+			C.G := cG - Round(Z * gdiv);
+			C.B := cB - Round(Z * rdiv);
+			C.A := cA - Round(Z * adiv);
+			VertLineT(X, R.Top, R.Bottom-1, C.ARGB);
+		end;
+	end
+	else
+	begin
+		H := R.Height-1;
+		for Y := R.Top to R.Bottom-1 do
+		begin
+			Z := (Y - R.Top) / H;
+			C.R := cR - Round(Z * bdiv);
+			C.G := cG - Round(Z * gdiv);
+			C.B := cB - Round(Z * rdiv);
+			C.A := cA - Round(Z * adiv);
+			HorzLineT(R.Left, Y, R.Right-1, C.ARGB);
+		end;
+	end;
 end;
 
 
