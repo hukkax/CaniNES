@@ -101,6 +101,7 @@ begin
 	NTSCRenderer.FrameBuffer.Clear(Color_Background);
 
 	CreateMainMenu;
+	Window.InitMenubar;
 
 	if Configuration.Application.RestoreROMOnStartup then
 	begin
@@ -147,10 +148,7 @@ begin
 				InfoBox.Layer.Visible := False;
 		end;
 
-		Window.FrameBuffer.Dirty := True;
-		Window.UpdateOSD;
-
-		Inc(Window.Framecounter);
+		Window.DoFrame;
 
 		if not Console.FastForward then
 		begin

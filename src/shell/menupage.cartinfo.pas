@@ -90,10 +90,12 @@ var
 begin
 	Str := nil;
 
-	LinesAdded := 2; // header + Back command
 	Page.Items.Clear;
 	Page.HeaderCaption := 'Cartridge Information';
-	Page.AddBackCommand;
+
+	LinesAdded := 1; // Header
+	if Page.AddBackCommand <> nil then
+		Inc(LinesAdded); // Back command
 
 	if not Console.GotCartridge then
 	begin
@@ -107,7 +109,6 @@ begin
 	H := MenuRenderer.FrameBuffer.Height;
 	R := Bounds(0, 0, W, H);
 	Padding := Min(14, W div 30);
-
 
 	Add('Filename:',  ExtractFilename(RomData.Info.Filename));
 	Add('Title:',     RomData.Info.DatabaseInfo.Title);

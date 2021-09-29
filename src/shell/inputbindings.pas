@@ -10,8 +10,11 @@ uses
 type
 	TAction =
 	(
+		actNone,
+
 		// Menu
 		actMenuShow, actMenuBack, actMenuSelect, actAltSelect,
+		actMenubarFocus,
 
 		// Controller 1
 		actPadUp, actPadDown, actPadLeft, actPadRight,
@@ -37,10 +40,11 @@ type
 		actStateSelect5, actStateSelect6, actStateSelect7, actStateSelect8, actStateSelect9,
 
 		// Application
-		actAppExit,
+		actAppExit, actShowPage,
 		actFavourite, actBookmarks,
 		actListCheats, actROMBrowser, actCartInfo,
-		actROMLoadPrevious, actRecordWAV,
+		actROMLoadPrevious, actROMLoadMRU,
+		actRecordWAV,
 		actToggleInfoBox, actToggleFullscreen,
 		actToggleFilterCRT, actToggleFilterNTSC, actToggleFilterNTSC_MergeFields
 	);
@@ -159,6 +163,8 @@ begin
 	SetInputBinding(actMenuBack, SDLK_BACKSPACE);
 	SetInputBinding(actMenuSelect, SDLK_RETURN);
 	SetInputBinding(actAltSelect, SDLK_RETURN, True);
+
+	SetInputBinding(actMenubarFocus, SDLK_LALT);
 
 	SetInputBinding(actFavourite, SDLK_F,  True);
 	SetInputBinding(actBookmarks, SDLK_F2, True);

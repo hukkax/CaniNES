@@ -196,7 +196,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="169">
+    <Units Count="172">
       <Unit0>
         <Filename Value="CaniNES.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1039,6 +1039,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Basement.FileCollection"/>
       </Unit168>
+      <Unit169>
+        <Filename Value="shell/menubar.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Menubar"/>
+      </Unit169>
+      <Unit170>
+        <Filename Value="basement/graphics32.extra.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Graphics32.Extra"/>
+      </Unit170>
+      <Unit171>
+        <Filename Value="basement/graphics32.freetype.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Graphics32.FreeType"/>
+      </Unit171>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

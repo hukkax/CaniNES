@@ -125,10 +125,11 @@ type
 		procedure UpdateScrollbar;
 
 	public
-		Visible: Boolean;
-		Recreated: Boolean;
-		Width:   Word;
-		ItemHeight: Byte;
+		Visible:      Boolean;
+		Recreated:    Boolean;
+		ShowAsWindow: Boolean;
+		Width:        Word;
+		ItemHeight:   Byte;
 
 		WaitingForBinding: PInputBinding;
 
@@ -388,22 +389,42 @@ end;
 
 function TMenuPage.AddBackCommand: TMenuEntry;
 begin
+	Result := nil;
 	if (ParentPage <> nil) and (Menu <> nil) then
-		Result := AddEntry(STR_PAGE_PREV, 0, Palette[COLOR_MENU_BACKBUTTON], Menu.CmdBackPage)
-	else
-		Result := nil;
+		if (ParentPage <> MainMenu.MainPage) or (not Menu.ShowAsWindow) then
+			Result := AddEntry(STR_PAGE_PREV, 0, Palette[COLOR_MENU_BACKBUTTON], Menu.CmdBackPage);
 end;
 
 procedure TMenuPage.BrowseItems(Change: Integer; AllowWrap: Boolean = True; Center: Boolean = True);
+
+	function ValidEntry(const E: TMenuEntry): Boolean;
+	begin
+		Result := not (E.Kind in [meHeader, meText, meImage]);
+	end;
+
+var
+	E: TMenuEntry;
+	B: Boolean;
 begin
 	if Items.Count < 1 then Exit;
 
-	Inc(ItemIndex, Change);
-	if ItemIndex < 0 then ItemIndex := IfThen(AllowWrap, Items.Count-1, 0)
-	else
-	if ItemIndex >= Items.Count then ItemIndex := IfThen(AllowWrap, 0, Items.Count-1);
+	B := False;
+	for E in Items do
+		if ValidEntry(E) then
+		begin
+			B := True;
+			Break;
+		end;
+	if not B then Exit;
 
-	if Items[ItemIndex].Kind in [meHeader, meText, meImage] then
+	Inc(ItemIndex, Change);
+	if ItemIndex < 0 then
+		ItemIndex := IfThen(AllowWrap, Items.Count-1, 0)
+	else
+	if ItemIndex >= Items.Count then
+		ItemIndex := IfThen(AllowWrap, 0, Items.Count-1);
+
+	if not ValidEntry(Items[ItemIndex]) then
 	begin
 		if AllowWrap then
 			BrowseItems(IfThen(Change < 0, -1, +1))
@@ -951,7 +972,6 @@ begin
 	if Page <> nil then
 	begin
 		CurrentPage := Page;
-
 		if Assigned(Page.OnEnter) then
 			Page.OnEnter(Page);
 

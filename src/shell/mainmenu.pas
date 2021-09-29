@@ -74,6 +74,7 @@ var
 begin
 	Menu.Free;
 	Menu := TEmulatorMenu.Create;
+	Menu.ShowAsWindow := False;
 
 	with Menu do
 	begin

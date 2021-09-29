@@ -1,6 +1,12 @@
 =============================================================================
 Changelog
 =============================================================================
+2021-09-30:
+- Added a menubar to the window (work in progress)
+
+2021-09-22:
+- Initial release on GitHub
+
 2021-09-21:
 - Boxart/screenshot locations can now each contain multiple paths separated
   by semicolon; Zip archives are also supported

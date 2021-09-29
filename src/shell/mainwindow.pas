@@ -15,19 +15,24 @@ uses
 	InputBindings, ConfigurationManager, MenuHandler, InfoBoxDisplay,
 	NES.Types, NES.Config, NES.Console,
 	NES.InputManager, NES.Controllers,
+	Menubar,
 	NES.PPU, NES.APU;
 
 const
 	EnabledString: array [Boolean] of String = ('disabled', 'enabled');
+	MouseHideThreshold = 3;
 
 type
 	TNESWindow = class(TWindow)
 	private
 		Controller: array[0..1] of TStandardControllerState;
 		IgnoreStartButton: Boolean;
+		MouseHiddenPos: Types.TPoint;
 
 		procedure RendererChanged;
 		procedure RealignOverlays;
+		procedure EnableMouse;
+		procedure GetCRTRendererConfig;
 	public
 		FontFilePath: String;
 		Framecounter: Word;
@@ -38,6 +43,7 @@ type
 		procedure UpdatePalette;
 
 		procedure InitRendering;
+		procedure InitMenubar;
 		procedure ReinitWindow; override;
 
 		procedure UpdateOSD; inline;
@@ -45,11 +51,14 @@ type
 
 		procedure PixelScalingChanged; override;
 		procedure ControllerSetupChanged;
-		procedure OnSettingChange(Item: TConfigItem);
+		procedure OnSettingChange(Item: TConfigItem); overload;
+		procedure OnSettingChange(ID: Integer); overload;
 		procedure OnMenuAction(Entry: TMenuEntry);
+		procedure ShowMenuPage(const Page: String; AsWindow: Boolean = True);
 		procedure Perform(Action: TAction; Pressed: Boolean = True);
 
-		procedure RunFrame;
+		procedure RunFrame; // called each emulated frame
+		procedure DoFrame;  // called each actual display frame
 		procedure ToggleFastForward(Enable: Boolean);
 		procedure OnUserEvent(EventCode: Integer); override;
 
@@ -93,6 +102,7 @@ var
 
 	CurrentIcon: Byte = 0;
 	IconOverlay: TOverlayRenderer;
+	MenuBar: TMenuBar;
 
 	{$IFDEF MEASURETIMING}
 	FrameTimer: TTimeMeasurer;
@@ -175,6 +185,7 @@ destructor TNESWindow.Destroy;
 begin
 	Icons.Free;
 	Bookmarks.Free;
+	MenuBar.Free;
 
 	inherited Destroy;
 end;
@@ -244,6 +255,13 @@ begin
 Done:
 	IconOverlay.Visible := not Menu.Visible;
 
+	if (not Menu.Visible) and (MenuBar <> nil) then
+	begin
+		MenuRenderer.Visible := Mouse.Visible or MenuBar.Active or MenuBar.Hovering;
+		if MenuRenderer.Visible then
+			MenuBar.Draw;
+	end;
+
 	// Fast forwarding
 	//
 	if (Console.FastForward) <>
@@ -271,10 +289,45 @@ begin
 	TextOutput.UpdateOSD;
 end;
 
+procedure TNESWindow.DoFrame;
+begin
+	FrameBuffer.Dirty := True;
+
+	UpdateOSD;
+
+	Inc(Framecounter);
+
+	if Mouse.Timer > 0 then
+	begin
+		if (Menubar.Hovering) or (Menu.Visible) then Exit;
+
+		Dec(Mouse.Timer);
+		if (Mouse.Timer = 0) or (not Mouse.InWindow) then
+		begin
+			if not MenuBar.RefreshActiveState then
+			begin
+				Mouse.Visible := False;
+				MouseHiddenPos := Mouse.Pos;
+				ShowMouse;
+			end
+			else
+				EnableMouse;
+		end;
+	end;
+end;
+
 procedure TNESWindow.OnMenuAction(Entry: TMenuEntry);
 begin
 	if Entry <> nil then
 		Perform(TAction(Entry.Action));
+end;
+
+procedure TNESWindow.ShowMenuPage(const Page: String; AsWindow: Boolean);
+begin
+	MenuRenderer.Opacity := 1.0;
+	MenuRenderer.Visible := True;
+	Menu.ShowAsWindow := AsWindow;
+	Menu.ShowPage(Page);
 end;
 
 procedure TNESWindow.Perform(Action: TAction; Pressed: Boolean = True);
@@ -337,6 +390,13 @@ begin
 		end;
 		actPadSelect: Controller[Ctrl].Select := Pressed;
 
+		actMenubarFocus:
+			if Pressed then
+			begin
+				Menubar.Active := not Menubar.Active;
+				if Menubar.Active then
+					MenuRenderer.Opacity := 1.0;
+			end;
 
 		actAppExit:
 			if Pressed then
@@ -348,10 +408,7 @@ begin
 
 		actToggleFullscreen:
 			if Pressed then
-			begin
-				NES_APU.Stop;
-				SetFullScreen(not Video.IsFullScreen);
-			end;
+				Configuration.ToggleBool(@Configuration.Display.Window.FullScreen);
 
 		actROMLoadPrevious:
 			if Pressed then
@@ -359,6 +416,15 @@ begin
 			begin
 				Console.LoadROM(Configuration.Application.LastROMFile);
 				EmulationMode := NORMAL;
+			end;
+
+		actROMLoadMRU:
+			if Pressed then
+			begin
+				// this was called via the Menubar
+				Console.LoadROM(Menubar.ActiveMenu.ActiveItem.Data);
+				EmulationMode := NORMAL;
+				Menubar.Active := False;
 			end;
 
 		actRecordWAV:
@@ -453,19 +519,19 @@ begin
 			if (Pressed) and (not Menu.Visible) then InfoBox.Toggle;
 
 		actMenuShow:
-			if Pressed then Menu.ShowPage('Main');
+			if Pressed then ShowMenuPage('Main', False);
 
 		actROMBrowser:
-			if Pressed then Menu.ShowPage('Load ROM');
+			if Pressed then ShowMenuPage('Load ROM');
 
 		actListCheats:
-			if Pressed then Menu.ShowPage('Cheats');
+			if Pressed then ShowMenuPage('Cheats');
 
 		actCartInfo:
-			if Pressed then Menu.ShowPage('Cart Info');
+			if Pressed then ShowMenuPage('Cart Info');
 
 		actBookmarks:
-			if Pressed then Menu.ShowPage('Favourites');
+			if Pressed then ShowMenuPage('Favourites');
 
 		actToggleFilterNTSC_MergeFields:
 			if Pressed then
@@ -478,18 +544,15 @@ begin
 
 		actToggleFilterNTSC:
 			if Pressed then
-			with Configuration.Display do
 			begin
-				NTSC.Enabled := not NTSC.Enabled;
-				RendererChanged;
-				OSD('NTSC filter ' + EnabledString[NTSC.Enabled]);
+				Configuration.ToggleBool(@Configuration.Display.NTSC.Enabled);
+				OSD('NTSC filter ' + EnabledString[Configuration.Display.NTSC.Enabled]);
 			end;
 
 		actToggleFilterCRT:
 			if Pressed then
 			begin
-				CRTRenderer.Enabled := not CRTRenderer.Enabled;
-				Configuration.Display.CRT.Enabled := CRTRenderer.Enabled;
+				Configuration.ToggleBool(@Configuration.Display.CRT.Enabled);
 				OSD('CRT filter ' + EnabledString[CRTRenderer.Enabled]);
 			end;
 
@@ -628,86 +691,95 @@ begin
 	end;
 end;
 
-procedure TNESWindow.OnSettingChange(Item: TConfigItem);
-var
-	Section, Caption: AnsiString;
+procedure TNESWindow.GetCRTRendererConfig;
 begin
-	Section := LowerCase(Item.Section);
-	Caption := LowerCase(Item.Caption);
-
-	if Section = 'filter.ntsc' then
+	with CRTRenderer do
 	begin
-		NES_PPU.ConfigureNTSCFilter(Configuration.Display.NTSC);
-		RendererChanged;
-	end
-	else
-	if Section = 'filter.crt' then
-	begin
+		Enabled := NES.Config.Configuration.Display.CRT.Enabled;
 		with NES.Config.Configuration.Display.CRT do
 		begin
-			CRTRenderer.Enabled := Enabled;
-			CRTRenderer.Options.MaskEnabled        := MaskEnabled;
-			CRTRenderer.Options.ScanlinesEnabled   := ScanlinesEnabled;
-			CRTRenderer.Options.ScanlineBloom      := ScanlineBloom;
-			CRTRenderer.Options.DotCrawlSpeed      := DotCrawlSpeed;
-			CRTRenderer.Options.HorizontalBlur     := HorizontalBlur;
-			CRTRenderer.Options.ScanlineBrightness := ScanlineBrightness;
-			CRTRenderer.Options.MaskBrightness     := MaskBrightness;
-			CRTRenderer.Options.BrightAndSharp     := BrightAndSharp;
-			CRTRenderer.Options.ExtraContrast      := ExtraContrast;
-			CRTRenderer.Options.EnlargeMaskAtZoomLevel := EnlargeMaskAtZoomLevel;
+			Options.MaskEnabled            := MaskEnabled;
+			Options.ScanlinesEnabled       := ScanlinesEnabled;
+			Options.ScanlineBloom          := ScanlineBloom;
+			Options.DotCrawlSpeed          := DotCrawlSpeed;
+			Options.HorizontalBlur         := HorizontalBlur;
+			Options.ScanlineBrightness     := ScanlineBrightness;
+			Options.MaskBrightness         := MaskBrightness;
+			Options.BrightAndSharp         := BrightAndSharp;
+			Options.ExtraContrast          := ExtraContrast;
+			Options.EnlargeMaskAtZoomLevel := EnlargeMaskAtZoomLevel;
+		end;
+	end;
+end;
+
+procedure TNESWindow.OnSettingChange(Item: TConfigItem);
+begin
+	OnSettingChange(Item.ID);
+end;
+
+procedure TNESWindow.OnSettingChange(ID: Integer);
+begin
+	case ID of
+
+		cfgInitWindow,
+		cfgRenderer:
+			ReinitWindow;
+
+		cfgRendererPalette:
+			UpdatePalette;
+
+		cfgRendererNTSC:
+		begin
+			NES_PPU.ConfigureNTSCFilter(Configuration.Display.NTSC);
+			RendererChanged;
 		end;
 
-		if 'ScanlineBrightness MaskBrightness EnlargeMaskAtZoomLevel'.Contains(Caption) then
-			CRTRenderer.Init
-		else
-			CRTRenderer.OptionsChanged;
-	end
-	else
-	if (Section = 'window') or (Section = 'renderer') then
-	begin
-		ReinitWindow;
-	end
-	else
-	if Section = 'palette.ntsc' then
-	begin
-		UpdatePalette;
-	end
-	else
-	if (Section = 'audio') or
-	   (Section = 'emulation.apu.channels') or
-	   (Section = 'emulation.apu') then
-		NES_APU.SettingsChanged
-	else
-	if (Section = 'input') then
-	begin
-		if Caption = 'force enable zapper' then
-			Console.ControllerSetupChanged
-		else
-			Console.ControlManager.PadVisualizationChanged;
-	end
-	else
-	if Section = 'gui' then
-	begin
-		if Item.Name.StartsWith('Align.') then
-			RealignOverlays;
-	end
-	else
-	if Section = 'overscan' then
-	begin
-		ReinitWindow;
-	end
-	{$IFDEF DEBUG}
-	else
-//		Log('Unhandled setting change: %s:%s', [Section, Caption])
-	{$ENDIF};
+		cfgRendererCRT,
+		cfgRendererCRTReinit:
+		begin
+			GetCRTRendererConfig;
+			if ID = cfgRendererCRTReinit then
+				CRTRenderer.Init
+			else
+				CRTRenderer.OptionsChanged;
+		end;
 
-	//writeln(section + ':' + caption);
+		cfgFullScreen:
+		begin
+			NES_APU.Stop;
+			SetFullScreen(Configuration.Display.Window.FullScreen);
+		end;
+
+		cfgGUIAlign:
+			RealignOverlays;
+
+		cfgEmulationAPU,
+		cfgEmulationAPUVolume,
+		cfgEmulationAPUPanning:
+			NES_APU.SettingsChanged;
+
+		cfgInputZapper:
+			Console.ControllerSetupChanged;
+
+		cfgInputVis:
+			Console.ControlManager.PadVisualizationChanged;
+
+	end;
 end;
 
 //==================================================================================================
 // Input handling
 //==================================================================================================
+
+procedure TNESWindow.EnableMouse;
+begin
+	Mouse.Timer := IfThen(Trunc(Video.SyncRate) > 40, Trunc(Video.SyncRate), 60) * 2; // 2 seconds
+	if not Mouse.Visible then
+	begin
+		Mouse.Visible := True;
+		ShowMouse;
+	end;
+end;
 
 procedure TNESWindow.OnKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean);
 var
@@ -720,6 +792,12 @@ begin
 	if MenuVisible then
 	begin
 		if Menu.ProcessKey(Key, Shift, Pressed, Repeated) then
+			Exit;
+	end
+	else
+	if Menubar.Active then
+	begin
+		if Menubar.ProcessKey(Key, Shift, Pressed, Repeated) then
 			Exit;
 	end;
 
@@ -790,31 +868,55 @@ begin
 end;
 
 procedure TNESWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
+var
+	B: Boolean;
 begin
-	if not Menu.Visible then
+	B := Mouse.Visible;
+	if not B then
+	if	(Menubar.Hovering) or (Menubar.Active) or
+		(Abs(Pos.X - MouseHiddenPos.X) >= MouseHideThreshold) or
+		(Abs(Pos.Y - MouseHiddenPos.Y) >= MouseHideThreshold) then
+			B := True;
+	if B then
+		EnableMouse
+	else
+		Exit;
+
+	if Menu.Visible then
+		Menu.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale))
+	else
+	if Menubar.Visible then
+	begin
+		if (Menubar.Active) or (UnScaledPos.Y < MenuRenderer.Font.GlyphHeight) then
+			MenuRenderer.Opacity := 1.0
+		else
+			MenuRenderer.Opacity := Max(0, 1 - (UnScaledPos.Y / (BasementOptions.Height / 2)));
+		Menubar.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale));
+	end
+	else
 	begin
 		UnscaledPos.X := Trunc(UnscaledPos.X / Settings.AspectRatioWidthMultiplier);
 		InputManager.Mouse.Pos := UnscaledPos;
 		UpdateControllers;
-	end
-	else
-		Menu.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale));
+	end;
 end;
 
 procedure TNESWindow.OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);
 begin
-	if (Pressed) and (Button = Basement.Window.mbRight) then
-	begin
-		Perform(actMenuShow, Pressed);
-	end
+	if Menu.Visible then
+		Menu.OnMouseButton(Button, Pressed)
 	else
-	if not Menu.Visible then
+	if Menubar.Active then
+		Menubar.OnMouseButton(Button, Pressed)
+	else
+	{if (Pressed) and (Button = Basement.Window.mbRight) then
+		Perform(actMenubarFocus, Pressed)
+		//Perform(actMenuShow, Pressed)
+	else}
 	begin
 		InputManager.Mouse.Buttons[Button] := Pressed;
 		UpdateControllers;
-	end
-	else
-		Menu.OnMouseButton(Button, Pressed);
+	end;
 end;
 
 procedure TNESWindow.OnMouseWheel(WheelDelta: Types.TPoint);
@@ -898,24 +1000,8 @@ begin
 
 	CRTRenderer := TCRTRenderer.Create(Self, nil, 'CRT');
 
-	with CRTRenderer do
-	begin
-		Enabled := NES.Config.Configuration.Display.CRT.Enabled;
-		with NES.Config.Configuration.Display.CRT do
-		begin
-			Options.MaskEnabled            := MaskEnabled;
-			Options.ScanlinesEnabled       := ScanlinesEnabled;
-			Options.ScanlineBloom          := ScanlineBloom;
-			Options.DotCrawlSpeed          := DotCrawlSpeed;
-			Options.HorizontalBlur         := HorizontalBlur;
-			Options.ScanlineBrightness     := ScanlineBrightness;
-			Options.MaskBrightness         := MaskBrightness;
-			Options.BrightAndSharp         := BrightAndSharp;
-			Options.ExtraContrast          := ExtraContrast;
-			Options.EnlargeMaskAtZoomLevel := EnlargeMaskAtZoomLevel;
-		end;
-		OptionsChanged;
-	end;
+	GetCRTRendererConfig;
+	CRTRenderer.OptionsChanged;
 
 	RendererChanged;
 
@@ -941,6 +1027,7 @@ begin
 	RealignOverlays;
 
 	UpdateMainMenu;
+	InitMenubar;
 	ControllerSetupChanged;
 end;
 
@@ -964,6 +1051,134 @@ begin
 				Bounds(0, Index*ICON_SIZE, ICON_SIZE, ICON_SIZE), Icons.Pixel[0,0], Icons);
 			IconOverlay.SetActiveArea(IconOverlay.FrameBuffer.CroppedRect(0));
 		end;
+	end;
+end;
+
+procedure TNESWindow.InitMenubar;
+var
+	Item: TMenuItem;
+	Root, SubMenu: TSubMenu;
+	i: Integer;
+begin
+	if Console = nil then Exit;
+
+	MenuBar.Free;
+	MenuBar := TMenuBar.Create(MenuRenderer.FrameBuffer, MenuRenderer.Font);
+
+	Root := MenuBar.RootMenu;
+
+	{File
+		Open
+		Reload Previous
+		Recent Files >
+		Favourites >
+		-
+		Save State
+		Load State
+		-
+		Exit
+	}
+	Item := Root.AddItem('File');
+	with Item.AddSubMenu(0) do
+	begin
+		Item := AddItem('Open...', actShowPage, 'Load ROM');
+
+		Item := AddItem('Recent Files');
+		with Item.AddSubMenu(0) do
+			for i := 0 to MRUcount-1 do
+				AddItem(ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
+					actROMLoadMRU).Data := Configuration.Application.MRU[i];
+		Item := AddItem('Favourites...', actShowPage, 'Favourites');
+		AddSeparator;
+		Item := AddItem('Save State', actStateSave);
+		Item := AddItem('Load State', actStateLoad);
+		AddSeparator;
+		Item := AddItem('Exit', actAppExit);
+	end;
+
+	{Console
+		Pause
+		Reset
+		Power Cycle
+		-
+		Play Movie
+	}
+	Item := Root.AddItem('Console');
+	with Item.AddSubMenu(0) do
+	begin
+		AddItem('Pause', actConsolePause);
+		AddItem('Reset', actConsoleReset);
+		AddItem('Power Cycle', actConsoleRestart);
+
+		if Console.MovieManager.Loaded then
+		begin
+			AddSeparator;
+			if Console.MovieManager.IsPlaying then
+				AddItem('Stop Movie', actMoviePlayback)
+			else
+				AddItem('Play Movie', actMoviePlayback);
+		end;
+	end;
+
+	{Options
+		Display >
+		Audio >
+		Input >
+		Emulation >
+		Application >
+	}
+	Item := Root.AddItem('Options');
+	with Item.AddSubMenu(0) do
+	begin
+		AddItem('Display', actShowPage);
+		AddItem('Audio', actShowPage);
+		AddItem('Input', actShowPage);
+		AddItem('Emulation', actShowPage);
+		AddItem('Application', actShowPage);
+	end;
+
+	{View
+		Cart Info
+		-
+		[X] CRT Filter
+		[X] NTSC Filter
+		[X] Fullscreen
+	}
+	Item := Root.AddItem('View');
+	with Item.AddSubMenu(0) do
+	begin
+		AddItem('Cart Info', actShowPage, 'Cart Info');
+		AddSeparator;
+		AddCheckItem('CRT Filter',  @Configuration.Display.CRT.Enabled);
+		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled);
+		AddCheckItem('Fullscreen',  @Configuration.Display.Window.FullScreen);
+	end;
+
+	{Tools
+		Cheat Browser
+		Record Audio
+		Debug Log
+	}
+	Item := Root.AddItem('Tools');
+	with Item.AddSubMenu(0) do
+	begin
+		AddItem('Cheat Browser', actShowPage, 'Cheats');
+
+		if NES_APU.WavRecording then
+			AddItem('Stop Recording Audio', actRecordWAV)
+		else
+			AddItem('Record Audio', actRecordWAV);
+
+		AddItem('Debug Log', actShowPage);
+	end;
+
+	{Help
+		About CaniNES
+	}
+	Item := Root.AddItem('Help');
+	with Item.AddSubMenu(0) do
+	begin
+		AddItem('About CaniNES...');
 	end;
 end;
 

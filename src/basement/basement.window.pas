@@ -51,6 +51,7 @@ type
 	TMouseInfo = record
 		Enabled:	Boolean;
 		Visible:	Boolean;
+		Timer:		Cardinal;
 		Pos,
 		UnscaledPos,
 		OldPos,
@@ -100,7 +101,7 @@ type
 		procedure	FlipFrame; virtual;
 		procedure	SyncFramerate;
 		procedure	SetTitle(const Title: AnsiString);
-		procedure	ShowMouse;
+		procedure	ShowMouse; virtual;
 		procedure 	PixelScalingChanged; virtual;
 
 		procedure	OnKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean); virtual;
