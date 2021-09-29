@@ -136,10 +136,10 @@ type
 					const SrcRect: TRect; TransColor: TColor32; Src: TBitmap32); overload;
 		procedure 	FillRect(R: TRect; Value: TColor32); overload;
 		procedure 	FillRect(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
-        procedure 	FillRectS(R: TRect; Value: TColor32); overload;
+		procedure 	FillRectS(R: TRect; Value: TColor32); overload;
 		procedure 	FillRectS(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
 		procedure 	FillRectT(X1, Y1, X2, Y2: Integer; Value: TColor32);
-        procedure 	FillRectTS(R: TRect; Value: TColor32); overload;
+		procedure 	FillRectTS(R: TRect; Value: TColor32); overload;
 		procedure 	FillRectTS(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
 		procedure 	FrameRect(R: TRect; Value: TColor32); overload;
 		procedure 	FrameRect(X1, Y1, X2, Y2: Integer; Value: TColor32); overload;
@@ -827,7 +827,6 @@ function TBitmap32.CroppedRect(BgColor: TColor32; Padding: Integer = 0): TRect;
 	function FindNonEmptyLineX(XX, Dir: Integer): Integer;
 	var
 		X, Y: Integer;
-		Pix: PColor32;
 	begin
 		X := XX;
 		while (X >= 0) and (X < Width) do
@@ -1183,7 +1182,10 @@ begin
 	if ValidateY(Y) then
 	begin
 		ValidateX(X1); ValidateX(X2);
-		HorzLineT(X1, Y, X2, Value);
+		if AlphaComponent(Value) < 255 then
+			HorzLineT(X1, Y, X2, Value)
+		else
+			HorzLine(X1, Y, X2, Value);
 	end;
 end;
 
@@ -1241,7 +1243,10 @@ begin
 	if ValidateX(X) then
 	begin
 		ValidateY(Y1); ValidateY(Y2);
-		VertLineT(X, Y1, Y2, Value);
+		if AlphaComponent(Value) < 255 then
+			VertLineT(X, Y1, Y2, Value)
+		else
+			VertLine(X, Y1, Y2, Value);
 	end;
 end;
 
@@ -2146,7 +2151,7 @@ var
 	fUpLeft, fUpRight, fLowLeft, fLowRight: Integer;
 	faUpLeft, faUpRight, faLowLeft, faLowRight: Integer;
 	rSum, gSum, bSum, aSum: Integer;
-	temp: TBitmap32;
+	//temp: TBitmap32;
 begin
 	Result := nil;
 
