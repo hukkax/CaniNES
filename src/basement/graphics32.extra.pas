@@ -10,15 +10,17 @@ uses
 
 type
 	TBitmap32Ext = class helper for TBitmap32
-		procedure DropShadow(const R: TRect; Color: Cardinal; ShadowDistance: Byte = 3);
-		procedure FillBox(SR: TRect; Color: Cardinal; Contrast: Integer; Gradient: Integer);
-		procedure DrawSelection(const R: TRect; Color: Cardinal); inline;
+		procedure DropShadow(const R: TRect; Color: TColor32; ShadowDistance: Byte = 3);
+		procedure Bevel(R: TRect; Contrast: Byte);
+
+		procedure FillBox(const R: TRect; Color: TColor32; Contrast: Byte; Gradient: Integer);
+		procedure DrawSelection(const R: TRect; Color: TColor32); inline;
 	end;
 
 
 implementation
 
-procedure TBitmap32Ext.DropShadow(const R: TRect; Color: Cardinal; ShadowDistance: Byte = 3);
+procedure TBitmap32Ext.DropShadow(const R: TRect; Color: TColor32; ShadowDistance: Byte = 3);
 begin
 	FillRectS(R.Left + ShadowDistance, R.Bottom,
 		R.Right + ShadowDistance, R.Bottom + ShadowDistance, Color);
@@ -26,39 +28,34 @@ begin
 		R.Right + ShadowDistance, R.Bottom + ShadowDistance, Color);
 end;
 
-procedure TBitmap32Ext.FillBox(SR: TRect; Color: Cardinal; Contrast: Integer; Gradient: Integer);
+procedure TBitmap32Ext.Bevel(R: TRect; Contrast: Byte);
 var
-	Col: Cardinal;
-	A, Y: Integer;
+	Col: TColor32;
 begin
-	FillRectS(SR, Color);
+	if Contrast = 0 then Exit;
 
-	if Gradient <> 0 then
-	begin
-		A := 0;
-		for Y := SR.Top to SR.Bottom-1 do
-		begin
-			Col := Lighten(Color, A);
-			HorzLineS(SR.Left, Y, SR.Right, Col);
-			Inc(A, Gradient);
-		end;
-	end;
+	ValidateRect(R);
 
-	if Contrast <> 0 then
-	begin
-		Col := Lighten(Color, +Contrast);
-		LineS(SR.Left, SR.Top, SR.Right, SR.Top,    Col, False);
-		LineS(SR.Left, SR.Top, SR.Left,  SR.Bottom, Col, False);
-		Col := Lighten(Color, -Contrast);
-		SR.Bottom := SR.Bottom - 1;
-		LineS(SR.Left,  SR.Bottom, SR.Right, SR.Bottom, Col, False);
-		LineS(SR.Right, SR.Top,    SR.Right, SR.Bottom, Col, True);
-	end;
+	Col := SetAlpha(clWhite32, Contrast); // light edges
+	HorzLineTS(R.Left, R.Top, R.Right-1,  Col);
+	VertLineTS(R.Left, R.Top, R.Bottom-1, Col);
+
+	Col := SetAlpha(clBlack32, Contrast); // dark edges
+	HorzLineTS(R.Left,    R.Bottom-1, R.Right-1,  Col);
+	VertLineTS(R.Right-1, R.Top,      R.Bottom-1, Col);
 end;
 
-procedure TBitmap32Ext.DrawSelection(const R: TRect; Color: Cardinal);
+procedure TBitmap32Ext.FillBox(const R: TRect; Color: TColor32; Contrast: Byte; Gradient: Integer);
 begin
-	FillBox(R, Lighten(Color, -20), 50, 2);
+	if Gradient < 0 then
+		Gradient := -20;
+	GradientRect(R, Lighten(Color, -Gradient), Lighten(Color, +Gradient), False);
+	Bevel(R, Contrast);
+end;
+
+procedure TBitmap32Ext.DrawSelection(const R: TRect; Color: TColor32);
+begin
+	FillBox(R, Color, 36, 17);
 end;
 
 end.
