@@ -277,24 +277,11 @@ begin
 end;
 
 function TMenuItem.Click: Boolean;
+var
+	Act: TAction;
 begin
-	Result := False; // keep menu open if no action taken
-
-	if Action <> actNone then
-	begin
-		Result := True;
-		if Action = actShowPage then
-			Window.ShowMenuPage(Data, True)
-		else
-			Window.Perform(Action);
-	end
-	else
-	if Flags.IsCheckbox then
-	begin
-		Result := True;
-	end
-	else
-		ActivateSubMenu(not SubmenuActive, False); // toggle submenu
+	// keep menu open if no action taken
+	Result := (Action <> actNone) or (Flags.IsCheckbox);
 
 	if Result then
 	begin
@@ -307,7 +294,17 @@ begin
 		//
 		if Flags.IsCheckbox then
 			Checked := Configuration.ToggleBool(ValuePtr);
-	end;
+
+		if Action <> actNone then
+		begin
+			if Action = actShowPage then
+				Window.ShowMenuPage(Data, True)
+			else
+				Window.Perform(Action);
+		end;
+	end
+	else
+		ActivateSubMenu(not SubmenuActive, False); // toggle submenu
 end;
 
 
