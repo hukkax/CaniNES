@@ -47,9 +47,10 @@ type
 		DrawnState: TMenuItemState;
 		Rect:       TRect;
 		ValuePtr:   PBoolean; // for checkbox
+		OnScreen:   Boolean;
 
 		function    GetWidth: Word;
-		function    GetHeight: Word;
+		function    GetHeight(FullHeight: Boolean = False): Word;
 		function    SubmenuActive: Boolean;
 		function    ActivateSubMenu(Show, Sticky: Boolean): Boolean;
 		function    AddSubMenu(nID: TSubMenuID): TSubMenu;
@@ -66,13 +67,16 @@ type
 		NeedUpdate: Boolean;
 		Drawn:      Boolean;
 		Sticky:     Boolean; // keyboard used, disallow some mouse interactions
+		Scrollable: Boolean; // more than MaxItemCount items in submenu?
 		Metrics:    TMenuMetrics;
 
 		procedure   Draw;
+		procedure   SelectionChanged;
 	public
 		Visible:    Boolean;
 		ID:         TSubMenuID;
 		Caption:    String;
+		ScrollPos:  Word;
 		Parent:     TSubMenu;
 		ActiveItem: TMenuItem;
 		Rect:       TRect;
@@ -84,6 +88,7 @@ type
 		function    GetWidth:  Integer;
 		function    GetHeight: Integer;
 
+		procedure   SetScrollPos(i: Integer);
 		procedure   PreviousItem;
 		procedure   NextItem;
 		procedure   Activate(Show: Boolean);
@@ -97,6 +102,7 @@ type
 		function    AddSeparator: TMenuItem;
 
 		function    OnMouseMove(P: TPoint): Boolean;
+		function    OnMouseWheel(WheelDelta: Integer): Boolean;
 
 		constructor Create(AParent: TSubMenu; nID: TSubMenuID);
 		destructor  Destroy; override;
@@ -122,6 +128,7 @@ type
 		Changed:    Boolean;
 		Hovering:   Boolean;
 		Metrics:    TMenuMetrics;
+		MaxItemCount: Byte;
 
 		function    ProcessKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean): Boolean;
 		procedure   OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);
@@ -218,9 +225,9 @@ begin
 		Inc(Result, Trunc(Menubar.Font.GlyphWidth * 2.5));
 end;
 
-function TMenuItem.GetHeight: Word;
+function TMenuItem.GetHeight(FullHeight: Boolean = False): Word;
 begin
-	if Flags.IsSeparator then
+	if (not FullHeight) and (Flags.IsSeparator) then
 		Result := MenuBar.Metrics.SEPHEIGHT
 	else
 		Result := Menubar.Font.GlyphHeight;
@@ -356,14 +363,21 @@ end;
 function TSubMenu.GetHeight: Integer;
 var
 	Item: TMenuItem;
+	FullHeightSep: Boolean;
+	GH, H: Integer;
 begin
+	GH := Menubar.Font.GlyphHeight;
 	if Self = Menubar.RootMenu then
-		Result := Menubar.Font.GlyphHeight + (Metrics.PADDING_Y * 2)
+		Result := GH + (Metrics.PADDING_Y * 2)
 	else
 	begin
+		Scrollable := Items.Count > Menubar.MaxItemCount;
 		Result := (Metrics.PADDING_Y * 2) - Metrics.ITEMSPACING;
+		H := 0;
 		for Item in Items do
-			Inc(Result, Item.GetHeight + Metrics.ITEMSPACING);
+			Inc(H, Item.GetHeight(Scrollable) + Metrics.ITEMSPACING);
+		H := Min(H, Menubar.MaxItemCount * (GH + Metrics.ITEMSPACING));
+		Inc(Result, H);
 	end;
 end;
 
@@ -379,7 +393,7 @@ procedure TSubMenu.Draw;
 
 var
 	Item: TMenuItem;
-	X, Y, W, H: Integer;
+	I, X, Y, W, H: Integer;
 	colFg, colBg: TColor32;
 	State: TMenuItemState;
 begin
@@ -407,6 +421,7 @@ begin
 
 		for Item in Items do // top menubar, horizontal
 		begin
+			Item.OnScreen := True;
 			W := Item.GetWidth;
 
 			State := GetItemState(Item);
@@ -436,9 +451,15 @@ begin
 	begin
 		W := Metrics.PADDING_X div 2;
 
-		for Item in Items do // dropdown menu, vertical
+		// dropdown menu, vertical
+		for I := ScrollPos to Min(ScrollPos + Menubar.MaxItemCount-1, Items.Count-1) do
 		begin
-			H := Item.GetHeight + Metrics.ITEMSPACING;
+			Item := Items[I];
+			if Item = nil then Continue;
+
+			Item.OnScreen := True;
+
+			H := Item.GetHeight(Scrollable) + Metrics.ITEMSPACING;
 
 			State := GetItemState(Item);
 			if State <> Item.DrawnState then
@@ -451,8 +472,8 @@ begin
 
 				if Item.Flags.IsSeparator then
 				begin
-					Item.Rect := Bounds(0, Y + (Metrics.SEPHEIGHT div 2), Buffer.Width-1, H);
-					Buffer.FillRectS(Item.Rect.Left, Item.Rect.Top, Item.Rect.Right, Item.Rect.Top+2,
+					Item.Rect := Bounds(0, Y, Buffer.Width-1, H);
+					Buffer.FillRectS(Bounds(Item.Rect.Left, Y + (H div 2) - 1, Item.Rect.Width, 2),
 						Palette[COLOR_MENU_BORDER]);
 				end
 				else
@@ -490,6 +511,11 @@ begin
 		X := Menubar.Buffer.Width - W;
 		Position.X := X;
 	end;
+	if (Y + H) > Menubar.Buffer.Height then
+	begin
+		Position.Y := Menubar.RootMenu.GetHeight;
+	end;
+
 	Rect := Bounds(X, Y, W, H-1);
 
 	Drawn := True;
@@ -532,6 +558,44 @@ begin
 	Result.ValuePtr := ValuePtr;
 end;
 
+procedure TSubMenu.SetScrollPos(i: Integer);
+var
+	P: Integer;
+	Item: TMenuItem;
+begin
+	P := Max(i, 0);
+	if (P + Menubar.MaxItemCount) >= Items.Count then
+		P := Max(0, Items.Count - Menubar.MaxItemCount);
+	if P <> ScrollPos then
+	begin
+		for Item in Items do
+			if Item <> nil then
+			begin
+				Item.DrawnState := misUndrawn;
+				Item.OnScreen := False;
+			end;
+		ScrollPos := P;
+		NeedUpdate := True;
+		Drawn := False;
+	end;
+end;
+
+procedure TSubMenu.SelectionChanged;
+var
+	i: Integer;
+begin
+	if ActiveItem = nil then Exit;
+
+	i := Items.IndexOf(ActiveItem);
+	if i < 0 then Exit;
+
+	if i < ScrollPos then
+		SetScrollPos(i)
+	else
+	if i >= (ScrollPos + Menubar.MaxItemCount) then
+		SetScrollPos(i - Menubar.MaxItemCount + 1);
+end;
+
 procedure TSubMenu.NextItem;
 var
 	i: Integer;
@@ -550,6 +614,7 @@ begin
 			ActiveItem := nil;
 	until (ActiveItem = nil) or (not ActiveItem.Flags.IsSeparator);
 
+	SelectionChanged;
 	NeedUpdate := True;
 end;
 
@@ -571,6 +636,7 @@ begin
 			ActiveItem := nil;
 	until (ActiveItem = nil) or (not ActiveItem.Flags.IsSeparator);
 
+	SelectionChanged;
 	NeedUpdate := True;
 end;
 
@@ -602,10 +668,14 @@ begin
 				Item.ActivateSubMenu(False, Sticky);
 			Menubar.ActiveMenu := Parent;
 		end;
+
+		if Show then
+			SelectionChanged;
 	end;
 
 	if Self <> Menubar.RootMenu then
 		Visible := Show;
+
 	NeedUpdate := True;
 	Menubar.Changed := True;
 end;
@@ -618,7 +688,7 @@ begin
 	Result := False;
 	for Item in Items do
 	begin
-		if PtInRect(Item.Rect, P) then
+		if (Item.OnScreen) and (PtInRect(Item.Rect, P)) then
 		begin
 			if Item <> ActiveItem then
 			begin
@@ -639,6 +709,16 @@ begin
 			Result := True;
 			Exit;
 		end;
+	end;
+end;
+
+function TSubMenu.OnMouseWheel(WheelDelta: Integer): Boolean;
+begin
+	Result := Scrollable;
+	if Result then
+	begin
+		SetScrollPos(ScrollPos - WheelDelta);
+		Menubar.Changed := True;
 	end;
 end;
 
@@ -675,6 +755,9 @@ begin
 	ActiveMenu := RootMenu;
 
 	Buffer.Clear(0);
+
+	MaxItemCount := (Buffer.Height - RootMenu.GetHeight - (Metrics.PADDING_Y * 2)) div
+		(Font.GlyphHeight + Metrics.ITEMSPACING) - 1;
 end;
 
 destructor TMenuBar.Destroy;

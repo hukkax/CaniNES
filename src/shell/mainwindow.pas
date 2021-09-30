@@ -933,7 +933,10 @@ begin
 	begin
 		Menu.CurrentPage.Scroll(-WheelDelta.Y * 3); // scroll amount per wheel rotation
 		Menu.Draw;
-	end;
+	end
+	else
+	if (MenuBar.Hovering) and (MenuBar.ActiveMenu <> nil) then
+		MenuBar.ActiveMenu.OnMouseWheel(WheelDelta.Y);
 end;
 
 procedure TNESWindow.OnFileDropped(const Filename: String);
