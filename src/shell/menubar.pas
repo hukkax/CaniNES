@@ -11,6 +11,9 @@ uses
 	InputBindings,
 	Graphics32;
 
+const
+	Dots = '...'; //' …';
+
 type
 	TSubMenuID = Word;
 
@@ -152,7 +155,8 @@ const
 	SUBMENU_SEPHEIGHT   = 0.3;
 	SUBMENU_MAXWIDTH    = 0.75;
 
-	CheckboxGlyph: array[Boolean] of String = ( STR_CHECKBOX_NO, STR_CHECKBOX_YES );
+	CheckboxGlyph: array[Boolean] of String = ( '  ', '✓ ' );
+	//STR_CHECKBOX_NO, STR_CHECKBOX_YES );
 
 var
 	Menubar: TMenuBar;
@@ -513,7 +517,7 @@ begin
 	Result := TMenuItem.Create(Self, ACaption, AAction);
 	Result.Data := AData;
 	if (AAction = actShowPage) and (AData.IsEmpty) then
-		Result.Data := ACaption;
+		Result.Data := ACaption.Replace(Dots, '');
 end;
 
 function TSubMenu.AddSeparator: TMenuItem;
