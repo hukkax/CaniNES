@@ -46,6 +46,7 @@ const
 	STR_CHECKBOX_NO     = '☐ ';
 	STR_PAGE_NEXT       = '▶';
 	STR_PAGE_PREV       = '◀ Back';
+	STR_PAGE_ACCEPT     = 'OK';
 	STR_ARROW_UP        = '▲';
 	STR_ARROW_DOWN      = '▼';
 	{$ELSE}

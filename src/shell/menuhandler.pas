@@ -28,6 +28,7 @@ type
 		IsFile,
 		IsFavourited,
 		IsLoaded,
+		IsCentered,
 		Checkbox,
 		Checked:    Boolean;
 		Action:     Integer;
@@ -123,6 +124,7 @@ type
 		end;
 
 		procedure UpdateScrollbar;
+		procedure UpdateBackButton;
 
 	public
 		Visible:      Boolean;
@@ -391,8 +393,8 @@ function TMenuPage.AddBackCommand: TMenuEntry;
 begin
 	Result := nil;
 	if (ParentPage <> nil) and (Menu <> nil) then
-		if (ParentPage <> MainMenu.MainPage) or (not Menu.ShowAsWindow) then
-			Result := AddEntry(STR_PAGE_PREV, 0, Palette[COLOR_MENU_BACKBUTTON], Menu.CmdBackPage);
+	//	if (ParentPage <> MainMenu.MainPage) or (not Menu.ShowAsWindow) then
+			Result := AddEntry(STR_PAGE_PREV, Ord(actMenuBack), Palette[COLOR_MENU_BACKBUTTON], Menu.CmdBackPage);
 end;
 
 procedure TMenuPage.BrowseItems(Change: Integer; AllowWrap: Boolean = True; Center: Boolean = True);
@@ -557,11 +559,33 @@ begin
 	NeedUpdate := True;
 end;
 
+procedure TEmulatorMenu.UpdateBackButton;
+var
+	Item: TMenuEntry;
+begin
+	for Item in CurrentPage.Items do
+	begin
+		if Item.Action = Ord(actMenuBack) then
+		begin
+			Item.IsCentered := ShowAsWindow;
+			if ShowAsWindow then
+				Item.Caption := STR_PAGE_ACCEPT
+			else
+				Item.Caption := STR_PAGE_PREV;
+			NeedUpdate := True;
+			Exit;
+		end;
+	end;
+end;
+
 procedure TEmulatorMenu.Show(Enable: Boolean);
 begin
 	Visible := Enable;
 	if Enable then
+	begin
+		UpdateBackButton;
 		NeedUpdate := True;
+	end;
 
 	Window.ControllerSetupChanged; // show/hide mouse pointer
 
@@ -731,7 +755,10 @@ begin
 							C := Palette[COLOR_FILE_CURRENT];
 					end;
 
-					OL.DrawString(-X1-2, -(Y+OSY), Item.Caption, C, X2-X1);
+					if Item.IsCentered then
+						OL.Font.DrawStringCentered(Buffer, Max(0, Y)-3, Item.Caption, Item.Color)
+					else
+						OL.DrawString(-X1-2, -(Y+OSY), Item.Caption, C, X2-X1);
 				end;
 
 				if Item.Kind = mePage then
@@ -1157,8 +1184,6 @@ end;
 
 procedure TEmulatorMenu.UpdateFilelisting;
 var
-	i: Integer;
-	S: String;
 	E: TMenuEntry;
 begin
 	if CurrentPage <> nil then
@@ -1174,7 +1199,17 @@ end;
 procedure TEmulatorMenu.CmdBackPage(Entry: TMenuEntry);
 begin
 	if (CurrentPage <> nil) and (CurrentPage.ParentPage <> nil) then
+	begin
+		if ShowAsWindow then
+		begin
+			if CurrentPage.ParentPage = MainPage then
+			begin
+				Show(False);
+				Exit;
+			end;
+		end;
 		SwitchPage(CurrentPage.ParentPage);
+	end;
 end;
 
 initialization
