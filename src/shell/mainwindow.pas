@@ -546,6 +546,7 @@ begin
 			if Pressed then
 			begin
 				Configuration.ToggleBool(@Configuration.Display.NTSC.Enabled);
+				MenuBar.ForceRedraw;
 				OSD('NTSC filter ' + EnabledString[Configuration.Display.NTSC.Enabled]);
 			end;
 
@@ -553,6 +554,7 @@ begin
 			if Pressed then
 			begin
 				Configuration.ToggleBool(@Configuration.Display.CRT.Enabled);
+				MenuBar.ForceRedraw;
 				OSD('CRT filter ' + EnabledString[CRTRenderer.Enabled]);
 			end;
 
@@ -1130,10 +1132,10 @@ begin
 	Item := Root.AddItem('Options');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Display', actShowPage);
-		AddItem('Audio', actShowPage);
-		AddItem('Input', actShowPage);
-		AddItem('Emulation', actShowPage);
+		AddItem('Display',     actShowPage);
+		AddItem('Audio',       actShowPage);
+		AddItem('Input',       actShowPage);
+		AddItem('Emulation',   actShowPage);
 		AddItem('Application', actShowPage);
 	end;
 
@@ -1149,8 +1151,8 @@ begin
 	begin
 		AddItem('Cart Info', actShowPage, 'Cart Info');
 		AddSeparator;
-		AddCheckItem('CRT Filter',  @Configuration.Display.CRT.Enabled);
 		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled);
+		AddCheckItem('CRT  Filter', @Configuration.Display.CRT.Enabled);
 		AddCheckItem('Fullscreen',  @Configuration.Display.Window.FullScreen);
 	end;
 
@@ -1175,11 +1177,13 @@ begin
 	{Help
 		About CaniNES
 	}
+{
 	Item := Root.AddItem('Help');
 	with Item.AddSubMenu(0) do
 	begin
 		AddItem('About CaniNES...');
 	end;
+}
 end;
 
 

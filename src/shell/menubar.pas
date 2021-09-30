@@ -125,6 +125,8 @@ type
 		procedure   OnMouseMove(P: TPoint);
 
 		procedure   Draw;
+		procedure   ForceUpdate;
+		procedure   ForceRedraw;
 		function    RefreshActiveState: Boolean;
 
 		constructor Create(const ABuffer: TBitmap32; const AFont: TRendererFont);
@@ -701,6 +703,22 @@ begin
 		if (Menu.Visible) and (PtInRect(Menu.Rect, MousePos)) then
 			Exit(Menu);
 	end;
+end;
+
+procedure TMenuBar.ForceUpdate;
+begin
+	if ActiveMenu <> nil then
+	begin
+		ActiveMenu.Drawn := False;
+		ActiveMenu.NeedUpdate := True;
+	end;
+	Changed := True;
+end;
+
+procedure TMenuBar.ForceRedraw;
+begin
+	ForceUpdate;
+	Draw;
 end;
 
 procedure TMenuBar.Draw;
