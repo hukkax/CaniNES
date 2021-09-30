@@ -433,7 +433,10 @@ begin
 
 		actFavourite:
 			if Pressed then
+			begin
 				Bookmarks.Toggle('');
+				InitMenubar;
+			end;
 
 		actMoviePlayback:
 			if Pressed and Console.MovieManager.Loaded then
@@ -446,6 +449,7 @@ begin
 					Console.MovieManager.Play;
 				end;
 				UpdateMainMenu;
+				InitMenubar;
 				Menu.Show(False);
 				OSD('');
 			end;
@@ -639,6 +643,8 @@ begin
 	if Cartridge.RomData.Info.IsPatched then
 		S := S + ' (patched)';
 	OSD(S);
+
+	InitMenubar;
 
 	S := Cartridge.RomData.Info.DatabaseInfo.Title;
 	if S.IsEmpty then
@@ -1059,8 +1065,9 @@ end;
 procedure TNESWindow.InitMenubar;
 var
 	Item: TMenuItem;
-	Root, SubMenu: TSubMenu;
+	Root: TSubMenu;
 	i: Integer;
+	S: String;
 begin
 	if Console = nil then Exit;
 
@@ -1083,14 +1090,33 @@ begin
 	Item := Root.AddItem('File');
 	with Item.AddSubMenu(0) do
 	begin
-		Item := AddItem('Open...', actShowPage, 'Load ROM');
+		Item := AddItem('Open'+Dots, actShowPage, 'Load ROM');
 
 		Item := AddItem('Recent Files');
 		with Item.AddSubMenu(0) do
 			for i := 0 to MRUcount-1 do
 				AddItem(ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
-					actROMLoadMRU).Data := Configuration.Application.MRU[i];
-		Item := AddItem('Favourites...', actShowPage, 'Favourites');
+					actROMLoadMRU, Configuration.Application.MRU[i]);
+
+		Item := AddItem('Favourites');
+		with Item.AddSubMenu(0) do
+		begin
+			if (Console.GotCartridge) and (not Console.LoadedFile.IsEmpty) then
+			begin
+				if Bookmarks.Contains(Console.LoadedFile) then
+					S := 'Remove' else S := 'Add';
+				S := S + ' Current';
+				AddItem(S, actFavourite);
+				if Bookmarks.Items.Count > 0 then
+					AddSeparator;
+			end;
+
+			if Bookmarks.Items.Count > 0 then
+				for S in Bookmarks.Items do
+					if not S.IsEmpty then
+						AddItem(ChangeFileExt(ExtractFilename(S), ''), actROMLoadMRU, S);
+		end;
+
 		AddSeparator;
 		Item := AddItem('Save State', actStateSave);
 		Item := AddItem('Load State', actStateLoad);
@@ -1132,11 +1158,11 @@ begin
 	Item := Root.AddItem('Options');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Display',     actShowPage);
-		AddItem('Audio',       actShowPage);
-		AddItem('Input',       actShowPage);
-		AddItem('Emulation',   actShowPage);
-		AddItem('Application', actShowPage);
+		AddItem('Display'+Dots,     actShowPage);
+		AddItem('Audio'+Dots,       actShowPage);
+		AddItem('Input'+Dots,       actShowPage);
+		AddItem('Emulation'+Dots,   actShowPage);
+		AddItem('Application'+Dots, actShowPage);
 	end;
 
 	{View
@@ -1149,7 +1175,7 @@ begin
 	Item := Root.AddItem('View');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Cart Info', actShowPage, 'Cart Info');
+		AddItem('Cart Info'+Dots, actShowPage, 'Cart Info');
 		AddSeparator;
 		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled);
 		AddCheckItem('CRT  Filter', @Configuration.Display.CRT.Enabled);
@@ -1164,14 +1190,14 @@ begin
 	Item := Root.AddItem('Tools');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Cheat Browser', actShowPage, 'Cheats');
+		AddItem('Cheat Browser'+Dots, actShowPage, 'Cheats');
 
 		if NES_APU.WavRecording then
 			AddItem('Stop Recording Audio', actRecordWAV)
 		else
 			AddItem('Record Audio', actRecordWAV);
 
-		AddItem('Debug Log', actShowPage);
+		AddItem('Debug Log'+Dots, actShowPage);
 	end;
 
 	{Help
