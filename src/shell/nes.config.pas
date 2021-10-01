@@ -345,7 +345,7 @@ begin
 
 	SetPalette(COLOR_MENU_BACKGROUND,	$E9111C20);	// background
 	SetPalette(COLOR_MENU_BORDER,		$EE225577);	// border for menubar submenus
-	SetPalette(COLOR_MENU_SHADOW,		$FF111111);	// shadow
+	SetPalette(COLOR_MENU_SHADOW,		$77111111);	// shadow
 	SetPalette(COLOR_MENU_SELECTION,	$FF883322);	// selection background
 	SetPalette(COLOR_MENU_HEADER,		$EE225577);	// header background
 	SetPalette(COLOR_MENU_NORMAL,		$FFFFFFFF);	// normal text

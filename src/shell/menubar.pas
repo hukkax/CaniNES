@@ -528,6 +528,11 @@ begin
 	begin
 		Draw;
 		DestBuffer.Draw(Position.X, Position.Y, Buffer);
+		if Self = Menubar.RootMenu then
+			DestBuffer.HorzLine(0, GetHeight, DestBuffer.Width, Palette[COLOR_MENU_SHADOW])
+		else
+			DestBuffer.DropShadow(Bounds(Position.X, Position.Y, Buffer.Width, Buffer.Height),
+				Palette[COLOR_MENU_SHADOW], 5);
 	end;
 end;
 
