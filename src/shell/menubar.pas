@@ -447,7 +447,7 @@ begin
 		W := Metrics.PADDING_X div 2;
 
 		// dropdown menu, vertical
-		for I := ScrollPos to Min(ScrollPos + Menubar.MaxItemCount-1, Items.Count-1) do
+		for I := ScrollPos to Min(Int64(ScrollPos + Menubar.MaxItemCount-1), Items.Count-1) do
 		begin
 			Item := Items[I];
 			if Item = nil then Continue;
