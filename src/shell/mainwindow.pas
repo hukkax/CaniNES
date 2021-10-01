@@ -385,7 +385,7 @@ begin
 		actMenubarFocus:
 			if Pressed then
 			begin
-				if Menubar.Hovering then Exit;
+				if (Menubar.Hovering) or (Menu.Visible) then Exit;
 				Menubar.Active := not Menubar.Active;
 				if Menubar.Active then
 				begin
@@ -1211,6 +1211,7 @@ begin
 		AddSeparator;
 		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled);
 		AddCheckItem('CRT  Filter', @Configuration.Display.CRT.Enabled);
+		AddSeparator;
 		AddCheckItem('Fullscreen',  @Configuration.Display.Window.FullScreen);
 	end;
 
