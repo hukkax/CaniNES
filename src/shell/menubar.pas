@@ -128,6 +128,7 @@ type
 		Visible:    Boolean;
 		Changed:    Boolean;
 		Hovering:   Boolean;
+		Recreated:  Boolean;
 		Metrics:    TMenuMetrics;
 		MaxItemCount: Byte;
 
@@ -255,18 +256,6 @@ begin
 		DrawnState := misUndrawn;
 		ParentMenu.Changed;
 	end;
-
-	{if Value <> Flags.Checked then
-	begin
-		if Value then
-		begin
-			Flags.IsCheckbox  := True;
-			Flags.IsSeparator := False;
-		end;
-		Flags.Checked := Value;
-		DrawnState := misUndrawn;
-		ParentMenu.Changed;
-	end;}
 end;
 
 function TMenuItem.GetDrawableCaption: String;
@@ -282,7 +271,7 @@ end;
 
 function TMenuItem.Click: Boolean;
 var
-	Act: TAction;
+	B: Boolean;
 begin
 	// keep menu open if no action taken
 	Result := (Action <> actNone) or (Flags.IsCheckbox);
@@ -297,7 +286,12 @@ begin
 		// and call its callback
 		//
 		if Flags.IsCheckbox then
-			Checked := Configuration.ToggleBool(ValuePtr);
+		begin
+			Menubar.Recreated := False;
+			B := Configuration.ToggleBool(ValuePtr);
+			if not Menubar.Recreated then
+				Checked := B;
+		end;
 
 		if Action <> actNone then
 		begin
@@ -309,6 +303,8 @@ begin
 	end
 	else
 		ActivateSubMenu(not SubmenuActive, False); // toggle submenu
+
+	Menubar.Recreated := False;
 end;
 
 
@@ -773,6 +769,8 @@ begin
 
 	MaxItemCount := (Buffer.Height - RootMenu.GetHeight - (Metrics.PADDING_Y * 2)) div
 		(Font.GlyphHeight + Metrics.ITEMSPACING) - 1;
+
+	Recreated := True;
 end;
 
 destructor TMenuBar.Destroy;
@@ -803,10 +801,7 @@ begin
 	begin
 		Menu := Items[i];
 		if (Menu.Visible) and (PtInRect(Menu.Rect, MousePos)) then
-		begin
-			writeln('getmenuat=',Menu.Caption);
 			Exit(Menu);
-		end;
 	end;
 end;
 
@@ -851,11 +846,8 @@ begin
 	begin
 		Menu := GetMenuAt(MousePos);
 
-if (Menu <> nil) <> Hovering then
-begin
-writeln('Hovering=',(menu<>nil));
-Changed := True;
-end;
+		if (Menu <> nil) <> Hovering then
+			Changed := True;
 
 		Hovering := (Menu <> nil);
 		if Hovering then
