@@ -75,6 +75,7 @@ implementation
 
 uses
 	TextOutput, Basement.Util,
+	MainWindow,
 	NES.Console;
 
 
@@ -101,6 +102,7 @@ begin
 	IsPlaying := False;
 	if Loaded then
 		Log('[Movie] Playback reset.');
+	Window.UpdateMenus;
 end;
 
 procedure TMovieManager.Play;
@@ -109,6 +111,7 @@ begin
 
 	IsPlaying := True;
 	Message('Movie playback started.');
+	Window.UpdateMenus;
 end;
 
 procedure TMovieManager.Stop;
@@ -117,6 +120,7 @@ begin
 
 	IsPlaying := False;
 	Message('Movie playback stopped.');
+	Window.UpdateMenus;
 end;
 
 function TMovieManager.Update: Boolean;

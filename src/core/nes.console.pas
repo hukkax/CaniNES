@@ -439,8 +439,8 @@ begin
 		if MovieManager.LoadFromFile(Filename) then
 		begin
 			Filename := FindROMFile(MovieManager.MovieInfo.ROMfile);
-			UpdateMainMenu;
 			MovieGotROM := not Filename.IsEmpty;
+			Window.UpdateMenus;
 			if not MovieGotROM then
 			begin
 				Message('Could not find associated ROM: ' +
@@ -590,7 +590,7 @@ log('[MD5] '+ss);
 	Reset(False, False);
 	RewindManager.Initialize;
 
-	UpdateMainMenu;
+	Window.UpdateMenus;
 end;
 
 procedure TConsole.ControllerSetupChanged;
@@ -926,7 +926,7 @@ begin
 	if Result then
 	begin
 		Message('Recording audio to ' + Fn + '.');
-		UpdateMainMenu;
+		Window.UpdateMenus;
 	end;
 end;
 
@@ -936,7 +936,7 @@ begin
 	begin
 		APU.StopRecording;
 		Message('Audio recording stopped.');
-		UpdateMainMenu;
+		Window.UpdateMenus;
 	end;
 end;
 

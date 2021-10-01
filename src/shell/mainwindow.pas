@@ -44,6 +44,7 @@ type
 
 		procedure InitRendering;
 		procedure InitMenubar;
+		procedure UpdateMenus;
 		procedure ReinitWindow; override;
 
 		procedure UpdateOSD; inline;
@@ -384,9 +385,14 @@ begin
 		actMenubarFocus:
 			if Pressed then
 			begin
+				if Menubar.Hovering then Exit;
 				Menubar.Active := not Menubar.Active;
 				if Menubar.Active then
+				begin
+					Menubar.RootMenu.ActivateItem(Menubar.RootMenu.Items.First);
+					Menubar.RootMenu.Sticky := True;
 					MenuRenderer.Opacity := 1.0;
+				end;
 			end;
 
 		actAppExit:
@@ -439,8 +445,7 @@ begin
 					Console.Reset(False);
 					Console.MovieManager.Play;
 				end;
-				UpdateMainMenu;
-				InitMenubar;
+				UpdateMenus;
 				Menu.Show(False);
 				OSD('');
 			end;
@@ -635,12 +640,16 @@ begin
 		S := S + ' (patched)';
 	OSD(S);
 
-	InitMenubar;
-
 	S := Cartridge.RomData.Info.DatabaseInfo.Title;
 	if S.IsEmpty then
 		S := ChangeFileExt(ExtractFilename(Console.LoadedFile), '');
 	SetTitle(APPNAME + {$IFDEF DEBUG} ' (Debug)' + {$ENDIF} ' - ' + S);
+end;
+
+procedure TNESWindow.UpdateMenus;
+begin
+	UpdateMainMenu;
+	Window.InitMenubar;
 end;
 
 procedure TNESWindow.UpdateControllers;
@@ -770,37 +779,6 @@ end;
 // Input handling
 //==================================================================================================
 
-procedure TNESWindow.EnableMouse(Enable: Boolean);
-begin
-	if Enable then
-	begin
-		Mouse.Timer := IfThen(Trunc(Video.SyncRate) > 40, Trunc(Video.SyncRate), 60) * 2; // 2 seconds
-		if not Mouse.Visible then
-		begin
-			Mouse.Visible := True;
-			ShowMouse;
-		end;
-	end
-	else
-	if Mouse.Visible then
-	begin
-		Mouse.Visible := False;
-		MouseHiddenPos := Mouse.Pos;
-		ShowMouse;
-
-		Menubar.Hovering := False;
-		if (MenuBar.RootMenu.ActiveItem = nil) or
-			(not MenuBar.RootMenu.ActiveItem.SubmenuActive) then
-				MenuRenderer.Opacity := 0;
-	end;
-end;
-
-procedure TNESWindow.OnMouseEnterLeave(Entered: Boolean);
-begin
-	inherited;
-	EnableMouse(Entered);
-end;
-
 procedure TNESWindow.OnKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean);
 var
 	Action: TAction;
@@ -885,6 +863,42 @@ begin
 	//writeln('Joy ', PadNum, '=', Button);
 
 	UpdateControllers;
+end;
+
+procedure TNESWindow.EnableMouse(Enable: Boolean);
+begin
+	if Enable then
+	begin
+		Mouse.Timer := IfThen(Trunc(Video.SyncRate) > 40, Trunc(Video.SyncRate), 60) * 2; // 2 seconds
+		if not Mouse.Visible then
+		begin
+			Mouse.Visible := True;
+			ShowMouse;
+		end;
+	end
+	else
+	if Mouse.Visible then
+	begin
+		Mouse.Visible := False;
+		MouseHiddenPos := Mouse.Pos;
+		ShowMouse;
+
+		Menubar.Hovering := False;
+		if not Menu.Visible then
+			if (MenuBar.RootMenu.ActiveItem = nil) or
+				(not MenuBar.RootMenu.ActiveItem.SubmenuActive) then
+				begin
+					MenuRenderer.Opacity := 0;
+					Menubar.Active := False;
+					Menubar.RootMenu.Sticky := False;
+				end;
+	end;
+end;
+
+procedure TNESWindow.OnMouseEnterLeave(Entered: Boolean);
+begin
+	inherited;
+	EnableMouse(Entered);
 end;
 
 procedure TNESWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
@@ -1052,8 +1066,7 @@ begin
 
 	RealignOverlays;
 
-	UpdateMainMenu;
-	InitMenubar;
+	UpdateMenus;
 	ControllerSetupChanged;
 end;
 
@@ -1209,13 +1222,13 @@ begin
 	with Item.AddSubMenu(0) do
 	begin
 		AddItem('Cheat Browser'+Dots, actShowPage, 'Cheats');
+		AddItem('Debug Log'+Dots, actShowPage);
 
+		AddSeparator;
 		if NES_APU.WavRecording then
 			AddItem('Stop Recording Audio', actRecordWAV)
 		else
 			AddItem('Record Audio', actRecordWAV);
-
-		AddItem('Debug Log'+Dots, actShowPage);
 	end;
 
 	{Help

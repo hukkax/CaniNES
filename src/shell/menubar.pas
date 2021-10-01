@@ -66,7 +66,6 @@ type
 	private
 		NeedUpdate: Boolean;
 		Drawn:      Boolean;
-		Sticky:     Boolean; // keyboard used, disallow some mouse interactions
 		Scrollable: Boolean; // more than MaxItemCount items in submenu?
 		Metrics:    TMenuMetrics;
 
@@ -76,6 +75,7 @@ type
 		Visible:    Boolean;
 		ID:         TSubMenuID;
 		Caption:    String;
+		Sticky:     Boolean; // keyboard used, disallow some mouse interactions
 		ScrollPos:  Word;
 		Parent:     TSubMenu;
 		ActiveItem: TMenuItem;
@@ -228,6 +228,9 @@ end;
 
 function TMenuItem.GetHeight(FullHeight: Boolean = False): Word;
 begin
+	if ParentMenu = Menubar.RootMenu then
+		Result := ParentMenu.GetHeight
+	else
 	if (not FullHeight) and (Flags.IsSeparator) then
 		Result := MenuBar.Metrics.SEPHEIGHT
 	else
@@ -361,12 +364,10 @@ end;
 function TSubMenu.GetHeight: Integer;
 var
 	Item: TMenuItem;
-	FullHeightSep: Boolean;
-	GH, H: Integer;
+	H: Integer;
 begin
-	GH := Menubar.Font.GlyphHeight;
 	if Self = Menubar.RootMenu then
-		Result := GH + (Metrics.PADDING_Y * 2)
+		Result := Menubar.Font.GlyphHeight + (Metrics.PADDING_Y * 2)
 	else
 	begin
 		Scrollable := Items.Count > Menubar.MaxItemCount;
@@ -374,7 +375,7 @@ begin
 		H := 0;
 		for Item in Items do
 			Inc(H, Item.GetHeight(Scrollable) + Metrics.ITEMSPACING);
-		H := Min(H, Menubar.MaxItemCount * (GH + Metrics.ITEMSPACING));
+		H := Min(H, Menubar.MaxItemCount * (Menubar.Font.GlyphHeight + Metrics.ITEMSPACING));
 		Inc(Result, H);
 	end;
 end;
@@ -415,7 +416,7 @@ begin
 
 	if Self = Menubar.RootMenu then
 	begin
-		H := Buffer.Height;
+		H := Menubar.RootMenu.GetHeight;
 
 		for Item in Items do // top menubar, horizontal
 		begin
@@ -431,7 +432,7 @@ begin
 
 				Item.DrawnState := State;
 
-				Item.Rect := Bounds(X-Metrics.ROOTSPACING, 0, W+(Metrics.ROOTSPACING*2), H-1);
+				Item.Rect := Bounds(X-Metrics.ROOTSPACING, 0, W+(Metrics.ROOTSPACING*2), H);
 
 				if (Menubar.Active) and (Item = ActiveItem) then
 					Buffer.DrawSelection(Item.Rect, Palette[COLOR_MENU_SELECTION]);
@@ -502,21 +503,24 @@ begin
 			Buffer.ThickFrameRect(Buffer.BoundsRect, -2, Palette[COLOR_MENU_BORDER]);
 	end;
 
-	X := Position.X;
-	Y := Position.Y;
-	W := Buffer.Width;
-	H := Buffer.Height;
-	if (X + W) > Menubar.Buffer.Width then
+	if Self <> Menubar.RootMenu then
 	begin
-		X := Menubar.Buffer.Width - W;
-		Position.X := X;
-	end;
-	if (Y + H) > Menubar.Buffer.Height then
-	begin
-		Position.Y := Menubar.RootMenu.GetHeight;
-	end;
+		X := Position.X;
+		Y := Position.Y;
+		W := Buffer.Width;
+		H := GetHeight;
+		if (X + W) > Menubar.Buffer.Width then
+		begin
+			X := Menubar.Buffer.Width - W;
+			Position.X := X;
+		end;
+		if (Y + H) > Menubar.Buffer.Height then
+		begin
+			Position.Y := Menubar.RootMenu.GetHeight;
+		end;
 
-	Rect := Bounds(X, Y, W, H-1);
+		Rect := Bounds(X, Y, W, H-1);
+	end;
 
 	Drawn := True;
 	NeedUpdate := False;
@@ -762,7 +766,7 @@ begin
 	RootMenu := TSubMenu.Create(nil, 0);
 	RootMenu.Visible := True;
 	RootMenu.Caption := 'Root';
-
+	RootMenu.Rect := Bounds(0, 0, Buffer.Width, RootMenu.GetHeight);
 	ActiveMenu := RootMenu;
 
 	Buffer.Clear(0);
@@ -799,7 +803,10 @@ begin
 	begin
 		Menu := Items[i];
 		if (Menu.Visible) and (PtInRect(Menu.Rect, MousePos)) then
+		begin
+			writeln('getmenuat=',Menu.Caption);
 			Exit(Menu);
+		end;
 	end;
 end;
 
@@ -843,6 +850,13 @@ begin
 	if MouseMoved then
 	begin
 		Menu := GetMenuAt(MousePos);
+
+if (Menu <> nil) <> Hovering then
+begin
+writeln('Hovering=',(menu<>nil));
+Changed := True;
+end;
+
 		Hovering := (Menu <> nil);
 		if Hovering then
 		begin
@@ -886,7 +900,7 @@ begin
 
 		if Value then
 		begin
-			RootMenu.ActiveItem := RootMenu.Items.First;
+			MouseMoved := False;
 			ActiveMenu := RootMenu;
 			RootMenu.Changed;
 		end
