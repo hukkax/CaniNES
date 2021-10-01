@@ -31,7 +31,7 @@ type
 
 		procedure RendererChanged;
 		procedure RealignOverlays;
-		procedure EnableMouse;
+		procedure EnableMouse(Enable: Boolean);
 		procedure GetCRTRendererConfig;
 	public
 		FontFilePath: String;
@@ -63,6 +63,7 @@ type
 		procedure OnUserEvent(EventCode: Integer); override;
 
 		procedure OnKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean); override;
+		procedure OnMouseEnterLeave(Entered: Boolean); override;
 		procedure OnMouseMove(Pos, UnscaledPos: Types.TPoint); override;
 		procedure OnMouseWheel(WheelDelta: Types.TPoint); override;
 		procedure OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean); override;
@@ -297,22 +298,12 @@ begin
 
 	Inc(Framecounter);
 
-	if Mouse.Timer > 0 then
+	if (Mouse.Timer > 0) and (Mouse.InWindow) then
 	begin
 		if (Menubar.Hovering) or (Menu.Visible) then Exit;
-
 		Dec(Mouse.Timer);
 		if (Mouse.Timer = 0) or (not Mouse.InWindow) then
-		begin
-			if not MenuBar.RefreshActiveState then
-			begin
-				Mouse.Visible := False;
-				MouseHiddenPos := Mouse.Pos;
-				ShowMouse;
-			end
-			else
-				EnableMouse;
-		end;
+			EnableMouse(MenuBar.RefreshActiveState);
 	end;
 end;
 
@@ -779,14 +770,35 @@ end;
 // Input handling
 //==================================================================================================
 
-procedure TNESWindow.EnableMouse;
+procedure TNESWindow.EnableMouse(Enable: Boolean);
 begin
-	Mouse.Timer := IfThen(Trunc(Video.SyncRate) > 40, Trunc(Video.SyncRate), 60) * 2; // 2 seconds
-	if not Mouse.Visible then
+	if Enable then
 	begin
-		Mouse.Visible := True;
+		Mouse.Timer := IfThen(Trunc(Video.SyncRate) > 40, Trunc(Video.SyncRate), 60) * 2; // 2 seconds
+		if not Mouse.Visible then
+		begin
+			Mouse.Visible := True;
+			ShowMouse;
+		end;
+	end
+	else
+	if Mouse.Visible then
+	begin
+		Mouse.Visible := False;
+		MouseHiddenPos := Mouse.Pos;
 		ShowMouse;
+
+		Menubar.Hovering := False;
+		if (MenuBar.RootMenu.ActiveItem = nil) or
+			(not MenuBar.RootMenu.ActiveItem.SubmenuActive) then
+				MenuRenderer.Opacity := 0;
 	end;
+end;
+
+procedure TNESWindow.OnMouseEnterLeave(Entered: Boolean);
+begin
+	inherited;
+	EnableMouse(Entered);
 end;
 
 procedure TNESWindow.OnKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean);
@@ -886,7 +898,7 @@ begin
 		(Abs(Pos.Y - MouseHiddenPos.Y) >= MouseHideThreshold) then
 			B := True;
 	if B then
-		EnableMouse
+		EnableMouse(True)
 	else
 		Exit;
 
@@ -915,7 +927,10 @@ begin
 		Menu.OnMouseButton(Button, Pressed)
 	else
 	if Menubar.Active then
-		Menubar.OnMouseButton(Button, Pressed)
+	begin
+		Menubar.OnMouseButton(Button, Pressed);
+		OnMouseMove(Mouse.Pos, Mouse.UnscaledPos);
+	end
 	else
 	{if (Pressed) and (Button = Basement.Window.mbRight) then
 		Perform(actMenubarFocus, Pressed)
