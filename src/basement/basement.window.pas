@@ -108,6 +108,7 @@ type
 
 		procedure 	HandleInput;
 		procedure	OnMouseMove(Pos, UnscaledPos: Types.TPoint); virtual;
+		procedure	OnMouseEnterLeave(Entered: Boolean); virtual;
 		procedure	OnMouseWheel(WheelDelta: Types.TPoint); virtual;
 		procedure	OnMouseButton(Button: TMouseButton; Pressed: Boolean); virtual;
 		procedure	OnJoyButton(Pressed: Boolean; PadNum: Integer; Button: Byte); virtual;
@@ -223,6 +224,11 @@ end;
 
 	// ============================================================================================
 	// Mouse Input
+
+	procedure TWindow.OnMouseEnterLeave(Entered: Boolean);
+	begin
+		Mouse.InWindow := Entered;
+	end;
 
 	procedure TWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
 	begin
@@ -366,8 +372,8 @@ begin
 
 		SDL_WINDOWEVENT:
 			case InputEvent.window.event of
-		        SDL_WINDOWEVENT_ENTER:      Mouse.InWindow := True;
-		        SDL_WINDOWEVENT_LEAVE:      Mouse.InWindow := False;
+		        SDL_WINDOWEVENT_ENTER:      OnMouseEnterLeave(True);
+		        SDL_WINDOWEVENT_LEAVE:      OnMouseEnterLeave(False);
 				SDL_WINDOWEVENT_SHOWN,
 				SDL_WINDOWEVENT_RESTORED:   Visible := True;
 				SDL_WINDOWEVENT_HIDDEN,
@@ -976,6 +982,7 @@ procedure TWindow.ReinitWindow;
 begin
 	SetupVideo;
 end;
+
 
 initialization
 
