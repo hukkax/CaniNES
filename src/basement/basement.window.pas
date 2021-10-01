@@ -37,6 +37,7 @@ type
 		Framerate:		Double;
 		AspectRatioWidthMultiplier:	Single;
 		VSyncLimits:	TMinMax;
+		FullScreen:		Boolean;
 		ScalingQuality: Boolean; // nearest/linear
 		HighPriority: 	Boolean;
 		CloseOnAltF4:	Boolean;
@@ -695,6 +696,8 @@ begin
 			end;
 		end;
 	end;
+	if Settings.FullScreen then
+		SetFullScreen(True);
 end;
 
 procedure TWindow.ShowMouse;
@@ -919,7 +922,7 @@ begin
 	PrevKeyTimeStamp := 0;
 	{$ENDIF}
 
-	SetFullScreen(Video.IsFullScreen);
+	SetFullScreen(Settings.FullScreen);
 	//SDL.Timer.SDL_AddTimer(TimerInterval, TimerTickCallback, nil);
 
 	Initialized := True;
@@ -997,6 +1000,7 @@ initialization
 
 		X := WINDOWPOS_CENTERED;
 		Y := WINDOWPOS_CENTERED;
+		FullScreen := False;
 		MaxScale := 3;
 		AspectRatioWidthMultiplier := 1;
 		Overscan := Types.Rect(0, 0, 0, 0);

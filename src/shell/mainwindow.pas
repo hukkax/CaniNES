@@ -984,6 +984,7 @@ begin
 		HighPriority := Configuration.Application.HighPriority;
 		VSyncMode := Configuration.Display.Renderer.VSyncMode;
 		Backend := Configuration.Display.Renderer.Backend;
+		FullScreen := Configuration.Display.Window.FullScreen;
 		with Configuration.Display.Renderer.Overscan do
 			Overscan := Rect(L, U, R, D);
 	end;
