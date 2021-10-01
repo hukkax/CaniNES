@@ -91,6 +91,7 @@ type
 		procedure   SetScrollPos(i: Integer);
 		procedure   PreviousItem;
 		procedure   NextItem;
+		procedure   ActivateItem(Item: TMenuItem);
 		procedure   Activate(Show: Boolean);
 
 		procedure   DrawTo(const DestBuffer: TBitmap32);
@@ -595,6 +596,16 @@ begin
 		SetScrollPos(i - Menubar.MaxItemCount + 1);
 end;
 
+procedure TSubMenu.ActivateItem(Item: TMenuItem);
+begin
+	if Visible then
+		Activate(True);
+	ActiveItem := Item;
+
+	SelectionChanged;
+	NeedUpdate := True;
+end;
+
 procedure TSubMenu.NextItem;
 var
 	i: Integer;
@@ -916,6 +927,9 @@ begin
 	end
 	else
 	case Key of
+
+		SDLK_HOME:	ActiveMenu.ActivateItem(ActiveMenu.Items.First);
+		SDLK_END:	ActiveMenu.ActivateItem(ActiveMenu.Items.Last);
 
 		SDLK_UP:	ActiveMenu.PreviousItem;
 		SDLK_DOWN:	ActiveMenu.NextItem;
