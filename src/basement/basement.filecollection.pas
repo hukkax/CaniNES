@@ -309,6 +309,8 @@ var
 	List: TFileList;
 	Name, Path: String;
 begin
+	if not Assigned(Sources) then Exit(False);
+
 	Name := Filename.Replace('\', '/');
 	Path := '';
 

@@ -224,6 +224,7 @@ var
 			if S.IsEmpty then Continue;
 
 			for Ext in ImageExts do
+			if FileList[Kind] <> nil then
 			begin
 				if FileList[Kind].FindFile(S + Ext, Item) then
 				begin
