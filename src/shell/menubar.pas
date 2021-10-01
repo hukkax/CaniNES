@@ -160,7 +160,7 @@ const
 	SUBMENU_ITEMSPACING = 0.1;
 	SUBMENU_ROOTSPACING = 0.5;
 	SUBMENU_SEPHEIGHT   = 0.3;
-	SUBMENU_MAXWIDTH    = 0.75;
+	SUBMENU_MAXWIDTH    = 0.76;
 
 	CheckboxGlyph: array[Boolean] of String = ( '  ', '✓ ' );
 	//STR_CHECKBOX_NO, STR_CHECKBOX_YES );
@@ -484,7 +484,9 @@ begin
 
 					if Item.SubMenu <> nil then
 					begin
-						Item.SubMenu.Position := Point(Position.X+Buffer.Width, Position.Y+Y-Metrics.PADDING_Y);
+						Item.SubMenu.Position := Point(
+							Position.X + Buffer.Width - Menubar.Font.GlyphWidth,
+							Position.Y + Y - Metrics.PADDING_Y);
 						Menubar.Font.DrawString(Buffer,
 							Buffer.Width - Metrics.PADDING_X - Menubar.Font.GlyphWidth, Y,
 							STR_PAGE_NEXT, colFg, Buffer.Width);
@@ -682,7 +684,7 @@ var
 	Item: TMenuItem;
 	WasOpen: Boolean;
 begin
-	Result := False;
+	Result := Menubar.ActiveMenu <> Menubar.RootMenu;
 	for Item in Items do
 	begin
 		if (Item.OnScreen) and (PtInRect(Item.Rect, P)) then
@@ -714,7 +716,7 @@ begin
 	Result := Scrollable;
 	if Result then
 	begin
-		SetScrollPos(ScrollPos - WheelDelta);
+		SetScrollPos(ScrollPos - (WheelDelta*3));
 		Menubar.Changed := True;
 	end;
 end;
@@ -748,6 +750,7 @@ begin
 
 	RootMenu := TSubMenu.Create(nil, 0);
 	RootMenu.Visible := True;
+	RootMenu.Caption := 'Root';
 
 	ActiveMenu := RootMenu;
 
@@ -813,7 +816,11 @@ procedure TMenuBar.Draw;
 		// deselect current item when mouse leaves menu
 		if not Menu.Sticky then
 		begin
-			Menu.ActiveItem := nil;
+			if Menu.ActiveItem <> nil then
+			begin
+				Menu.ActiveItem.ActivateSubMenu(False, False);
+				Menu.ActiveItem := nil;
+			end;
 			Menu.NeedUpdate := True;
 			Changed := True;
 		end;
