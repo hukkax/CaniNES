@@ -415,10 +415,10 @@ begin
 				EmulationMode := NORMAL;
 			end;
 
-		actROMLoadMRU:
-			if Pressed then
+		actROMLoadFromMenu:
+			if Pressed then // this was called via the Menubar
 			begin
-				// this was called via the Menubar
+				if Menubar.ActiveMenu.ActiveItem = nil then Exit;
 				Console.LoadROM(Menubar.ActiveMenu.ActiveItem.Data);
 				EmulationMode := NORMAL;
 				Menubar.Active := False;
@@ -1128,7 +1128,7 @@ begin
 		with Item.AddSubMenu(0) do
 			for i := 0 to MRUcount-1 do
 				AddItem(ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
-					actROMLoadMRU, Configuration.Application.MRU[i]);
+					actROMLoadFromMenu, Configuration.Application.MRU[i]);
 
 		Item := AddItem('&Favourites');
 		with Item.AddSubMenu(0) do
@@ -1146,7 +1146,7 @@ begin
 			if Bookmarks.Items.Count > 0 then
 				for S in Bookmarks.Items do
 					if not S.IsEmpty then
-						AddItem(ChangeFileExt(ExtractFilename(S), ''), actROMLoadMRU, S);
+						AddItem(ChangeFileExt(ExtractFilename(S), ''), actROMLoadFromMenu, S);
 		end;
 
 		AddSeparator;

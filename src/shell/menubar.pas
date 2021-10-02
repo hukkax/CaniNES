@@ -338,7 +338,12 @@ begin
 			Menubar.Recreated := False;
 			B := Configuration.ToggleBool(ValuePtr);
 			if not Menubar.Recreated then
-				Checked := B;
+				Checked := B
+			else
+			begin
+				Menubar.Recreated := False;
+				Exit;
+			end;
 		end;
 
 		if SubMenu <> nil then
@@ -1055,14 +1060,15 @@ begin
 	if (Key > 32) and (Key <= 255) and not (Key in [126, 127, 167]) then
 	begin
 		Ch := LowerCase(Chr(Key));
-
+		if Ch <> '' then
 		for Item in ActiveMenu.Items do
 		begin
 			if Item.Mnemonic = Ch then
 			begin
 				Result := True;
 				ActiveMenu.ActivateItem(Item);
-				Item.Click;
+				if Item.Click then
+					Active := False;
 				Exit;
 			end;
 		end;

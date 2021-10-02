@@ -43,7 +43,7 @@ type
 		actAppExit, actShowPage,
 		actFavourite, actBookmarks,
 		actListCheats, actROMBrowser, actCartInfo,
-		actROMLoadPrevious, actROMLoadMRU,
+		actROMLoadPrevious, actROMLoadFromMenu,
 		actRecordWAV,
 		actToggleInfoBox, actToggleFullscreen,
 		actToggleFilterCRT, actToggleFilterNTSC, actToggleFilterNTSC_MergeFields
