@@ -619,7 +619,7 @@ begin
 	Result := TMenuItem.Create(Self, ACaption, AAction);
 	Result.Data := AData;
 	if (AAction = actShowPage) and (AData.IsEmpty) then
-		Result.Data := ACaption.Replace(Dots, '');
+		Result.Data := Result.Caption.Replace(Dots, '');
 end;
 
 function TSubMenu.AddSeparator: TMenuItem;

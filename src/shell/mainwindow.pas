@@ -1190,11 +1190,11 @@ begin
 	Item := Root.AddItem('&Options');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('&Display Settings'+Dots,     actShowPage);
-		AddItem('&Sound Settings'+Dots,       actShowPage);
-		AddItem('&Input Settings'+Dots,       actShowPage);
-		AddItem('&Emulation Settings'+Dots,   actShowPage);
-		AddItem('&Application Settings'+Dots, actShowPage);
+		AddItem('&Display'+Dots,     actShowPage);
+		AddItem('&Sound'+Dots,       actShowPage, 'Audio');
+		AddItem('&Input'+Dots,       actShowPage);
+		AddItem('&Emulation'+Dots,   actShowPage);
+		AddItem('&Application'+Dots, actShowPage);
 	end;
 
 	{View
