@@ -41,6 +41,7 @@ type
 	public
 		Action:     TAction;
 		Caption:    String;
+		KeyCaption: String;
 		Data:       String;
 		ParentMenu: TSubMenu;
 		SubMenu:    TSubMenu;
@@ -48,6 +49,8 @@ type
 		Rect:       TRect;
 		ValuePtr:   PBoolean; // for checkbox
 		OnScreen:   Boolean;
+
+		procedure   SetKeyAction(KeyAction: TAction);
 
 		function    GetWidth: Word;
 		function    GetHeight(FullHeight: Boolean = False): Word;
@@ -187,6 +190,7 @@ begin
 	Flags.IsSeparator := ACaption.IsEmpty;
 	Caption := ACaption;
 	Action := AAction;
+	SetKeyAction(AAction);
 	SubMenu := nil;
 	DrawnState := misUndrawn;
 
@@ -217,14 +221,40 @@ begin
 	end;
 end;
 
-function TMenuItem.GetWidth: Word;
+procedure TMenuItem.SetKeyAction(KeyAction: TAction);
+var
+	Bind: PInputBinding;
 begin
+	if KeyAction <> actNone then
+	begin
+		Bind := @Bindings[KeyAction];
+		if Bind.Key > 0 then
+		begin
+			if Bind.Shift then
+				KeyCaption := 'Shift+'
+			else
+				KeyCaption := '';
+			KeyCaption := KeyCaption + SDL_GetKeyName(Bind.Key);
+		end;
+	end;
+end;
+
+function TMenuItem.GetWidth: Word;
+var
+	W: Integer;
+begin
+	W := Menubar.Font.GlyphWidth;
+
 	Result := Menubar.Font.TextWidth(GetDrawableCaption);
+
 	if ParentMenu = Menubar.RootMenu then
-		Inc(Result, Trunc(Menubar.Font.GlyphWidth * 0.4))
+		Inc(Result, Trunc(W * 0.4))
 	else
 	if SubMenu <> nil then
-		Inc(Result, Trunc(Menubar.Font.GlyphWidth * 2.5));
+		Inc(Result, Trunc(W * 2.5))
+	else
+	if not KeyCaption.IsEmpty then
+		Inc(Result, Trunc(W * 1.5) + Menubar.Font.TextWidth(KeyCaption));
 end;
 
 function TMenuItem.GetHeight(FullHeight: Boolean = False): Word;
@@ -488,7 +518,12 @@ begin
 						Menubar.Font.DrawString(Buffer,
 							Buffer.Width - Metrics.PADDING_X - Menubar.Font.GlyphWidth, Y,
 							STR_PAGE_NEXT, colFg, Buffer.Width);
-					end;
+					end
+					else
+					if not Item.KeyCaption.IsEmpty then
+						Menubar.Font.DrawString(Buffer,
+							Buffer.Width - Metrics.PADDING_X - Menubar.Font.TextWidth(Item.KeyCaption),
+							Y, Item.KeyCaption, Palette[COLOR_MENU_SETTING], Buffer.Width);
 				end;
 			end;
 

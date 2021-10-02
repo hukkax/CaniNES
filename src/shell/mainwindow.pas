@@ -1207,12 +1207,12 @@ begin
 	Item := Root.AddItem('View');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Cart Info'+Dots, actShowPage, 'Cart Info');
+		AddItem('Cart Info'+Dots, actShowPage, 'Cart Info').SetKeyAction(actCartInfo);
 		AddSeparator;
-		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled);
-		AddCheckItem('CRT  Filter', @Configuration.Display.CRT.Enabled);
+		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled).SetKeyAction(actToggleFilterNTSC);
+		AddCheckItem('CRT  Filter', @Configuration.Display.CRT.Enabled).SetKeyAction(actToggleFilterCRT);
 		AddSeparator;
-		AddCheckItem('Fullscreen',  @Configuration.Display.Window.FullScreen);
+		AddCheckItem('Fullscreen',  @Configuration.Display.Window.FullScreen).SetKeyAction(actToggleFullscreen);
 	end;
 
 	{Tools
@@ -1223,7 +1223,7 @@ begin
 	Item := Root.AddItem('Tools');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Cheat Browser'+Dots, actShowPage, 'Cheats');
+		AddItem('Cheat Browser'+Dots, actShowPage, 'Cheats').SetKeyAction(actListCheats);
 		AddItem('Debug Log'+Dots, actShowPage);
 
 		AddSeparator;
