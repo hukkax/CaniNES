@@ -13,6 +13,7 @@ uses
 
 const
 	Dots = '...'; //' …';
+	MnemonicChar = '&';
 
 type
 	TSubMenuID = Word;
@@ -39,16 +40,18 @@ type
 		function    GetChecked: Boolean;
 		procedure   SetChecked(Value: Boolean);
 	public
-		Action:     TAction;
-		Caption:    String;
-		KeyCaption: String;
-		Data:       String;
-		ParentMenu: TSubMenu;
-		SubMenu:    TSubMenu;
-		DrawnState: TMenuItemState;
-		Rect:       TRect;
-		ValuePtr:   PBoolean; // for checkbox
-		OnScreen:   Boolean;
+		Action:      TAction;
+		Caption:     String;
+		KeyCaption:  String;
+		Data:        String;
+		Mnemonic:    Char;
+		MnemonicPos: Word;
+		ParentMenu:  TSubMenu;
+		SubMenu:     TSubMenu;
+		DrawnState:  TMenuItemState;
+		Rect:        TRect;
+		ValuePtr:    PBoolean; // for checkbox
+		OnScreen:    Boolean;
 
 		procedure   SetKeyAction(KeyAction: TAction);
 
@@ -179,6 +182,8 @@ var
 //==================================================================================================
 
 constructor TMenuItem.Create(AParent: TSubMenu; const ACaption: String; AAction: TAction);
+var
+	X: Integer;
 begin
 	inherited Create;
 
@@ -188,7 +193,20 @@ begin
 		ParentMenu := AParent;
 
 	Flags.IsSeparator := ACaption.IsEmpty;
-	Caption := ACaption;
+
+	X := ACaption.IndexOf(MnemonicChar);
+	if X >= 0 then
+	begin
+		if Length(ACaption) >= X+2 then
+		begin
+			Mnemonic := LowerCase(ACaption[X+2]);
+			MnemonicPos := X+1;
+		end;
+		Caption := ACaption.Replace(MnemonicChar, '');
+	end
+	else
+		Caption := ACaption;
+
 	Action := AAction;
 	SetKeyAction(AAction);
 	SubMenu := nil;
@@ -323,6 +341,9 @@ begin
 				Checked := B;
 		end;
 
+		if SubMenu <> nil then
+			ActivateSubMenu(True, FromKeyboard)
+		else
 		if Action <> actNone then
 		begin
 			if Action = actShowPage then
@@ -407,6 +428,8 @@ begin
 end;
 
 procedure TSubMenu.Draw;
+var
+	colFg, colBg: TColor32;
 
 	function GetItemState(const Item: TMenuItem): TMenuItemState;
 	begin
@@ -416,10 +439,21 @@ procedure TSubMenu.Draw;
 			Result := misNormal;
 	end;
 
+	procedure DrawCaption(const Item: TMenuItem; X, Y: Integer);
+	var
+		XX: Integer;
+	begin
+		if Item.MnemonicPos > 0 then // underline glyph
+		begin
+			XX := X + ((Item.MnemonicPos-1) * Menubar.Font.GlyphWidth);
+			Buffer.HorzLineS(XX, Y+Menubar.Font.GlyphHeight, XX+Menubar.Font.GlyphWidth-1, colFg);
+		end;
+		Menubar.Font.DrawString(Buffer, X, Y, Item.GetDrawableCaption, colFg, Buffer.Width);
+	end;
+
 var
 	Item: TMenuItem;
 	I, X, Y, W, H: Integer;
-	colFg, colBg: TColor32;
 	State: TMenuItemState;
 begin
 	if (not NeedUpdate) or (Items.Count < 1) then
@@ -463,7 +497,7 @@ begin
 				if (Menubar.Active) and (Item = ActiveItem) then
 					Buffer.DrawSelection(Item.Rect, Palette[COLOR_MENU_SELECTION]);
 
-				Menubar.Font.DrawString(Buffer, X, Y, Item.GetDrawableCaption, colFg, Buffer.Width);
+				DrawCaption(Item, X, Y);
 
 				if Item.SubMenu <> nil then
 					Item.SubMenu.Position := Point(Max(0, Item.Rect.Left-(Metrics.PADDING_X div 2)), Item.Rect.Bottom);
@@ -508,7 +542,7 @@ begin
 					if Item = ActiveItem then
 						Buffer.DrawSelection(Item.Rect, Palette[COLOR_MENU_SELECTION]);
 
-					Menubar.Font.DrawString(Buffer, X, Y, Item.GetDrawableCaption, colFg, Buffer.Width);
+					DrawCaption(Item, X, Y);
 
 					if Item.SubMenu <> nil then
 					begin
@@ -521,9 +555,11 @@ begin
 					end
 					else
 					if not Item.KeyCaption.IsEmpty then
+					begin
 						Menubar.Font.DrawString(Buffer,
 							Buffer.Width - Metrics.PADDING_X - Menubar.Font.TextWidth(Item.KeyCaption),
 							Y, Item.KeyCaption, Palette[COLOR_MENU_SETTING], Buffer.Width);
+					end;
 				end;
 			end;
 
@@ -596,6 +632,8 @@ begin
 	Result := AddItem(ACaption);
 	Result.Flags.IsCheckbox := True;
 	Result.ValuePtr := ValuePtr;
+	if Result.MnemonicPos > 0 then
+		Inc(Result.MnemonicPos, 2);
 end;
 
 procedure TSubMenu.SetScrollPos(i: Integer);
@@ -954,6 +992,7 @@ function TMenuBar.ProcessKey(Key: Integer; Shift: TShiftState; Pressed, Repeated
 var
 	GotItem: Boolean;
 	Item: TMenuItem;
+	Ch: Char;
 begin
 	Result := Pressed;
 	if (not Result) or (ActiveMenu = nil) then Exit;
@@ -1011,6 +1050,23 @@ begin
 	end;
 
 	FromKeyboard := False;
+
+	if not Result then
+	if (Key > 32) and (Key <= 255) and not (Key in [126, 127, 167]) then
+	begin
+		Ch := LowerCase(Chr(Key));
+
+		for Item in ActiveMenu.Items do
+		begin
+			if Item.Mnemonic = Ch then
+			begin
+				Result := True;
+				ActiveMenu.ActivateItem(Item);
+				Item.Click;
+				Exit;
+			end;
+		end;
+	end;
 end;
 
 procedure TMenuBar.OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);

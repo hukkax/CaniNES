@@ -1119,24 +1119,24 @@ begin
 		-
 		Exit
 	}
-	Item := Root.AddItem('File');
+	Item := Root.AddItem('&File');
 	with Item.AddSubMenu(0) do
 	begin
-		Item := AddItem('Open'+Dots, actShowPage, 'Load ROM');
+		Item := AddItem('&Open'+Dots, actShowPage, 'Load ROM');
 
-		Item := AddItem('Recent Files');
+		Item := AddItem('&Recent Files');
 		with Item.AddSubMenu(0) do
 			for i := 0 to MRUcount-1 do
 				AddItem(ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
 					actROMLoadMRU, Configuration.Application.MRU[i]);
 
-		Item := AddItem('Favourites');
+		Item := AddItem('&Favourites');
 		with Item.AddSubMenu(0) do
 		begin
 			if (Console.GotCartridge) and (not Console.LoadedFile.IsEmpty) then
 			begin
 				if Bookmarks.Contains(Console.LoadedFile) then
-					S := 'Remove' else S := 'Add';
+					S := '&Remove' else S := '&Add';
 				S := S + ' Current';
 				AddItem(S, actFavourite);
 				if Bookmarks.Items.Count > 0 then
@@ -1150,10 +1150,10 @@ begin
 		end;
 
 		AddSeparator;
-		Item := AddItem('Save State', actStateSave);
-		Item := AddItem('Load State', actStateLoad);
+		Item := AddItem('&Save State', actStateSave);
+		Item := AddItem('&Load State', actStateLoad);
 		AddSeparator;
-		Item := AddItem('Exit', actAppExit);
+		Item := AddItem('E&xit', actAppExit);
 	end;
 
 	{Console
@@ -1163,20 +1163,20 @@ begin
 		-
 		Play Movie
 	}
-	Item := Root.AddItem('Console');
+	Item := Root.AddItem('&Console');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Pause', actConsolePause);
-		AddItem('Reset', actConsoleReset);
-		AddItem('Power Cycle', actConsoleRestart);
+		AddItem('&Pause', actConsolePause);
+		AddItem('&Reset', actConsoleReset);
+		AddItem('Power &Cycle', actConsoleRestart);
 
 		if Console.MovieManager.Loaded then
 		begin
 			AddSeparator;
 			if Console.MovieManager.IsPlaying then
-				AddItem('Stop Movie', actMoviePlayback)
+				AddItem('Stop &Movie', actMoviePlayback)
 			else
-				AddItem('Play Movie', actMoviePlayback);
+				AddItem('Play &Movie', actMoviePlayback);
 		end;
 	end;
 
@@ -1187,14 +1187,14 @@ begin
 		Emulation >
 		Application >
 	}
-	Item := Root.AddItem('Options');
+	Item := Root.AddItem('&Options');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Display'+Dots,     actShowPage);
-		AddItem('Audio'+Dots,       actShowPage);
-		AddItem('Input'+Dots,       actShowPage);
-		AddItem('Emulation'+Dots,   actShowPage);
-		AddItem('Application'+Dots, actShowPage);
+		AddItem('&Display Settings'+Dots,     actShowPage);
+		AddItem('&Sound Settings'+Dots,       actShowPage);
+		AddItem('&Input Settings'+Dots,       actShowPage);
+		AddItem('&Emulation Settings'+Dots,   actShowPage);
+		AddItem('&Application Settings'+Dots, actShowPage);
 	end;
 
 	{View
@@ -1204,15 +1204,15 @@ begin
 		[X] NTSC Filter
 		[X] Fullscreen
 	}
-	Item := Root.AddItem('View');
+	Item := Root.AddItem('&View');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Cart Info'+Dots, actShowPage, 'Cart Info').SetKeyAction(actCartInfo);
+		AddItem('Cartridge &Info'+Dots, actShowPage, 'Cart Info').SetKeyAction(actCartInfo);
 		AddSeparator;
-		AddCheckItem('NTSC Filter', @Configuration.Display.NTSC.Enabled).SetKeyAction(actToggleFilterNTSC);
-		AddCheckItem('CRT  Filter', @Configuration.Display.CRT.Enabled).SetKeyAction(actToggleFilterCRT);
+		AddCheckItem('&NTSC Filter', @Configuration.Display.NTSC.Enabled).SetKeyAction(actToggleFilterNTSC);
+		AddCheckItem('&CRT  Filter', @Configuration.Display.CRT.Enabled).SetKeyAction(actToggleFilterCRT);
 		AddSeparator;
-		AddCheckItem('Fullscreen',  @Configuration.Display.Window.FullScreen).SetKeyAction(actToggleFullscreen);
+		AddCheckItem('&Fullscreen',  @Configuration.Display.Window.FullScreen).SetKeyAction(actToggleFullscreen);
 	end;
 
 	{Tools
@@ -1220,27 +1220,27 @@ begin
 		Record Audio
 		Debug Log
 	}
-	Item := Root.AddItem('Tools');
+	Item := Root.AddItem('&Tools');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('Cheat Browser'+Dots, actShowPage, 'Cheats').SetKeyAction(actListCheats);
-		AddItem('Debug Log'+Dots, actShowPage);
+		AddItem('&Cheat Browser'+Dots, actShowPage, 'Cheats').SetKeyAction(actListCheats);
+		AddItem('Debug &Log'+Dots, actShowPage);
 
 		AddSeparator;
 		if NES_APU.WavRecording then
-			AddItem('Stop Recording Audio', actRecordWAV)
+			AddItem('Stop &Recording Audio', actRecordWAV)
 		else
-			AddItem('Record Audio', actRecordWAV);
+			AddItem('&Record Audio', actRecordWAV);
 	end;
 
 	{Help
 		About CaniNES
 	}
 {
-	Item := Root.AddItem('Help');
+	Item := Root.AddItem('&Help');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('About CaniNES...');
+		AddItem('&About CaniNES...');
 	end;
 }
 end;
