@@ -14,7 +14,7 @@ Donate to the original author of Mesen: [![Donate](https://www.mesen.ca/images/d
 
 - Accurate NES emulation as per Mesen
 - Recent Files, Favourites, Cheat Selector
-- Cartridge information screen with screenshots (if image locations configured)
+- Cartridge information screen with screenshots (requires manual configuration)
 - Savestates, Rewind, Fast Forward, Run-ahead
 - NTSC and CRT simulation filters
 
@@ -28,21 +28,18 @@ Donate to the original author of Mesen: [![Donate](https://www.mesen.ca/images/d
 ## Quick help
 
 Press:
-- Esc to show menu
-- Backspace to go back to the previous page in menu
-- F1 to toggle info display
-- F2 to choose game cheats (if available)
-- F3 to toggle NTSC simulation filter
-- F4 to toggle CRT simulation filter (Num -/+ to toggle scanlines)
-- F5 to save console state
-- F7 to load console state
-- F9 for ROM file browser
-- F11 to toggle full screen
-- Tab to fast forward
-- Backspace to rewind (if enabled in settings)
-- 0..9 to select savestate slot
-- I to show catridge info and box art/screenshot (if configured)
-- Use arrows and Z,X,Shift,Enter for NES controller 1,B,A,Select,Start;
+- Left Alt or mouse for menu
+- Esc - alternative menu
+- Backspace - go back to the previous page in alt. menu
+- F1 - toggle info display
+- F5 - save console state
+- F7 - load console state
+- 0-9 - select savestate slot
+- F9 - file browser
+- F11 - toggle full screen
+- Tab - fast forward
+- Backspace - rewind (if enabled in settings)
+- Arrows and Z,X,Shift,Enter for NES controller 1,B,A,Select,Start;
   numpad for controller 2, or a connected joypad
 - Key and joypad bindings are customizable via the Input menu
 
