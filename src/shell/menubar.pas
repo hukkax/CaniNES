@@ -1054,8 +1054,6 @@ begin
 			Result := False;
 	end;
 
-	FromKeyboard := False;
-
 	if not Result then
 	if (Key > 32) and (Key <= 255) and not (Key in [126, 127, 167]) then
 	begin
@@ -1069,10 +1067,12 @@ begin
 				ActiveMenu.ActivateItem(Item);
 				if Item.Click then
 					Active := False;
-				Exit;
+				Break;
 			end;
 		end;
 	end;
+
+	FromKeyboard := False;
 end;
 
 procedure TMenuBar.OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);
