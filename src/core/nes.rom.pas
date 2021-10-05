@@ -62,7 +62,7 @@ type
 		BiosMissing, Error: Boolean;
 
 		procedure UpdateRomData;
-		function  SetGameInfo(updateRomData, forHeaderlessRom: Boolean): Boolean;
+		function  SetGameInfo(updateRomData: Boolean): Boolean;
 	end;
 
 	PRomData = ^TRomData;
@@ -125,7 +125,7 @@ begin
 	end;
 end;
 
-function TRomData.SetGameInfo(updateRomData, forHeaderlessRom: Boolean): Boolean;
+function TRomData.SetGameInfo(updateRomData: Boolean): Boolean;
 begin
 	if not Console.Database.GetGameInfo(Info.Hash.PrgChrCrc32, Info) then
 	begin

@@ -82,7 +82,7 @@ begin
 				FS.Skip(512);
 			RomData.Info.Hash.PrgChrCrc32 := StreamGetCRC32(FS);
 
-			if (Console.Database.Enabled) and (RomData.SetGameInfo(True, False)) then
+			if (Console.Database.Enabled) and (RomData.SetGameInfo(True)) then
 			begin
 				Result := RomData.Info.MapperID;
 			end;
@@ -130,7 +130,8 @@ var
 	TempMapper: TMapper;
 	MapperClass: TMapperClass;
 	PatchedData: TBytes;
-	DataSize: Cardinal;
+	SizeChanged: Boolean = False;
+	DataSize, UnpatchedSize: Cardinal;
 	S: String;
 	FmtStr: AnsiString;
 const
@@ -159,6 +160,8 @@ begin
 	//
 	if (Configuration.Application.IPSAutoPatch > 0) and (Length(IPSData) > 0) then
 	begin
+		UnpatchedSize := DataSize;
+
 		FStr.Write(Data[0], DataSize);
 		FStr.Seek(0, soFromBeginning);
 
@@ -170,7 +173,7 @@ begin
 
 			RomData.Info.Hash.PrgChrCrc32 := FS.GetCRC32;
 
-			if (Console.Database.Enabled) and (RomData.SetGameInfo(True, False)) then
+			if (Console.Database.Enabled) and (RomData.SetGameInfo(True)) then
 				prgSize := RomData.Info.DatabaseInfo.PrgRomSize
 			else
 				prgSize := RomData.Info.NesHeader.GetPrgSize;
@@ -189,6 +192,7 @@ begin
 		finally
 			FS.SeekTo(0);
 			DataSize := Length(PatchedData);
+			SizeChanged := (DataSize <> UnpatchedSize);
 			FStr.Clear;
 			FStr.Write(PatchedData[0], DataSize);
 		end;
@@ -321,7 +325,7 @@ begin
 	if RomData.Info.Hash.PrgChrCrc32 = 0 then
 		RomData.Info.Hash.PrgChrCrc32 := FS.GetCRC32;
 
-	if (Console.Database.Enabled) and (RomData.SetGameInfo(True, False)) then
+	if (Console.Database.Enabled) and (not SizeChanged) and (RomData.SetGameInfo(True)) then
 	begin
 		prgSize := RomData.Info.DatabaseInfo.PrgRomSize;
 		chrSize := RomData.Info.DatabaseInfo.ChrRomSize;
@@ -389,33 +393,34 @@ begin
 
 	// Write out ROM info
 	//
-	LogVerbose('[CRC32] File:%s PRG:%s PRG+CHR:%s', [
-		RomData.Info.Hash.Crc32.ToHexString,
-		RomData.Info.Hash.PrgCrc32.ToHexString,
-		RomData.Info.Hash.PrgChrCrc32.ToHexString] );
-
 	Console.Database.GetGameTitle(RomData.Info);
 	Console.Database.FindBoxArt(RomData.Info);
-
 
 	RomData.PrgSize := prgSize;
 	RomData.ChrSize := chrSize;
 
-	LogVerbose('PRG ROM: %dK (%d)', [prgSize div 1024, prgSize]);
+	{$IFDEF DEBUG}
+	Log('[CRC32] File:%s PRG:%s PRG+CHR:%s', [
+		RomData.Info.Hash.Crc32.ToHexString,
+		RomData.Info.Hash.PrgCrc32.ToHexString,
+		RomData.Info.Hash.PrgChrCrc32.ToHexString] );
+
+	Log('PRG ROM: %dK (%d)', [prgSize div 1024, prgSize]);
 	if chrSize > 0 then
-		LogVerbose('CHR ROM: %dK (%d)', [chrSize div 1024, chrSize])
+		Log('CHR ROM: %dK (%d)', [chrSize div 1024, chrSize])
 	else
-		LogVerbose('CHR ROM: None');
+		Log('CHR ROM: None');
 	if (RomData.ChrRamSize > 0) or (RomData.Info.IsNes20Header) then
-		LogVerbose('CHR RAM: %dK (%d)', [RomData.ChrRamSize div 1024, RomData.ChrRamSize])
+		Log('CHR RAM: %dK (%d)', [RomData.ChrRamSize div 1024, RomData.ChrRamSize])
 	else
 	if chrSize = 0 then
-		LogVerbose('CHR RAM: 8 KB');
+		Log('CHR RAM: 8 KB');
 
 	if RomData.WorkRamSize > 0 then
-		LogVerbose('WorkRAM: %dK (%d)', [RomData.WorkRamSize div 1024, RomData.WorkRamSize]);
+		Log('WorkRAM: %dK (%d)', [RomData.WorkRamSize div 1024, RomData.WorkRamSize]);
 	if RomData.SaveRamSize > 0 then
-		LogVerbose('SaveRAM: %dK (%d)', [RomData.SaveRamSize div 1024, RomData.SaveRamSize]);
+		Log('SaveRAM: %dK (%d)', [RomData.SaveRamSize div 1024, RomData.SaveRamSize]);
+	{$ENDIF}
 
 	S := 'System: ' + NESSystemNames[RomData.Info.System];
 	if RomData.Info.DatabaseInfo.Board <> '' then

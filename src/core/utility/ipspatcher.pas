@@ -147,15 +147,15 @@ begin
 	while ipsFile.Position < ipsFile.Size do
 	begin
 		rec := TIpsRecord.Create;
-
 		if rec.ReadRecord(ipsFile) then
 		begin
-			if (rec.Address + rec.Length + rec.RepeatCount) > maxOutputSize then
-				maxOutputSize := rec.Address + rec.Length + rec.RepeatCount;
+			if Int64(rec.Address + rec.Length + rec.RepeatCount) > maxOutputSize then
+				maxOutputSize := Int64(rec.Address + rec.Length + rec.RepeatCount);
 			records.Add(rec);
 		end
 		else
 		begin
+			rec.Free;
 			// EOF, try to read truncate offset record if it exists
 			try
 				ipsFile.ReadBuffer(buffer[0], Length(buffer));
@@ -167,8 +167,8 @@ begin
 		end;
 	end;
 
+	output := Copy(input);
 	SetLength(output, maxOutputSize);
-	output := Copy(input); // std.copy(input.begin, input.end, output.begin);
 
 	for rec in records do
 	begin
