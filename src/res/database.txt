@@ -1,15 +1,20 @@
 ###################################################################################
 #
-# Mesen Game Database
+# CaniNES Game Database
 #
+# Based on Mesen's database: 
 # Automatically generated database based on Nestopia's DB and NesCartDB
+# Added ram initialization value
 #
-# Generated on 2020-05-02 using:
+# Originally generated on 2020-05-02 using:
 #     -NewRisingSun's NES 2.0 header database (2020-04-26)
 #     -NesCartDB (dated 2017-08-21)
 #     -Nestopia UE's latest DB (dated 2015-10-22) 
 # 
-# Fields: CRC, System, Board, PCB, Chip, Mapper, PrgRomSize, ChrRomSize, ChrRamSize, WorkRamSize, SaveRamSize, Battery, Mirroring, Controller Type, Bus Conflicts, SubMapper, VsSystemType, PpuModel
+# Fields: CRC, System, Board, PCB, Chip, Mapper, 
+#         PrgRomSize, ChrRomSize, ChrRamSize, WorkRamSize, SaveRamSize, 
+#         Battery, Mirroring, Controller Type, Bus Conflicts, SubMapper, 
+#         VsSystemType, PpuModel, RamInitState
 #
 ###################################################################################
 000B7B60,NesNtsc,,,,1,128,128,0,0,8,1,h,1,,0,,
@@ -390,7 +395,7 @@
 0F1BABE7,Famicom,JALECO-JF-27,JF-27B,SS88006,18,128,128,0,0,8,1,h,1,,0,,
 0F1CC048,NesNtsc,NES-SLROM,NES-SLROM-03,MMC1A,1,128,128,0,0,0,0,h,1,,0,,
 0F20210D,Dendy,,,,241,128,0,8,0,0,0,v,1,,0,,
-0F3B89E3,NesNtsc,,,,0,16,8,0,0,0,0,v,1,,0,,
+0F3B89E3,NesNtsc,,,,0,16,8,0,0,0,0,v,1,,0,,,0
 0F5410E3,Famicom,,,,2,128,,8,0,0,0,h,,,,,
 0F5F1F86,Famicom,,,,1,128,128,0,0,8,1,h,1,,0,,
 0F6A9327,NesNtsc,,,,45,512,512,0,0,0,0,h,1,,0,,
@@ -629,7 +634,7 @@
 187E9D07,NesNtsc,,,,0,32,8,0,0,0,0,v,1,,0,,
 1898F423,Dendy,,,,227,1024,0,8,0,8,1,h,1,,0,,
 189ACA12,NesNtsc,,,,3,16,32,0,0,0,0,v,1,,1,,
-18A04825,NesPal,NES-TLROM,NES-TLROM-03,MMC3C,4,128,128,0,0,0,0,h,1,,0,,
+18A04825,NesPal,NES-TLROM,NES-TLROM-03,MMC3C,4,128,128,0,0,0,0,h,1,,0,,,1
 18A2E74F,NesNtsc,NES-TGROM,NES-TGROM-01,MMC3B,4,512,0,8,0,0,0,h,1,,0,,
 18A885B0,Famicom,HVC-TLROM,HVC-TLROM-04,MMC3B,4,128,128,0,0,0,0,h,1,,0,,
 18A9F0D9,NesNtsc,NES-TKROM,NES-TKROM-10,MMC3B,4,256,128,0,0,8,1,h,1,,0,,
@@ -664,7 +669,7 @@
 19E81461,Famicom,,,,157,256,0,8,0,0,0,h,1,,0,,
 19F1B3BF,NesNtsc,,,,197,128,512,0,0,0,0,h,1,,0,,
 19F4CA6B,NesNtsc,NES-SJROM,NES-SJROM-03,MMC1B2,1,128,32,0,8,0,0,h,1,,0,,
-1A018A26,NesNtsc,,,,3,32,32,0,0,0,0,v,1,,2,,
+1A018A26,NesNtsc,,,,3,32,32,0,0,0,0,v,1,,2,,,0
 1A0E5D4C,VsSystem,,,,99,64,32,0,0,2,1,4,4,,0,5,4
 1A128930,Famicom,,,,241,512,,8,0,8,1,v,38,,,,
 1A156A9D,VT03,,,,256,1024,0,0,8,0,0,h,1,,0,,
@@ -2107,7 +2112,7 @@
 5529431F,NesPal,NES-SLROM,NES-SLROM-06,MMC1B3,1,128,128,0,0,0,0,h,8,,0,,
 55397DB3,Famicom,HVC-TKROM,HVC-TKROM-01,MMC3A,4,128,128,0,0,8,1,h,33,,0,,
 553AD67C,NesNtsc,,,,4,128,128,0,0,8,1,h,1,,0,,
-555042B3,Famicom,HVC-CNROM,CN-04B,,3,32,32,0,0,0,0,v,1,,2,,
+555042B3,Famicom,HVC-CNROM,CN-04B,,3,32,32,0,0,0,0,v,1,,2,,,255
 55568F0D,NesNtsc,,,,2,128,0,8,0,0,0,v,1,,2,,
 555A555E,Famicom,,,,191,256,128,2,1,8,1,,,,,,
 55761931,Famicom,HVC-NROM-256,3A,,0,32,8,0,0,0,0,v,1,,0,,
@@ -4178,7 +4183,7 @@ AC4F4E9F,Famicom,,,,0,16,8,,0,0,0,v,,,,,
 AC609320,NesPal,NES-TLROM,NES-TLROM-03,MMC3C,4,128,256,0,0,0,0,h,1,,0,,
 AC652B47,Famicom,KONAMI-VRC-3,350685,VRC3,73,128,0,8,8,0,0,v,1,,0,,
 AC81F449,Dendy,,,,164,512,0,8,8,0,1,h,1,,1,,
-AC8DCDEA,NesNtsc,NES-CNROM,NES-CNROM-06,,3,32,32,0,0,0,0,v,1,,2,,
+AC8DCDEA,NesNtsc,NES-CNROM,NES-CNROM-06,,3,32,32,0,0,0,0,v,1,,2,,,1
 AC92E9E0,Famicom,,,,0,16,8,0,0,0,0,v,1,,0,,
 AC97AA09,Famicom,,,,172,32,32,0,0,0,0,v,1,,0,,
 AC9895CC,Famicom,KONAMI-VRC-2,350603,VRC2,23,128,128,0,0,0,0,h,1,,3,,
@@ -5105,7 +5110,7 @@ D2674B0A,Famicom,,,,132,64,32,0,0,0,0,h,1,,0,,
 D2699893,Famicom,NAMCOT-3433,3433,118,88,128,128,0,0,0,0,h,1,,0,,
 D26EFD78,NesNtsc,NES-MHROM,NES-MH,,66,64,16,0,0,0,0,v,42,,0,,
 D273B409,NesNtsc,NES-TLROM,NES-TLROM-03,MMC3C,4,128,128,0,0,0,0,h,1,,0,,
-D27B9D50,Famicom,,,,4,128,128,0,0,0,0,h,1,,0,,
+D27B9D50,Famicom,,,,4,128,128,0,0,0,0,h,1,,0,,,1
 D29DB3C7,Famicom,HVC-SNROM,HVC-SNROM-07,MMC1A,1,256,0,8,0,8,1,h,1,,0,,
 D29EAF12,NesNtsc,,,,1,128,0,8,8,0,0,h,1,,0,,
 D2BC86F3,Famicom,,,,1,256,0,8,0,0,0,h,1,,0,,
@@ -5681,8 +5686,8 @@ E9FB30EB,NesNtsc,,,,0,32,0,8,0,0,0,h,1,,0,,
 EA113128,NesNtsc,COLORDREAMS-74*377,UNK-COLORDREAMS-REVC,,11,64,64,0,0,0,0,v,1,,0,,
 EA19080A,NesNtsc,AVE-NINA-03,NINA-03 REV. A,,79,32,32,0,0,0,0,h,1,,0,,
 EA2511A4,NesNtsc,,,,4,128,128,0,0,0,0,h,1,,0,,
-EA27B477,NesNtsc,ACCLAIM-MC-ACC,53361-2,MC-ACC,4,128,128,0,0,0,0,h,1,,3,,
-EA31CCD3,NesNtsc,,,,2,128,0,8,0,0,0,v,1,,2,,
+EA27B477,NesNtsc,ACCLAIM-MC-ACC,53361-2,MC-ACC,4,128,128,0,0,0,0,h,1,,3,,,1
+EA31CCD3,NesNtsc,,,,2,128,0,8,0,0,0,v,1,,2,,,0
 EA39CD0F,NesNtsc,,,,0,16,8,0,0,0,0,h,1,,0,,
 EA3E78DD,Famicom,JALECO-JF-37,JF-37,SS88006,18,128,256,0,0,0,0,h,1,,0,,
 EA4197B9,NesNtsc,,,,222,128,256,0,0,0,0,h,1,,2,,
