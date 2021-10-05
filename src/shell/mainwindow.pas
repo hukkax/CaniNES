@@ -27,12 +27,14 @@ type
 	private
 		Controller: array[0..1] of TStandardControllerState;
 		IgnoreStartButton: Boolean;
-		MouseHiddenPos: Types.TPoint;
+		GotZapper:         Boolean;
+		MouseHiddenPos:    Types.TPoint;
 
 		procedure RendererChanged;
 		procedure RealignOverlays;
 		procedure EnableMouse(Enable: Boolean);
 		procedure GetCRTRendererConfig;
+		procedure HideMenubar;
 	public
 		FontFilePath: String;
 		Framecounter: Word;
@@ -304,7 +306,8 @@ begin
 		if (Menubar.Hovering) or (Menu.Visible) then Exit;
 		Dec(Mouse.Timer);
 		if (Mouse.Timer = 0) or (not Mouse.InWindow) then
-			EnableMouse(MenuBar.RefreshActiveState);
+			EnableMouse(MenuBar.RefreshActiveState or
+				(GotZapper and not Configuration.Input.Zapper.HidePointer));
 	end;
 end;
 
@@ -389,10 +392,14 @@ begin
 				Menubar.Active := not Menubar.Active;
 				if Menubar.Active then
 				begin
+					Menubar.Visible := True;
 					Menubar.RootMenu.ActivateItem(Menubar.RootMenu.Items.First);
 					Menubar.RootMenu.Sticky := True;
 					MenuRenderer.Opacity := 1.0;
-				end;
+				end
+				else
+				if GotZapper then
+					HideMenubar;
 			end;
 
 		actAppExit:
@@ -775,6 +782,13 @@ begin
 	end;
 end;
 
+procedure TNESWindow.HideMenubar;
+begin
+	MenuRenderer.Opacity := 0;
+	Menubar.Visible := False;
+	Menubar.Active := False;
+end;
+
 //==================================================================================================
 // Input handling
 //==================================================================================================
@@ -905,16 +919,19 @@ procedure TNESWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
 var
 	B: Boolean;
 begin
-	B := Mouse.Visible;
-	if not B then
-	if	(Menubar.Hovering) or (Menubar.Active) or
-		(Abs(Pos.X - MouseHiddenPos.X) >= MouseHideThreshold) or
-		(Abs(Pos.Y - MouseHiddenPos.Y) >= MouseHideThreshold) then
-			B := True;
-	if B then
-		EnableMouse(True)
-	else
-		Exit;
+	if not GotZapper then
+	begin
+		B := Mouse.Visible;
+		if not B then
+		if	(Menubar.Hovering) or (Menubar.Active) or
+			(Abs(Pos.X - MouseHiddenPos.X) >= MouseHideThreshold) or
+			(Abs(Pos.Y - MouseHiddenPos.Y) >= MouseHideThreshold) then
+				B := True;
+		if B then
+			EnableMouse(True)
+		else
+			Exit;
+	end;
 
 	if Menu.Visible then
 		Menu.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale))
@@ -943,13 +960,14 @@ begin
 	if Menubar.Active then
 	begin
 		Menubar.OnMouseButton(Button, Pressed);
+		if (GotZapper) and (not Menubar.Active) then
+			HideMenubar;
 		OnMouseMove(Mouse.Pos, Mouse.UnscaledPos);
 	end
 	else
-	{if (Pressed) and (Button = Basement.Window.mbRight) then
+	if (Pressed) and (Button = Basement.Window.mbRight) then
 		Perform(actMenubarFocus, Pressed)
-		//Perform(actMenuShow, Pressed)
-	else}
+	else
 	begin
 		InputManager.Mouse.Buttons[Button] := Pressed;
 		UpdateControllers;
@@ -994,14 +1012,15 @@ procedure TNESWindow.ControllerSetupChanged;
 begin
 	if not Assigned(Menu) then Exit;
 
+	GotZapper := Console.CurrentControllerType in [gitZapper, gitTwoZappers];
+	if GotZapper then
+		HideMenubar;
+
 	Mouse.Enabled := True;
-	{(Menu.Visible) or (Configuration.Input.Zapper.Enabled) or
-		((Console <> nil) and (Console.CurrentControllerType in [gitZapper, gitTwoZappers]));}
-	//if Mouse.Enabled then
-		Mouse.Visible := {(Menu.Visible) or}
-		(	(Console <> nil) and (Console.CurrentControllerType in [gitZapper, gitTwoZappers]) and
-			(not Configuration.Input.Zapper.HidePointer) );
+	Mouse.Visible := (Console <> nil) and (GotZapper) and
+		(not Configuration.Input.Zapper.HidePointer);
 	ShowMouse;
+
 	Console.ControlManager.PadVisualizationChanged;
 end;
 
