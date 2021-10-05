@@ -35,6 +35,7 @@ type
 		procedure EnableMouse(Enable: Boolean);
 		procedure GetCRTRendererConfig;
 		procedure HideMenubar;
+		procedure UpdateCursor;
 	public
 		FontFilePath: String;
 		Framecounter: Word;
@@ -301,6 +302,9 @@ begin
 
 	Inc(Framecounter);
 
+	if Menu.Visible then
+		MenuRenderer.Opacity := 1.0;
+
 	if (Mouse.Timer > 0) and (Mouse.InWindow) then
 	begin
 		if (Menubar.Hovering) or (Menu.Visible) then Exit;
@@ -400,6 +404,7 @@ begin
 				else
 				if GotZapper then
 					HideMenubar;
+				UpdateCursor;
 			end;
 
 		actAppExit:
@@ -787,6 +792,7 @@ begin
 	MenuRenderer.Opacity := 0;
 	Menubar.Visible := False;
 	Menubar.Active := False;
+	UpdateCursor;
 end;
 
 //==================================================================================================
@@ -1008,6 +1014,12 @@ begin
 	end;
 end;
 
+procedure TNESWindow.UpdateCursor;
+begin
+	SetSystemCursor(IfThen((not GotZapper) or (Menubar.Active),
+		SDL_SYSTEM_CURSOR_ARROW, SDL_SYSTEM_CURSOR_CROSSHAIR));
+end;
+
 procedure TNESWindow.ControllerSetupChanged;
 begin
 	if not Assigned(Menu) then Exit;
@@ -1015,6 +1027,7 @@ begin
 	GotZapper := Console.CurrentControllerType in [gitZapper, gitTwoZappers];
 	if GotZapper then
 		HideMenubar;
+	UpdateCursor;
 
 	Mouse.Enabled := True;
 	Mouse.Visible := (Console <> nil) and (GotZapper) and

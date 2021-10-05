@@ -58,6 +58,10 @@ type
 		OldPos,
 		Scaling:	Types.TPoint;
 		InWindow:	Boolean;
+		CurrentCursor: record
+			Kind:   TSDL_SystemCursor;
+			Cursor: PSDL_Cursor;
+		end;
 	end;
 
 	TWindow = class
@@ -103,6 +107,7 @@ type
 		procedure	SyncFramerate;
 		procedure	SetTitle(const Title: AnsiString);
 		procedure	ShowMouse; virtual;
+		procedure	SetSystemCursor(Kind: TSDL_SystemCursor);
 		procedure 	PixelScalingChanged; virtual;
 
 		procedure	OnKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean); virtual;
@@ -680,7 +685,7 @@ begin
 			begin
 				CustomRes50 := dm;
 				LogDebug(Format('50Hz custom mode: %d * %d @ %d Hz', [dm.w, dm.h, dm.refresh_rate]));
-				break;
+				Break;
 			end;
 		end;
 
@@ -692,12 +697,15 @@ begin
 			begin
 				CustomRes60 := dm;
 				LogDebug(Format('60Hz custom mode: %d * %d @ %d Hz', [dm.w, dm.h, dm.refresh_rate]));
-				break;
+				Break;
 			end;
 		end;
 	end;
 	if Settings.FullScreen then
 		SetFullScreen(True);
+
+	if Initialized then
+		SetSystemCursor(Mouse.CurrentCursor.Kind);
 end;
 
 procedure TWindow.ShowMouse;
@@ -706,6 +714,21 @@ begin
 		SDL_ShowCursor(SDL_ENABLE)
 	else
 		SDL_ShowCursor(SDL_DISABLE);
+end;
+
+procedure TWindow.SetSystemCursor(Kind: TSDL_SystemCursor);
+var
+	Cursor: PSDL_Cursor;
+begin
+	Cursor := SDL_CreateSystemCursor(Kind);
+	if Cursor <> nil then
+	begin
+		if Mouse.CurrentCursor.Cursor <> nil then
+			SDL_FreeCursor(Mouse.CurrentCursor.Cursor);
+		Mouse.CurrentCursor.Kind   := Kind;
+		Mouse.CurrentCursor.Cursor := Cursor;
+		SDL_SetCursor(Cursor);
+	end;
 end;
 
 procedure TWindow.SetFullScreen(B: Boolean);
@@ -875,6 +898,9 @@ begin
 	SkippedFrames := 0;
 	LastTitle := '';
 
+	Mouse.CurrentCursor.Cursor := nil;
+	Mouse.CurrentCursor.Kind := 0;
+
 	BasementMainWindow := Self;
 	Settings := BasementOptions;
 
@@ -930,6 +956,9 @@ end;
 
 destructor TWindow.Destroy;
 begin
+	if Mouse.CurrentCursor.Cursor <> nil then
+		SDL_FreeCursor(Mouse.CurrentCursor.Cursor);
+
 	Logo.Free;
 
 	if Initialized then
