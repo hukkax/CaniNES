@@ -78,6 +78,7 @@ type
 		Mirroring,
 		BusConflicts,
 		SubmapperID:  String;
+		InitRamValue: Integer;
 
 		Title:        String;
 		Artwork:      array [caBoxArt..caTitles] of String; // file paths to cart. artwork

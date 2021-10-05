@@ -633,20 +633,38 @@ end;
 
 procedure TConsole.InitializeRam(data: Pointer; length: Cardinal);
 var
-	i: Integer;
+	Value, i: Integer;
 begin
 	if (data <> nil) and (length > 0) then
 	begin
 		case Configuration.Emulator.PowerOnState.DefaultRAMState of
-			irAllZeros: FillByte(data^, length, $00);
-			irAllOnes:  FillByte(data^, length, $FF);
-			irRandom:
-				for i := 0 to length-1 do
-				begin
-					PByte(data)^ := Random($FF);
-					Inc(PByte(data));
-				end;
+			irAllZeros: Value :=  0;
+			irAllOnes:  Value :=  1;
+			irRandom:   Value := -1;
 		end;
+
+		// override initialization value from database
+		if (Configuration.Application.EnableDatabase) and
+			(Configuration.Emulator.PowerOnState.RAMStateOverride) then
+		begin
+			i := Cartridge.RomData.Info.DatabaseInfo.InitRamValue;
+			case i of
+				INITRAM_DEFAULT: ;
+				INITRAM_RANDOM:  Value := -1;
+				else             Value :=  i;
+			end;
+		end;
+
+		if value < 0 then
+		begin
+			for i := 0 to length-1 do
+			begin
+				PByte(data)^ := Random($FF);
+				Inc(PByte(data));
+			end;
+		end
+		else
+			FillByte(data^, length, Value);
 	end;
 end;
 

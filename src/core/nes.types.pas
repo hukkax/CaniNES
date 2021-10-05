@@ -84,6 +84,9 @@ const
 	irAllOnes  = 1;
 	irRandom   = 2;
 
+	INITRAM_DEFAULT = -1;
+	INITRAM_RANDOM  = -2;
+
 type
 //	TByteArray = packed array of Byte;
 	T2DByteArray = array of array of Byte;

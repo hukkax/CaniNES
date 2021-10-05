@@ -225,6 +225,7 @@ type
 		PowerOnState: record
 			RandomizeForMappers: Boolean; // Randomize power-on state for mappers?
 			RandomizeAlignment:  Boolean; // Randomize power-on/reset CPU/PPU alignment?
+			RAMStateOverride:    Boolean; // Allow database info to override RAM init state
 			DefaultRAMState:     Byte;    // Default power-on state for RAM
 		end;
 
@@ -644,6 +645,9 @@ begin
 
 	Cfg.AddByte(Sect, 'DefaultRAMState', @Emulator.PowerOnState.DefaultRAMState, 0)
 	.SetInfo('Initialize RAM with', cfgEmulation, 0, 2, ['Zeroes', 'Ones', 'Random'], nil);
+
+	Cfg.AddBoolean(Sect, 'RAMStateOverride', @Emulator.PowerOnState.RAMStateOverride, True)
+	.SetInfo('Allow DB to override RAM init', cfgEmulation);
 
 	Cfg.AddBoolean(Sect, 'RandomizeForMappers', @Emulator.PowerOnState.RandomizeForMappers, False)
 	.SetInfo('Randomize for mappers', cfgEmulation);

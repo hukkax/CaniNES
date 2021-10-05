@@ -386,9 +386,9 @@ end;
 
 function TGameDatabase.GetGameInfo(RomCrc: Cardinal; var RomInfo: TRomInfo): Boolean;
 
-	function GetInt(const S: String): Integer;
+	function GetInt(const S: String; DefVal: Integer = 0): Integer;
 	begin
-		if not TryStrToInt(S, Result) then Result := 0;
+		if not TryStrToInt(S, Result) then Result := DefVal;
 	end;
 
 var
@@ -429,6 +429,10 @@ begin
 		Info.InputType   := TGameInputType(GetInt(values[13]));
 		Info.BusConflicts:= values[14];
 		Info.SubmapperID := values[15];
+		if High(values) >= 18 then
+			Info.InitRamValue := GetInt(values[18], INITRAM_DEFAULT)
+		else
+			Info.InitRamValue := INITRAM_DEFAULT;
 		//Info.VsType := (VsSystemType)ToInt<uint32_t>(values[16]);
 		//Info.VsPpuModel := (PpuModel)ToInt<uint32_t>(values[17]);
 		//if Info.MapperID = 65000 then
