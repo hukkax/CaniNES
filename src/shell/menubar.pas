@@ -675,7 +675,7 @@ begin
 	if i < ScrollPos then
 		SetScrollPos(i)
 	else
-	if i >= (ScrollPos + Menubar.MaxItemCount) then
+	if i >= Integer(ScrollPos + Menubar.MaxItemCount) then
 		SetScrollPos(i - Menubar.MaxItemCount + 1);
 end;
 

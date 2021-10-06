@@ -133,9 +133,9 @@ begin
 
 	// Convert YIQ into RGB according to FCC-sanctioned conversion matrix.
 	Result := $FF000000 or
-	  ($10000 * Clamp(Trunc(255 * GammaFix(y +  0.946882*i +  0.623557*q))))
-	+ ($00100 * Clamp(Trunc(255 * GammaFix(y + -0.274788*i + -0.635691*q))))
-	+ ($00001 * Clamp(Trunc(255 * GammaFix(y + -1.108545*i +  1.709007*q))));
+	  Cardinal($10000 * Clamp(Trunc(255 * GammaFix(y +  0.946882*i +  0.623557*q))))
+	+ Cardinal($00100 * Clamp(Trunc(255 * GammaFix(y + -0.274788*i + -0.635691*q))))
+	+ Cardinal($00001 * Clamp(Trunc(255 * GammaFix(y + -1.108545*i +  1.709007*q))));
 end;
 
 

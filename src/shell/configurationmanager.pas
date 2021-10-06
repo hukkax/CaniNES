@@ -672,7 +672,7 @@ procedure TConfigItemCardinal.ModifyValue(Amount: Integer);
 var
 	V: Cardinal;
 begin
-	V := Value^ + Amount;
+	V := Value^ {%H-}+ Amount;
 	if V < Min then
 		V := Min
 	else

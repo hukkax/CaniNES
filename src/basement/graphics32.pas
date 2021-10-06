@@ -52,7 +52,10 @@ unit Graphics32;
 	{$ASMMODE INTEL}
 {$ENDIF}
 
-{$DEFINE SUPPORT_JPEG}
+{$DEFINE SUPPORT_PNG}
+{$DEFINE SUPPORT_JPG}
+{.$DEFINE SUPPORT_IFF}
+{.$DEFINE SUPPORT_PCX}
 
 interface
 
@@ -103,7 +106,7 @@ type
 		function 	GetScanline(Y: Integer): PColor32; inline;
 	public
 		Width,
-		Height: 	Cardinal;
+		Height: 	Word;
 		BoundsRect,
 		ClipRect:	TRect;
 		Bits:		array of TColor32;
@@ -238,7 +241,7 @@ type
 
 	function  Color32(R, G, B: Byte): TColor32; overload; inline;
 	function  Color32(R, G, B, A: Byte): TColor32; overload; inline;
-	{$IFDEF SUPPORT_JPEG}{
+	{$IFDEF SUPPORT_JPG}{
 	function  Color32(C: TColor): TColor32; overload; inline;}
 	{$ENDIF}
 	function  SetAlpha(Color: TColor32; A: Byte): TColor32; inline;
@@ -286,10 +289,11 @@ type
 implementation
 
 uses
-	Math, hkaFileUtils,
-	{$IFDEF SUPPORT_JPEG}Graphics32.JPG,{$ENDIF}
-	Graphics32.PCX, Graphics32.IFF,
-	Graphics32.PNG, GR32_PortableNetworkGraphic;
+	{$IFDEF SUPPORT_PNG}Graphics32.PNG, GR32_PortableNetworkGraphic,{$ENDIF}
+	{$IFDEF SUPPORT_JPG}Graphics32.JPG,{$ENDIF}
+	{$IFDEF SUPPORT_PCX}Graphics32.PCX,{$ENDIF}
+	{$IFDEF SUPPORT_IFF}Graphics32.IFF,{$ENDIF}
+	Math, hkaFileUtils;
 
 const
 	{$ifdef UNICODE}
@@ -338,7 +342,7 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF SUPPORT_JPEG}
+{$IFDEF SUPPORT_JPG}
 {function Color32(C: TColor): TColor32;
 begin
 	Result := $FF000000 or (C and $0000FF shl 16) or (C and $00FF00) or (C and $FF0000 shr 16);
@@ -437,9 +441,9 @@ var
 begin
 	Color1.ARGB := Col1;
 	Color2.ARGB := Col2;
-    R := (Color1.R * (255 - Color2.A) + Color2.R * Color2.A) / 255;
-    G := (Color1.G * (255 - Color2.A) + Color2.G * Color2.A) / 255;
-    B := (Color1.B * (255 - Color2.A) + Color2.B * Color2.A) / 255;
+    R := (Color1.R * (255 - Color2.A) {%H-}+ Color2.R * Color2.A) / 255;
+    G := (Color1.G * (255 - Color2.A) {%H-}+ Color2.G * Color2.A) / 255;
+    B := (Color1.B * (255 - Color2.A) {%H-}+ Color2.B * Color2.A) / 255;
     A := 255 - ((255 - Color1.A) * (255 - Color2.A) / 255);
 	Result := Color32(Trunc(R), Trunc(G), Trunc(B), Trunc(A));
 end;
@@ -908,7 +912,7 @@ const
 var
 	HdrBytes: Cardinal;
 	bufPNG: TPortableNetworkGraphic32;
-	{$IFDEF SUPPORT_JPEG}
+	{$IFDEF SUPPORT_JPG}
 	tmp: TBitmap32;
 	{$ENDIF}
 begin
@@ -931,7 +935,7 @@ begin
 			bufPNG.Free;
 		end;
 	end
-	{$IFDEF SUPPORT_JPEG}
+	{$IFDEF SUPPORT_JPG}
 	else
 	if (HdrBytes and $FFFF0000) = Hdr_JPG then
 	try
@@ -952,16 +956,50 @@ end;
 function TBitmap32.LoadFromFile(const Filename: String): Boolean;
 var
 	Ext: String;
-	bufPNG: TPortableNetworkGraphic32;
-	bufPCX: TPCXImage;
-	bufIFF: TIFFImage;
-	{$IFDEF SUPPORT_JPEG}
-	tmp: TBitmap32;
-	{$ENDIF}
+	{$IFDEF SUPPORT_PNG}bufPNG: TPortableNetworkGraphic32;{$ENDIF}
+	{$IFDEF SUPPORT_JPG}tmp:    TBitmap32;{$ENDIF}
+	{$IFDEF SUPPORT_PCX}bufPCX: TPCXImage;{$ENDIF}
+	{$IFDEF SUPPORT_IFF}bufIFF: TIFFImage;{$ENDIF}
 begin
 	Result := False;
 	Ext := UpperCase(ExtractFileExt(Filename));
 
+	{$IFDEF SUPPORT_PNG}
+	if Ext = '.PNG' then
+	begin
+		//LoadBitmap32FromPNG(Self, Filename);
+		bufPNG := TPortableNetworkGraphic32.Create;
+		try
+			bufPNG.LoadFromFile(Filename);
+			bufPNG.AssignTo(Self);
+            SetSize(bufPNG.Width, bufPNG.Height);
+			Result := True;
+		finally
+			bufPNG.Free;
+			Changed;
+		end;
+		Exit;
+	end;
+	{$ENDIF}
+
+	{$IFDEF SUPPORT_JPG}
+	if Pos(Ext, '.JPG .JPEG') > 0 then
+	begin
+		try
+			tmp := JPEGFromFile(Filename);
+			if tmp <> nil then
+			begin
+				Self.Assign(tmp);
+				Result := True;
+			end;
+		finally
+			tmp.Free;
+		end;
+		Exit;
+	end;
+	{$ENDIF}
+
+	{$IFDEF SUPPORT_PCX}
 	if Ext = '.PCX' then
 	begin
 		bufPCX := TPCXImage.Create;
@@ -976,40 +1014,12 @@ begin
 			bufPCX.Free;
 			Changed;
 		end;
-	end
-	else
-	if Ext = '.PNG' then
-	begin
-		//LoadBitmap32FromPNG(Self, Filename);
-		bufPNG := TPortableNetworkGraphic32.Create;
-		try
-			bufPNG.LoadFromFile(Filename);
-			bufPNG.AssignTo(Self);
-            SetSize(bufPNG.Width, bufPNG.Height);
-			Result := True;
-		finally
-			bufPNG.Free;
-			Changed;
-		end;
-	end
-	else
-	{$IFDEF SUPPORT_JPEG}
-	if Pos(Ext, '.JPG .JPEG') > 0 then
-	begin
-		try
-			tmp := JPEGFromFile(Filename);
-			if tmp <> nil then
-			begin
-				Self.Assign(tmp);
-				Result := True;
-			end;
-		finally
-			tmp.Free;
-		end;
-	end
-	else
-	if Pos(Ext, '.IFF .ILBM .HAM') > 0 then
+		Exit;
+	end;
 	{$ENDIF}
+
+	{$IFDEF SUPPORT_IFF}
+	if Pos(Ext, '.IFF .ILBM .HAM') > 0 then
 	begin
 		bufIFF := TIFFImage.Create;
 		try
@@ -1023,6 +1033,7 @@ begin
 			bufIFF.Free;
 		end;
 	end;
+	{$ENDIF}
 end;
 
 // !!! TODO

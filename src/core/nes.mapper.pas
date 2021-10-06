@@ -857,7 +857,7 @@ begin
 	slotCount := (endAddr - startAddr + 1) >> 8;
 	for i := 0 to slotCount-1 do
 	begin
-		chrMemoryOffset[firstSlot + i] := sourceOffset + (i * $100);
+		chrMemoryOffset[firstSlot + i] := Int32(sourceOffset) + (i * $100);
 		chrMemoryType  [firstSlot + i] := memoryType;
 		chrMemoryAccess[firstSlot + i] := TMemoryAccessType(accessType);
 	end;

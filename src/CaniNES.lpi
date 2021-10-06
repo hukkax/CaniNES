@@ -1014,10 +1014,12 @@
       <Unit163>
         <Filename Value="core/mappers/nes.mapper_521.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_521"/>
       </Unit163>
       <Unit164>
         <Filename Value="core/mappers/nes.mapper_193.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_193"/>
       </Unit164>
       <Unit165>
         <Filename Value="shell/bookmarkmanager.pas"/>
@@ -1095,7 +1097,7 @@
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx5091="True" idx5057="True" idx5024="True"/>
+        <IgnoredMessages idx5091="True" idx5057="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True"/>
       </CompilerMessages>
       <CustomOptions Value="-vm6060
 -OoFASTMATH

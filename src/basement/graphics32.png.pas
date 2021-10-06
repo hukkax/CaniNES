@@ -32,6 +32,8 @@ unit Graphics32.PNG;
  *
  * ***** END LICENSE BLOCK ***** *)
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 interface
 
 {$mode DELPHI}
@@ -560,7 +562,7 @@ begin
             raise EPngError.Create(RCStrUnsupportedFormat);
         end;
       else
-        raise EPngError.Create(RCStrUnsupportedFormat);
+        raise EPngError.Create(RCStrUnsupportedFormat){%H-};
     end;
 
     if Assigned(FTransparencyChunk) then

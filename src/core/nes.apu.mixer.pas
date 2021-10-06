@@ -197,7 +197,6 @@ end;
 procedure TSoundMixer.PlayAudioBuffer(time: Cardinal);
 var
 	i, sampleCount: Cardinal;
-	rate: Single;
 begin
 	UpdateTargetSampleRate;
 	EndFrame(time);
@@ -213,7 +212,7 @@ begin
 			outputBuffer[i*2 + 1] := outputBuffer[i*2];
 
 	if not Console.IsRunAheadFrame then
-		APU.PlayBuffer(@outputBuffer[0], sampleCount, False); // !!! Console.Rewind);
+		APU.PlayBuffer(@outputBuffer[0], sampleCount);
 end;
 
 procedure TSoundMixer.UpdateRates(ForceUpdate: Boolean);

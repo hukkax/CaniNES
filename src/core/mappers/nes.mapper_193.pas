@@ -5,7 +5,7 @@ unit NES.Mapper_193;
 interface
 
 uses
-	NES.Types, NES.Cartridge, NES.Mapper;
+	NES.Types, NES.Mapper;
 
 type
 	TMapper_193 = class(TMapper)

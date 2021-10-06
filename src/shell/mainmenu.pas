@@ -37,7 +37,7 @@ uses
 procedure UpdateMainMenu;
 var
 	PT: AnsiString;
-	i: Integer;
+	i: Integer = -1;
 begin
 	if not Assigned(Menu) then Exit;
 
@@ -56,7 +56,8 @@ begin
 		Menu.Show;
 		Menu.SwitchPage(PT);
 		Menu.UpdateFilelisting;
-		Menu.SetItemIndex(i);
+		if i >= 0 then
+			Menu.SetItemIndex(i);
 	end;
 end;
 

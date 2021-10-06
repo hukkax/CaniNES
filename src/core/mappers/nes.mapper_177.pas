@@ -5,7 +5,7 @@ unit NES.Mapper_177;
 interface
 
 uses
-	NES.Types, NES.Cartridge, NES.Mapper;
+	NES.Types, NES.Mapper;
 
 type
 	TMapper_177 = class(TMapper)
@@ -21,8 +21,6 @@ type
 
 
 implementation
-
-uses Math;
 
 { TMapper_177 }
 

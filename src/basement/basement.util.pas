@@ -74,7 +74,7 @@ var
 	function  SplitString(const aString, aSeparator: String; aMax: Integer = 0): TArrayOfString;
 
 	function  StringInData(Data: PByte; const Text: AnsiString): Boolean; inline;
-	function  StringFromData(Data: PByte; Len: Word): AnsiString;
+	function  StringFromData({%H-}Data: PByte; Len: Word): AnsiString;
 
 	procedure ZeroMemory(Destination: Pointer; Length: DWord); inline;
     procedure CopyMemory(Destination, Source: Pointer; Length:DWord); inline;

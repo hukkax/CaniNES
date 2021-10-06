@@ -1,5 +1,7 @@
 unit NES.Mapper_046;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 046: Color Dreams Rumblestation 15-in-1
 
 interface

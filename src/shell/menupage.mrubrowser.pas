@@ -20,11 +20,11 @@ type
 implementation
 
 uses
-	MainWindow, TextOutput, NES.Config,
+	MainWindow, NES.Config,
 	Logging, FileUtil;
 
 var
-	MRUBrowser: TMRUBrowser;
+	{%H-}MRUBrowser: TMRUBrowser;
 
 // ============================================================================
 // MRU Browser

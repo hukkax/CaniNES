@@ -35,7 +35,7 @@ type
 		Buffer:          TBytes;
 
 		procedure	ReadFromBuffer(output: PByte; len: Cardinal);
-		procedure	WriteToBuffer (input:  PByte; len: Cardinal; Backwards: Boolean);
+		procedure	WriteToBuffer (input:  PByte; len: Cardinal);
 	protected
 		Playing:      Boolean;
 
@@ -59,7 +59,7 @@ type
 
 		function 	Init(WantedLatency: Word = 0; Stereo: Boolean = True; Device: String = ''): Boolean;
 
-		procedure	PlayBuffer(SoundBuffer: PInt16; Len: Cardinal; Backwards: Boolean);
+		procedure	PlayBuffer(SoundBuffer: PInt16; Len: Cardinal);
 
 		procedure	Play;
 		procedure	Pause;
@@ -214,25 +214,13 @@ begin
 	end;}
 end;
 
-procedure TPlayRoutine.WriteToBuffer(input: PByte; len: Cardinal; Backwards: Boolean);
+procedure TPlayRoutine.WriteToBuffer(input: PByte; len: Cardinal);
 var
 	RemainingBytes: Integer;
 begin
 	if (WritePosition + len) < BufferSize then
 	begin
-		if not Backwards then
-			CopyMemory(@Buffer[WritePosition], input, len)
-		else
-		begin
-			for RemainingBytes := (len div 2)-1 downto 0 do
-			begin
-				Buffer[WritePosition+(RemainingBytes*2)]   := input^;
-				Inc(input);
-				Buffer[WritePosition+(RemainingBytes*2)+1] := input^;
-				Inc(input);
-			end;
-		end;
-
+		CopyMemory(@Buffer[WritePosition], input, len);
 		Inc(WritePosition, len);
 	end
 	else
@@ -251,13 +239,13 @@ begin
 	end;
 end;
 
-procedure TPlayRoutine.PlayBuffer(SoundBuffer: PInt16; Len: Cardinal; Backwards: Boolean);
+procedure TPlayRoutine.PlayBuffer(SoundBuffer: PInt16; Len: Cardinal);
 var
 	ByteLatency, PlayWriteByteLatency: Integer;
 begin
 	UpdateSoundSettings;
 
-	WriteToBuffer(PByte(SoundBuffer), Len * BytesPerSample, Backwards);
+	WriteToBuffer(PByte(SoundBuffer), Len * BytesPerSample);
 
 	ByteLatency := Round((SampleRate * PreviousLatency) / 1000 * BytesPerSample);
 	PlayWriteByteLatency := WritePosition - ReadPosition;

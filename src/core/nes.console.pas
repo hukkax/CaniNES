@@ -165,7 +165,7 @@ uses
 	Basement.Util, Basement.UnZip, TextOutput,
 	{$IFDEF MEASURETIMING} Basement.Timing, {$ENDIF}
 	NES.Config, NES.Mapper, NES.AudioManager,
-	MainMenu, MainWindow;
+	MainWindow;
 
 
 function TConsole.GetFPS: Double;
@@ -633,14 +633,14 @@ end;
 
 procedure TConsole.InitializeRam(data: Pointer; length: Cardinal);
 var
-	Value, i: Integer;
+	i, Value: Integer;
 begin
 	if (data <> nil) and (length > 0) then
 	begin
 		case Configuration.Emulator.PowerOnState.DefaultRAMState of
-			irAllZeros: Value :=  0;
-			irAllOnes:  Value :=  1;
 			irRandom:   Value := -1;
+			irAllOnes:  Value :=  1;
+			else        Value :=  0;
 		end;
 
 		// override initialization value from database
@@ -655,7 +655,7 @@ begin
 			end;
 		end;
 
-		if value < 0 then
+		if Value < 0 then
 		begin
 			for i := 0 to length-1 do
 			begin

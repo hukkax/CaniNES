@@ -1102,9 +1102,9 @@ end;
 function TPPU.GetAttributeAddr: Word;
 begin
 	Result := $23C0 or
-		(VideoRamAddr and $0C00) or
-		((VideoRamAddr >> 4) and $38) or
-		((VideoRamAddr >> 2) and $07);
+		Word(VideoRamAddr and $0C00) or
+		(Word(VideoRamAddr >> 4) and $38) or
+		(Word(VideoRamAddr >> 2) and $07);
 end;
 
 procedure TPPU.LoadTileInfo;
@@ -1402,7 +1402,7 @@ begin
 		pixelNumber := (scanline << 8) - 1
 	else
 	if cycle <= 258 then
-		pixelNumber := (scanline << 8) + cycle - 3
+		pixelNumber := (scanline << 8) + Int32(cycle) - 3
 	else
 		pixelNumber := (scanline << 8) + 255;
 
@@ -1557,7 +1557,7 @@ begin
 						end;
 					end;
 				end;
-				SpriteRamAddr := (spriteAddrL and $03) or (spriteAddrH << 2);
+				SpriteRamAddr := (spriteAddrL and $03) or Byte(spriteAddrH << 2);
 			end;
 		end;
 	end;

@@ -616,10 +616,10 @@ end;
 
 function TFileAccessor.ReadBytes(var Buffer: Pointer; Size: Cardinal): Cardinal;
 var
-	len: Cardinal;
+	len: Int64;
 	Src: Pointer;
 begin
-	len := Min(FPosition+Size, Length(Data)) - FPosition;
+	len := Min(Int64(FPosition)+Size, Length(Data)) - FPosition;
 	Src := @Data[FPosition];
 	Move(Src^, Buffer, len);
 	Inc(FPosition, len);

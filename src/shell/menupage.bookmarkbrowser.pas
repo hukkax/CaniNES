@@ -25,7 +25,7 @@ uses
 	StrUtils;
 
 var
-	BookmarkBrowser: TBookmarkBrowser;
+	{%H-}BookmarkBrowser: TBookmarkBrowser;
 
 // ============================================================================
 // Bookmark Browser

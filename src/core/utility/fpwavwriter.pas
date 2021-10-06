@@ -82,13 +82,13 @@ end;
 
 function TWavWriter.FlushHeader: Boolean;
 var
-  riff: TRiffHeader;
+  {%H-}riff: TRiffHeader;
   fmtLE: TWaveFormat;
-  DataChunk: TChunkHeader;
+  {%H-}DataChunk: TChunkHeader;
   Pos, Sz: Int64;
 begin
   Pos := fStream.Position;
-  with riff, ChunkHeader do begin
+  with {%H-}riff, ChunkHeader do begin
     ID := AUDIO_CHUNK_ID_RIFF;
 	Sz := Pos - SizeOf(ChunkHeader);
 	if Sz < 0 then Sz := 0;

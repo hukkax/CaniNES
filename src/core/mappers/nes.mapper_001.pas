@@ -72,7 +72,7 @@ type
 implementation
 
 uses
-	TextOutput, Basement.Util, Math, SysUtils,
+	Basement.Util, Math, SysUtils,
 	NES.Types, NES.Console, NES.CPU;
 
 

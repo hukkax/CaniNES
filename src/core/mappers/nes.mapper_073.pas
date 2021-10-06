@@ -32,8 +32,8 @@ type
 implementation
 
 uses
-	SysUtils, Math, Basement.Util,
-	NES.Config, NES.Console, NES.CPU;
+	SysUtils, Basement.Util,
+	NES.Config, NES.CPU;
 
 // ============================================================================
 // TMapper_VRC3

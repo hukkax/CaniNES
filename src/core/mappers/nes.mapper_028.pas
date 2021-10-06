@@ -1,5 +1,7 @@
 unit NES.Mapper_028;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 028: Action 53
 
 interface

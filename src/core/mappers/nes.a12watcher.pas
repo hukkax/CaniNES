@@ -23,7 +23,8 @@ type
 implementation
 
 uses
-	SysUtils, NES.Console, NES.CPU;
+	SysUtils, NES.CPU;
+
 
 constructor TA12Watcher.Create(MinimumDelay: Byte);
 begin

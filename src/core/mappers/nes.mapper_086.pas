@@ -1,11 +1,13 @@
 unit NES.Mapper_086;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 086: Jaleco JF-13
 
 interface
 
 uses
-	NES.Types, NES.Cartridge, NES.Mapper;
+	NES.Types, NES.Mapper;
 
 type
 	TMapper_086 = class(TMapper)

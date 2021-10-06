@@ -11,8 +11,6 @@ uses
 
 type
 	TNTSCRenderer = class(TRenderer)
-	private
-		MultiLine: Boolean;
 	public
 		Enabled: Boolean;
 

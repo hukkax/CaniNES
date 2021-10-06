@@ -1,5 +1,7 @@
 unit NES.Mapper_005;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 005: MMC5 ExROM
 
 interface

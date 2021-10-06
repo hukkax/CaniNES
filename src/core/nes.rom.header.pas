@@ -157,7 +157,7 @@ begin
 	case GetRomHeaderVersion of
 		iNes:    Result := (Byte7 and $F0) or (Byte6 shr 4);
 		OldiNes: Result := (Byte6 shr 4);
-		Nes2_0:  Result := ((Byte8 and $0F) shl 8) or (Byte7 and $F0) or (Byte6 shr 4);
+		Nes2_0:  Result := Word((Byte8 and $0F) shl 8) or Word(Byte7 and $F0) or Word(Byte6 shr 4);
 	end;
 end;
 

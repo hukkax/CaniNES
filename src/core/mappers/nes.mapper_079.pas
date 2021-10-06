@@ -1,5 +1,7 @@
 unit NES.Mapper_079;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 079: NINA-03/NINA-06
 // Mapper 113: Multicart mode
 

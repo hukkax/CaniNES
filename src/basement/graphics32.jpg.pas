@@ -1,6 +1,7 @@
 unit Graphics32.JPG;
 
 {$mode objfpc}
+{$WARN 4046 off : Constructing a class "$1" with abstract method "$2"}
 
 interface
 

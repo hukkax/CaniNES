@@ -110,7 +110,7 @@ function TUnZipperEx.ListFiles(const SearchPath: String; const SearchMask: Strin
 var
 	i: Integer;
 	E: TZipFileEntry;
-	SP: String;
+	SP: String = '';
 	WantPath: Boolean;
 begin
 	Result := TStringList.Create;
@@ -137,7 +137,7 @@ function TUnZipperEx.ListDirectories(const SearchPath: String): TStringList;
 var
 	i: Integer;
 	E: TZipFileEntry;
-	SP: String;
+	SP: String = '';
 	WantPath: Boolean;
 begin
 	Result := TStringList.Create;

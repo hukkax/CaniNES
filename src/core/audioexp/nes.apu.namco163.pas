@@ -1,5 +1,7 @@
 unit NES.APU.Namco163;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 interface
 
 uses

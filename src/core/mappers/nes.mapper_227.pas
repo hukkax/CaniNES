@@ -1,5 +1,7 @@
 unit NES.Mapper_227;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 227: multicart (1200-in-1, 600-in-1), Nanjing/Waixing/Yancheng
 
 interface

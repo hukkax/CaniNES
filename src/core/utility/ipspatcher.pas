@@ -195,7 +195,7 @@ var
 	patchRecord: TIpsRecord;
 begin
 	len := Length(originalData);
-	Assert(len = Length(newData));
+	//Assert(len = Length(newData));
 
 	Result := BytesOf(S_PATCH);
 

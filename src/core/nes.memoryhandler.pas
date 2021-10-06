@@ -166,8 +166,8 @@ begin
 end;
 
 procedure TIMemoryHandler.WriteDebug(Stream: TFileStreamEx);
-var
-	ranges: TMemoryRanges;
+//var
+//	ranges: TMemoryRanges;
 begin
 	if Debugged then Exit;
 

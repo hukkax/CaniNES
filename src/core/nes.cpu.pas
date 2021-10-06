@@ -354,11 +354,11 @@ implementation
 
 uses
 	Basement.Util, Math, TextOutput,
-	NES.MemoryManager, NES.Console, NES.Config,
-	NES.Mapper, NES.PPU;
+	NES.Config, NES.MemoryManager, NES.Console, NES.PPU;
 
 	{$INCLUDE coredefs.inc}
 
+{$IFDEF DEBUGGER}
 const
 	Mnemonic: array[Byte] of AnsiString = (
 		'BRK','ORA','???','SLO','NOP','ORA','ASL','SLO','PHP','ORA','ASL','???','NOP','ORA','ASL','SLO',
@@ -378,6 +378,7 @@ const
 		'CPX','SBC','???','ISB','CPX','SBC','INC','ISB','INX','SBC','NOP','SBC','CPX','SBC','INC','ISB',
 		'BEQ','SBC','???','ISB','NOP','SBC','INC','ISB','SED','SBC','NOP','ISB','NOP','SBC','INC','ISB'
 	);
+{$ENDIF}
 
 // ================================================================================================
 // Utility
@@ -1158,7 +1159,7 @@ procedure TCPU.OpADD(value: Byte);
 var
 	res: Word;
 begin
-	res := Word(A) + Word(value) + IfThen(CheckFlag(psfCarry), psfCarry, $00);
+	res := Word(A) + Word(value) + Word(IfThen(CheckFlag(psfCarry), psfCarry, $00));
 
 	ClearFlags(psfCarry or psfNegative or psfOverflow or psfZero);
 	SetZeroNegativeFlags(res and $FF);
@@ -1262,7 +1263,7 @@ begin
 	ClearFlags(psfCarry or psfNegative or psfZero);
 	if (value and $80) <> 0 then
 		SetFlags(psfCarry);
-	Result := (value << 1) or IfThen(carryFlag, $01, $00);
+	Result := (value << 1) or Byte(IfThen(carryFlag, $01, $00));
 	SetZeroNegativeFlags(Result);
 end;
 
@@ -1274,7 +1275,7 @@ begin
 	ClearFlags(psfCarry or psfNegative or psfZero);
 	if Odd(value) then
 		SetFlags(psfCarry);
-	Result := (value >> 1) or IfThen(carryFlag, $80, $00);
+	Result := (value >> 1) or Byte(IfThen(carryFlag, $80, $00));
 	SetZeroNegativeFlags(Result);
 end;
 
@@ -1546,11 +1547,11 @@ end;
 
 procedure TCPU.OpARR;
 begin
-	SetA(((A and GetOperandValue) shr 1) or IfThen(CheckFlag(psfCarry), $80, $00));
+	SetA(((A and GetOperandValue) shr 1) or Byte(IfThen(CheckFlag(psfCarry), $80, $00)));
 	ClearFlags(psfCarry or psfOverflow);
 	if (A and $40) = $40 then
 		SetFlags(psfCarry);
-	if IfThen(CheckFlag(psfCarry), $01, $00) xor ((A shr 5) and 1) = 1 then
+	if Byte(IfThen(CheckFlag(psfCarry), $01, $00)) xor Byte((A shr 5) and 1) = 1 then
 		SetFlags(psfOverflow);
 end;
 

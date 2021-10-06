@@ -1,5 +1,7 @@
 unit NES.Mapper_018;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 018: Jaleco SS88006
 
 interface

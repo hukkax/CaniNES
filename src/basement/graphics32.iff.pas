@@ -382,7 +382,7 @@ var
 	id: RawByteString;
 	sb: ShortInt;
 	b: Byte;
-	i, j, x, y, h, _width, size, bytesloaded, row_bytes, viewmodes, stencil: Uint32;
+	i, j, x, y, h, size, bytesloaded, row_bytes, viewmodes, stencil: Uint32;
 	p, iterations, planes, pixel_mask: Integer;
 	plane_mask: Cardinal;
 begin
@@ -723,11 +723,11 @@ end;
 procedure TIFFImage.DrawTo(var Buffer: TBitmap32);
 var
 	ratio: Single;
-	x, y, W, H: Integer;
+	x, y {, W, H}: Integer;
 	//DoubleX, DoubleY: Boolean;
 	Color: TColor32;
 	Car: Cardinal;
-	ScaledBuffer: TBitmap32;
+//	ScaledBuffer: TBitmap32;
 begin
 	if not Assigned(Buffer) then
 		Buffer := TBitmap32.Create;
@@ -796,10 +796,10 @@ begin
 	SetError('Final ratio: ' + FloatToStr(Ratio));
 	//ratio := 1.0;
 
-	W := Trunc(Width  * Max(ratio, 1));
+{	W := Trunc(Width  * Max(ratio, 1));
 	H := Trunc(Height / Min(ratio, 1));
 
-{	if (W <> Width) or (H <> Height) then
+	if (W <> Width) or (H <> Height) then
 	begin
 		ScaledBuffer := TBitmap32.Create;
 		ScaledBuffer.SetSize(W, H);

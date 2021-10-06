@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-	MainWindow, MainMenu, InputBindings, Basement.Renderer.Overlay, TextOutput,
+	MainWindow, MainMenu, InputBindings, Basement.Renderer.Overlay,
 	NES.Config, NES.Console, NES.Cartridge, NES.Mapper,
 	{$IFDEF WINDOWS}Windows,{$ENDIF}
 	Logging, Math, FileUtil,

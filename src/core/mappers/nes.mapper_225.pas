@@ -1,5 +1,7 @@
 unit NES.Mapper_225;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 225: various multicarts
 // Mapper 255: 110-in-1 multicart
 

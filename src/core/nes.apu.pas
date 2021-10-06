@@ -14,7 +14,7 @@ uses
 type
 	TFrameType = ( None = 0, QuarterFrame = 1, HalfFrame = 2 );
 
-	TStepCycles = array [0..1, 0..5] of Int32;
+	TStepCycles = array [0..1, 0..5] of Word;
 
 type
 	TApuFrameCounter = class(TIMemoryHandler)
@@ -167,7 +167,7 @@ var
 	cyclesRan: Cardinal;
 	ftype: TFrameType;
 begin
-	if (PreviousCycle + cyclesToRun) >= StepCycles[StepMode, CurrentStep] then
+	if Cardinal(PreviousCycle + cyclesToRun) >= StepCycles[StepMode, CurrentStep] then
 	begin
 		if (not InhibitIRQ) and (StepMode = 0) and (CurrentStep >= 3) then
 		begin
@@ -244,7 +244,7 @@ begin
 	// - The "blockFrameCounterTick" process is running
 	// - We're at the before-last or last tick of the current step
 	Result := (NewValue >= 0) or (BlockFrameCounterTick > 0) or
-		(PreviousCycle + cyclesToRun >= StepCycles[StepMode, CurrentStep] - 1);
+		(Cardinal(PreviousCycle + cyclesToRun) >= Cardinal(StepCycles[StepMode, CurrentStep] - 1));
 end;
 
 procedure TApuFrameCounter.GetMemoryRanges(var ranges: TMemoryRanges);

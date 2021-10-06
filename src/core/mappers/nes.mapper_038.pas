@@ -5,7 +5,7 @@ unit NES.Mapper_038;
 interface
 
 uses
-	NES.Types, NES.Cartridge, NES.Mapper;
+	NES.Types, NES.Mapper;
 
 type
 	TMapper_038 = class(TMapper)
@@ -23,7 +23,6 @@ type
 
 
 implementation
-
 
 function TMapper_038.GetPRGPageSize: Word;
 begin

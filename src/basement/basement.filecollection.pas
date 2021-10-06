@@ -84,7 +84,8 @@ type
 implementation
 
 uses
-	hkaFileUtils, StrUtils, TextOutput;
+	{$IFDEF FILECOLL_LOGGING}TextOutput,{$ENDIF}
+	hkaFileUtils, StrUtils;
 
 
 function SameString(const S1, S2: String; IgnoreCase: Boolean): Boolean; inline;
@@ -368,6 +369,7 @@ function TFileCollector.GetFileBytes(const Filename: String): TBytes;
 var
 	Str: TMemoryStream;
 begin
+	Result := nil;
 	if Filename.IsEmpty then Exit;
 
 	Str := GetFileStream(Filename);

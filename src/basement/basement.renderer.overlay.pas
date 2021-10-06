@@ -1,6 +1,7 @@
 unit Basement.Renderer.Overlay;
 
 {$MODE DELPHI}
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
 
 {$I basement.inc}
 
@@ -337,7 +338,7 @@ begin
 	SDL_RenderCopy(Renderer, Texture, @ActiveRect, @DestRect);
 
 	if not ScaleWithWindow then
-		SDL_RenderSetScale(Renderer, X, Y);
+		SDL_RenderSetScale(Renderer, X{%H-}, Y{%H-});
 end;
 
 // ================================================================================================

@@ -178,10 +178,7 @@ begin
 	until x >= MaxLen;
 end;
 
-procedure StreamWriteString(Stream: TStream;
-	const Val: AnsiString; Terminate: Boolean);
-var
-	x: Integer;
+procedure StreamWriteString(Stream: TStream; const Val: AnsiString; Terminate: Boolean);
 begin
 	Stream.WriteBuffer(Pointer(Val)^, Length(Val));
 	if Terminate then

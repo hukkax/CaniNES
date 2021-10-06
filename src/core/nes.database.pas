@@ -6,7 +6,6 @@ interface
 
 uses
 	Classes, SysUtils,
-	Generics.Collections,
 	Basement.FileCollection,
 	NES.Types, NES.ROM, NES.ROM.Header;
 
@@ -79,8 +78,8 @@ type
 implementation
 
 uses
-	Math, hkaFileUtils, Basement.Util, TextOutput,
-	NES.Config, NES.Console;
+	Math, Basement.Util, TextOutput,
+	NES.Config;
 
 
 // roms.ini
@@ -139,8 +138,7 @@ end;
 constructor TGameDatabase.Create(Path, fnFilename, fnTitles: String);
 var
 	i: Integer;
-	Dir, S: String;
-	sl: TStrings;
+	Dir: String;
 begin
 	inherited Create;
 
@@ -159,6 +157,7 @@ begin
 			caBoxArt: Dir := Configuration.Application.ImagePath_Boxart;
 			caSnaps:  Dir := Configuration.Application.ImagePath_Snaps;
 			caTitles: Dir := Configuration.Application.ImagePath_Titles;
+			else      Dir := '';
 		end;
 		if Dir = '' then Continue;
 
@@ -186,12 +185,12 @@ end;
 //
 procedure TGameDatabase.FindBoxArt(var info: TRomInfo);
 var
-	Paths: array [caBoxArt..caTitles] of String;
+	//Paths: array [caBoxArt..caTitles] of String;
 	Item: TFileCollectionItem;
 
 	function TryFindMatchingFile(Kind: Integer; const Filename: String): String;
 	var
-		S, TS, Fn, Ext: String;
+		S, TS, Ext: String;
 		sl: TStringList;
 		x, x2: Integer;
 	begin
@@ -243,9 +242,9 @@ var
 	i, ci: Integer;
 	slo, sl: TStringList;
 begin
-	Paths[caBoxArt] := IncludeTrailingPathDelimiter(Configuration.Application.ImagePath_Boxart);
+{	Paths[caBoxArt] := IncludeTrailingPathDelimiter(Configuration.Application.ImagePath_Boxart);
 	Paths[caSnaps]  := IncludeTrailingPathDelimiter(Configuration.Application.ImagePath_Snaps);
-	Paths[caTitles] := IncludeTrailingPathDelimiter(Configuration.Application.ImagePath_Titles);
+	Paths[caTitles] := IncludeTrailingPathDelimiter(Configuration.Application.ImagePath_Titles);}
 
 	for ci := caBoxArt to caLastIndex do
 		info.DatabaseInfo.Artwork[ci] := '';

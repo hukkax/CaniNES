@@ -157,7 +157,7 @@ procedure TestSwap(var A, B: Integer); overload;{$IFDEF USEINLINING} inline; {$E
 function TestClip(var A, B: Integer; const Size: Integer): Boolean; overload;
 function TestClip(var A, B: Integer; const Start, Stop: Integer): Boolean; overload;
 
-function Scale(Width, Height, NewWidth, NewHeight: Cardinal; AllowUpscale: Boolean): TPoint;
+function Scale(Width, Height, NewWidth, NewHeight: Integer; AllowUpscale: Boolean): TPoint;
 
 
 implementation
@@ -168,7 +168,7 @@ uses
 {$R-}{$Q-}  // switch off overflow and range checking
 
 
-function Scale(Width, Height, NewWidth, NewHeight: Cardinal; AllowUpscale: Boolean): TPoint;
+function Scale(Width, Height, NewWidth, NewHeight: Integer; AllowUpscale: Boolean): TPoint;
 var
 	RScaleX, RScaleY: Single;
 begin

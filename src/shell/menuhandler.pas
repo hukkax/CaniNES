@@ -1,6 +1,7 @@
 unit MenuHandler;
 
 {$MODE DELPHI}
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
 
 interface
 
@@ -458,7 +459,7 @@ end;
 
 procedure TMenuPage.ScrollToView;
 var
-	ClientHeight: Integer;
+	ClientHeight: Cardinal;
 begin
 	ClientHeight := MenuRenderer.FrameBuffer.Height - (MenuRenderer.Font.GlyphHeight + 2);
 	RowsVisible := Round(ClientHeight / MenuRenderer.Font.GlyphHeight);

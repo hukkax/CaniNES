@@ -1,5 +1,7 @@
 unit NES.Mapper_268;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 268: MMC3-Coolboy
 //
 // Mostly taken from FCEUX's code
@@ -7,7 +9,7 @@ unit NES.Mapper_268;
 interface
 
 uses
-	NES.A12Watcher, NES.Cartridge,
+	NES.Cartridge,
 	NES.Mapper_004, NES.Mapper, NES.Types;
 
 type
@@ -32,7 +34,7 @@ implementation
 
 uses
 	SysUtils, Math,
-	NES.Config, NES.Console, NES.CPU, NES.PPU;
+	NES.Config, NES.CPU;
 
 // ============================================================================
 // TMapper_268

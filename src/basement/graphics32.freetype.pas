@@ -747,8 +747,6 @@ begin
                   round((x-rect.left)*64), round((rect.bottom-y)*64),
                   rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top,
                   OnRender, ARasterizer) = TT_Err_Ok;
-  else
-    result := false;
   end;
 end;
 

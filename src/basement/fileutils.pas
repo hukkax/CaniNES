@@ -167,7 +167,7 @@ begin
 		Path := ExtractFilePath(Filename);
 		if not DirectoryExists(Path) then
 			ForceDirectories(Path);
-		RS := TResourceStream.Create(hInstance, Name, RT_RCDATA);
+		RS := TResourceStream.Create(hInstance, Name, RT_RCDATA{%H-});
 		Sl := TStringList.Create;
 		Sl.LoadFromStream(RS);
 		Sl.SaveToFile(Filename);

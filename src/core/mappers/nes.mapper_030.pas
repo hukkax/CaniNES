@@ -1,11 +1,13 @@
 unit NES.Mapper_030;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 030: UNROM512
 
 interface
 
 uses
-	NES.Types, NES.Cartridge, NES.Mapper,
+	NES.Types, NES.Mapper,
 	NES.Flash.SST39SF040;
 
 type

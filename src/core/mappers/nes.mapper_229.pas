@@ -38,8 +38,6 @@ begin
 end;
 
 procedure TMapper_229.WriteRegister(addr: Word; value: Byte);
-var
-	prgBank: Byte;
 begin
 	SelectCHRPage(0, addr and $FF);
 

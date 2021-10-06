@@ -6,7 +6,7 @@ interface
 
 uses
 	Classes, SysUtils,
-	NES.Types, NES.Console, NES.SaveState;
+	NES.Types, NES.SaveState;
 
 type
 	TEepromMode = (

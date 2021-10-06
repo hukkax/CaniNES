@@ -31,7 +31,10 @@ unit GR32_PortableNetworkGraphic;
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** *)
+
 {$WARN 6048 off : Inherited call to abstract method ignored}
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 interface
 
 {$mode Delphi}
@@ -811,7 +814,7 @@ type
   TChunkPngUnknown = class(TCustomChunk)
   private
     function GetData(index: Integer): Byte;
-    procedure SetData(index: Integer; const Value: Byte);
+    procedure SetData(index: Integer; const {%H-}Value: Byte);
   protected
     FChunkName  : TChunkName;
     FDataStream : TMemoryStream;
@@ -2486,7 +2489,7 @@ end;
 
 procedure TChunkPngText.WriteToStream(Stream: TStream);
 var
-  Temp  : Byte;
+  {%H-}Temp  : Byte;
 begin
   with Stream do
   begin
@@ -2592,7 +2595,7 @@ end;
 procedure TChunkPngCompressedText.WriteToStream(Stream: TStream);
 var
   OutputStream: TMemoryStream;
-  Temp         : Byte;
+  {%H-}Temp         : Byte;
 begin
   OutputStream := TMemoryStream.Create;
   try
@@ -2912,7 +2915,7 @@ end;
 
 procedure TChunkPngEmbeddedIccProfile.WriteToStream(Stream: TStream);
 var
-  Temp  : Byte;
+  {%H-}Temp  : Byte;
 begin
   with Stream do
   begin
@@ -4384,7 +4387,7 @@ begin
     afmAverage : DecodeFilterAverage(CurrentRow, PreviousRow, BytesPerRow, PixelByteSize);
     afmPaeth   : DecodeFilterPaeth(CurrentRow, PreviousRow, BytesPerRow, PixelByteSize);
     else
-      raise EPngError.Create(RCStrUnsupportedFilter);
+      raise EPngError.Create(RCStrUnsupportedFilter){%H-};
   end;
 end;
 
@@ -4519,7 +4522,7 @@ begin
     afmAverage : DecodeFilterAverage(CurrentRow, PreviousRow, BytesPerRow, PixelByteSize);
     afmPaeth   : DecodeFilterPaeth(CurrentRow, PreviousRow, BytesPerRow, PixelByteSize);
     else
-      raise EPngError.Create(RCStrUnsupportedFilter);
+      raise EPngError.Create(RCStrUnsupportedFilter){%H-};
   end;
 end;
 
@@ -5220,11 +5223,11 @@ end;
 
 procedure TPortableNetworkGraphic.SaveToStream(Stream: TStream);
 var
-  ChunkName    : TChunkName;
-  ChunkSize    : Cardinal;
-  CRC          : Cardinal;
-  MemoryStream : TMemoryStream;
-  Index        : Integer;
+  {%H-}ChunkName: TChunkName;
+  ChunkSize     : Cardinal;
+  {%H-}CRC      : Cardinal;
+  MemoryStream  : TMemoryStream;
+  Index         : Integer;
 
   procedure SaveChunkToStream(Chunk: TCustomChunk);
   begin
@@ -5399,7 +5402,7 @@ begin
       imNone  : TranscoderClass := TPngNonInterlacedToAdam7Transcoder;
       imAdam7 : TranscoderClass := TPngAdam7ToNonInterlacedTranscoder;
       else
-        raise EPngError.Create(RCStrWrongInterlaceMethod);
+        raise EPngError.Create(RCStrWrongInterlaceMethod){%H-};
     end;
 
     with TranscoderClass.Create(TempStream, FImageHeader) do

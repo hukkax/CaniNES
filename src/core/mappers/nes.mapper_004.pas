@@ -1,5 +1,7 @@
 unit NES.Mapper_004;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 004: MMC3A, MMC3B, MMC3C, MMC6
 // Mapper 044/045/047/049/052/091/114/187/189: MMC3 variants
 //

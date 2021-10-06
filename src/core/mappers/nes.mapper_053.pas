@@ -1,5 +1,7 @@
 unit NES.Mapper_053;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Mapper 053: Supervision
 
 interface

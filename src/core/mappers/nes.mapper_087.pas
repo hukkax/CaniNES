@@ -5,7 +5,7 @@ unit NES.Mapper_087;
 interface
 
 uses
-	NES.Types, NES.Cartridge, NES.Mapper;
+	NES.Types, NES.Mapper;
 
 type
 	TMapper_087 = class(TMapper)
@@ -28,10 +28,6 @@ type
 
 
 implementation
-
-uses
-	NES.Console;
-
 
 { TMapper_087 }
 

@@ -1,6 +1,7 @@
 unit NES.MovieManager;
 
-{$mode Delphi}
+{$MODE DELPHI}
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
 
 interface
 

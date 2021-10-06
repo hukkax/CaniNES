@@ -1,5 +1,7 @@
 unit NES.Mapper_041;
 
+{$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+
 // Caltron41
 
 interface
