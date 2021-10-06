@@ -188,7 +188,7 @@ var
 begin
 	if not HasBattery then Exit;
 
-	SetLength(batteryContent, saveRamSize + Audio.AudioRamSize);
+	SetLength(batteryContent{%H-}, saveRamSize + Audio.AudioRamSize);
 	DoLoadBattery(battNormal, batteryContent, Length(batteryContent));
 
 	CopyMemory(@saveRam[0], @batteryContent[0], saveRamSize);
@@ -201,7 +201,7 @@ var
 begin
 	if not HasBattery then Exit;
 
-	SetLength(batteryContent, saveRamSize + Audio.AudioRamSize);
+	SetLength(batteryContent{%H-}, saveRamSize + Audio.AudioRamSize);
 
 	CopyMemory(@batteryContent[0], @saveRam[0], saveRamSize);
 	CopyMemory(@batteryContent[saveRamSize], Audio.GetInternalRam, Audio.AudioRamSize);

@@ -397,7 +397,7 @@ var
 	i: Integer;
 	NameArr: array of AnsiString;
 begin
-	SetLength(NameArr, aValueNames.Count);
+	SetLength(NameArr{%H-}, aValueNames.Count);
 	for i := 0 to aValueNames.Count-1 do
 		NameArr[i] := aValueNames[i];
 	SetInfo(aCaption, aID, aMin, aMax, NameArr,
@@ -415,7 +415,7 @@ begin
 	Sl := TStringList.Create;
 	FileSearch(Dir, Extensions, Sl);
 	Sl.Sort;
-	SetLength(Filelist, Sl.Count);
+	SetLength(Filelist{%H-}, Sl.Count);
 	for i := 0 to Sl.Count-1 do
 		Filelist[i] := ChangeFileExt(ExtractFilename(Sl[i]), '');
 

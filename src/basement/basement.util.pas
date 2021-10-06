@@ -183,7 +183,7 @@ end;
 
 function StringFromData(Data: PByte; Len: Word): AnsiString;
 begin
-	SetLength(Result, Len);
+	SetLength(Result{%H-}, Len);
 	if Len > 0 then
 		Move(Data, Result[1], Len);
 end;
@@ -252,7 +252,7 @@ var
 begin
 	if (aString = '') or (aMax < 0) then
 	begin
-		SetLength(Result, 0);
+		SetLength(Result{%H-}, 0);
 		Exit;
 	end;
 	if (aSeparator = '') then

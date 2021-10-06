@@ -99,11 +99,11 @@ procedure FillWord(var X; Count: Cardinal; Value: Longword);
 
 { An analogue of Move for 32 bit values }
 {$IFDEF USEMOVE}
-procedure MoveLongword(const Source; var Dest; Count: Integer); {$IFDEF USEINLINING} inline; {$ENDIF}
+procedure MoveLongword(const {%H-}Source; var Dest; Count: Integer); {$IFDEF USEINLINING} inline; {$ENDIF}
 {$ELSE}
 procedure MoveLongword(const Source; var Dest; Count: Integer);
 {$ENDIF}
-procedure MoveWord(const Source; var Dest; Count: Integer);
+procedure MoveWord(const {%H-}Source; var Dest; Count: Integer);
 
 
 { Returns value constrained to [Lo..Hi] range}

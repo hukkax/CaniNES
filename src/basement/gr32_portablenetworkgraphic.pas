@@ -1372,7 +1372,7 @@ var
   ZResult       : Integer;
   TempBuffer    : Pointer;
 begin
-  FillChar(ZStreamRecord, SizeOf(TZStreamRec), 0);
+  FillChar(ZStreamRecord{%H-}, SizeOf(TZStreamRec), 0);
 
   with ZStreamRecord do
   begin
@@ -1436,7 +1436,7 @@ var
   ZResult       : Integer;
   TempBuffer    : Pointer;
 begin
-  FillChar(ZStreamRecord, SizeOf(TZStreamRec), 0);
+  FillChar(ZStreamRecord{%H-}, SizeOf(TZStreamRec), 0);
 
   with ZStreamRecord do
   begin
@@ -1529,7 +1529,7 @@ begin
     Result := 0;
     while Position < Size do
     begin
-      Read(b, 1);
+      Read(b{%H-}, 1);
       Result := Result + b;
     end;
   end;
@@ -1552,7 +1552,7 @@ begin
     with FDataStream do
     begin
       Position := Index;
-      Read(Result, 1);
+      Read(Result{%H-}, 1);
     end
   else
     raise EPngError.CreateFmt(RCStrIndexOutOfBounds, [index]);
@@ -5012,7 +5012,7 @@ begin
 
   if Result then
   begin
-    Stream.Read(ChunkID, 4);
+    Stream.Read(ChunkID{%H-}, 4);
     Stream.Seek(-4, soFromCurrent);
     Result := ChunkID = '‰PNG';
   end;
@@ -5048,7 +5048,7 @@ begin
       raise EPngError.Create(RCStrNotAValidPNGFile);
 
     // read chunk ID
-    Read(ChunkName, 4);
+    Read(ChunkName{%H-}, 4);
     if ChunkName <> #$89+'PNG' then
       raise EPngError.Create(RCStrNotAValidPNGFile);
 

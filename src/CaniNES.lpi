@@ -71,7 +71,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx6060="True" idx6058="True" idx5024="True" idx3123="True"/>
+              <IgnoredMessages idx6060="True" idx6058="True" idx5062="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True" idx3124="True" idx3123="True"/>
             </CompilerMessages>
             <CustomOptions Value="-vm6060
 -OoFASTMATH
@@ -1097,7 +1097,7 @@
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx5091="True" idx5057="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True"/>
+        <IgnoredMessages idx5062="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True" idx3124="True" idx3123="True"/>
       </CompilerMessages>
       <CustomOptions Value="-vm6060
 -OoFASTMATH

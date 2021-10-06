@@ -153,7 +153,7 @@ begin
 	Len := Min(Len, Stream.Size-StartPos);
 	if Len > 0 then
 	begin
-		SetLength(Buf, Len);
+		SetLength(Buf{%H-}, Len);
 		Stream.Read(Buf[0], Len);
 		Result := CRC32(Result, @Buf[0], Len);
 		Stream.Seek(OrigPos, soBeginning);
@@ -192,7 +192,7 @@ var
 begin
 	Stream := TFileStream.Create(FileName, fmOpenRead);
 	try
-		SetLength(Result, Stream.Size);
+		SetLength(Result{%H-}, Stream.Size);
 		Stream.ReadBuffer(Pointer(Result)^, Length(Result));
 	finally
 		Stream.Free;

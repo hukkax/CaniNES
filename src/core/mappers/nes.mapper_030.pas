@@ -100,10 +100,11 @@ begin
 		SetPpuMemoryMapping($2000, $3FFF, TChrMemoryType.ChrRam, $6000, Ord(maReadWrite));
 	end;
 
+	orgPrgRom := prgRom;
+
 	if HasBattery then
 	begin
 		AddRegisterRange($8000, $FFFF, moRead);
-		orgPrgRom := prgRom;
 		ApplySaveData;
 	end;
 end;

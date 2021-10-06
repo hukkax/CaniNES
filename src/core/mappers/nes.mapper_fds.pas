@@ -853,7 +853,7 @@ var
 	i: Integer;
 begin
 	Done := False;
-	SetLength(Result, 0);
+	SetLength(Result{%H-}, 0);
 	Files := ListFiles(Configuration.Path + '*', False);
 
 	for Filename in Files do
@@ -983,7 +983,7 @@ begin
 
 	for i := 0 to numberOfSides-1 do
 	begin
-		SetLength(fdsDiskImage, 0);
+		SetLength(fdsDiskImage{%H-}, 0);
 
 		SetLength(diskHeaders[i], 56);
 		Move(romFile[fileOffset+1], diskHeaders[i][0], 56);

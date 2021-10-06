@@ -2088,7 +2088,7 @@ begin
 	MapXLoPos := MapX[0][0].Pos;
 	MapXHiPos := MapX[NewWidth-1][High(MapX[NewWidth-1])].Pos;
 
-	SetLength(verticalSum, MapXHiPos - MapXLoPos + 1);
+	SetLength(verticalSum{%H-}, MapXHiPos - MapXLoPos + 1);
 
 	for yb := 0 to NewHeight-1 do
 	begin
@@ -2210,7 +2210,7 @@ begin
 	yfactor := (bmp.Height - 1) / (newHeight - 1);
 	xfactor := (bmp.Width - 1)  / (newWidth - 1);
 
-	SetLength(yTab, newHeight);
+	SetLength(yTab{%H-}, newHeight);
 	for yb := 0 to newHeight - 1 do
 	begin
 		ysrc     := yb * yfactor;
@@ -2220,7 +2220,7 @@ begin
 		yTab[yb].factCorr := Round(FineInterpolation(factVert, ResampleFilter) * 256);
 	end;
 
-	SetLength(xTab, newWidth);
+	SetLength(xTab{%H-}, newWidth);
 	for xb := 0 to newWidth - 1 do
 	begin
 		xsrc     := xb * xfactor;

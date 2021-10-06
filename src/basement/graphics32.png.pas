@@ -33,6 +33,7 @@ unit Graphics32.PNG;
  * ***** END LICENSE BLOCK ***** *)
 
 {$WARN 4035 off : Mixing signed expressions and longwords gives a 64bit result}
+{$WARN 5091 off : Local variable "$1" of a managed type does not seem to be initialized}
 
 interface
 

@@ -158,7 +158,7 @@ begin
 			rec.Free;
 			// EOF, try to read truncate offset record if it exists
 			try
-				ipsFile.ReadBuffer(buffer[0], Length(buffer));
+				ipsFile.ReadBuffer({%H-}buffer[0], Length(buffer));
 			except
 			end;
 			if ipsFile.Position < ipsFile.Size then
