@@ -210,7 +210,7 @@ begin
 		// When we are certain this is a VRC2 game, only use the first bit for mirroring selection
 		if (not useHeuristics) and (variant >= VRC2a) and (variant <= VRC2c) then
 			mask := $01;
-		GenericChooseMirroringType(value);
+		GenericChooseMirroringType(value and mask);
 	end
 	else
 	if (variant >= VRC4a) and (address >= $9002) and (address <= $9003) then
