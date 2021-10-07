@@ -174,8 +174,8 @@ begin
 	Bookmarks := TBookmarkCollection.Create(ConfigPath + 'bookmarks.ini');
 
 	Framecounter := 0;
-	Controller[0] := Default(TStandardControllerState);
-	Controller[1] := Default(TStandardControllerState);
+	Controller[0].Value := 0;
+	Controller[1].Value := 0;
 
 	DefaultConfigItemCallback := OnSettingChange;
 
@@ -616,20 +616,23 @@ end;
 procedure TNESWindow.ROMLoaded;
 var
 	NewHz: Double;
+	NeedReinit: Boolean;
 	S: String;
 begin
 	Controller[0].Value := 0;
-	UpdateControllers;
+	Controller[1].Value := 0;
 	IgnoreStartButton := True;
+	UpdateControllers;
 
 	Menu.Show(False);
 
 	NewHz := Console.GetFPS;
+	NeedReinit := False;
 
 	if TAspectRatio(Configuration.Display.Window.AspectRatio) = arAuto then
 	begin
 		if GetAspectRatioWidthMultiplier <> Settings.AspectRatioWidthMultiplier then
-			ReinitWindow;
+			NeedReinit := True;
 	end;
 
 	if NewHz <> Settings.Framerate then
@@ -640,11 +643,14 @@ begin
 		begin
 			if Video.HaveVSync then S := 'VSync' else S := 'No VSync';
 			Log('Reinitializing video at %f Hz (%s)', [NewHz, S]);
-			ReinitWindow;
+			NeedReinit := True;
 		end;
 	end;
 
-	EmulationMode := NORMAL;
+	if NeedReinit then
+		ReinitWindow
+	else
+		UpdateMenus;
 
 	S := Format('%s (%s, mapper %d)',
 		[ExtractFilename(Console.LoadedFile), NESSystemNames[Console.System], Cartridge.nMapperID]);

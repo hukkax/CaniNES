@@ -1303,7 +1303,9 @@ begin
 	InitMapper;
 	InitMapper(RomData);
 
+	InvA13Audio.Free;
 	InvA13Audio := TAudioInterference.Create(channel_InvA13);
+	InvOE1Audio.Free;
 	InvOE1Audio := TAudioInterference.Create(channel_InvOE1);
 
 	LoadBattery; // Load battery data if present

@@ -832,7 +832,7 @@ begin
 		ppuOffset := 1;
 	end;
 
-	MasterClock := {%H-}cpuDivider + cpuOffset;
+	MasterClock := Word(cpuDivider + cpuOffset);
 
 	// The CPU takes some cycles before starting its execution after a reset/power up
 	for i := 1 to 8 do

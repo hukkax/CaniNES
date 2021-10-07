@@ -504,7 +504,9 @@ var
 begin
 	if not ACartridge.ImageValid then Exit;
 
+	{$IFDEF AUDIO}
 	APU.Stop;
+	{$ENDIF}
 
 	// Connects cartridge to both Main Bus and CPU Bus
 	Cartridge.Free;
@@ -513,17 +515,16 @@ begin
 
 	RewindManager.Stop;
 
-{
-log('[SHA1] '+SHA1Print(SHA1File(LoadedFile)));
-log('[MD5]  '+MD5Print(MD5File(LoadedFile)));
+	{
+	log('[SHA1] '+SHA1Print(SHA1File(LoadedFile)));
+	log('[MD5]  '+MD5Print(MD5File(LoadedFile)));
 
-ss := '';
-s := DecodeStringBase64('cefvdUpxbO1bMGoeW26TwQ==');
-for i := 1 to Length(s) do
-	ss := ss + IntToHex(Ord(s[i]),2);
-log('[MD5] '+ss);
-}
-
+	ss := '';
+	s := DecodeStringBase64('cefvdUpxbO1bMGoeW26TwQ==');
+	for i := 1 to Length(s) do
+		ss := ss + IntToHex(Ord(s[i]),2);
+	log('[MD5] '+ss);
+	}
 
 	// MRU
 	MRU.Clear; // transfer from settings
@@ -545,52 +546,9 @@ log('[MD5] '+ss);
 
 	SaveStateManager.UpdateStateAvailability;
 
-	// set model
-	if Configuration.Emulator.NESModel = nesAuto then
-	begin
-		System := Cartridge.RomData.Info.System;
-		case System of
-			TGameSystem.NES_PAL: Model := nesPAL;
-			TGameSystem.Dendy:   Model := nesDendy;
-			else                 Model := nesNTSC;
-		end
-	end
-	else
-	begin
-		Model := Configuration.Emulator.NESModel;
-		System := TGameSystem.Unknown; // fixme
-	end;
+	Reset(False, True);
 
-	Mapper.SetNesModel(Model);
-
-	APU.Settings := Configuration.Emulator.APU;
-	APU.SetNesModel(Model, True);
-
-	PPU.Settings := Configuration.Emulator.PPU;
-	{$IFDEF USE_NTSC_FILTER}
-	PPU.ConfigureNTSCFilter(Configuration.Display.NTSC);
-	{$ENDIF}
-	PPU.SetNesModel(Model);
-	PPU.ConnectCartridge(Cartridge);
-
-	if Cartridge.RomData.Info.DatabaseInfo.InputType <> CurrentControllerType then
-	begin
-		CurrentControllerType := Cartridge.RomData.Info.DatabaseInfo.InputType;
-		ControllerSetupChanged;
-	end;
-
-	MemoryManager.SetMapper(Mapper);
-	MemoryManager.RegisterIODevice(PPU);
-	MemoryManager.RegisterIODevice(APU);
-	MemoryManager.RegisterIODevice(Mapper);
-	MemoryManager.RegisterIODevice(ControlManager);
-
-	Mapper.Initialize(Cartridge.RomData);
-
-	Reset(False, False);
 	RewindManager.Initialize;
-
-	Window.UpdateMenus;
 end;
 
 procedure TConsole.ControllerSetupChanged;
@@ -602,33 +560,74 @@ begin
 	else
 		CT := CurrentControllerType;
 
-	if Assigned(ControlManager) then
-		ControlManager.Free;
+	ControlManager.Free;
 	ControlManager := TControlManager.Create('CTRL', CT);
+	MemoryManager.RegisterIODevice(ControlManager);
 
 	Window.ControllerSetupChanged;
 end;
 
 procedure TConsole.Reset(SoftReset: Boolean; InitMapper: Boolean = True);
 begin
-	if not GotCartridge then Exit;
+	if (not GotCartridge) or (Mapper = nil) then Exit;
 
 	{$IFDEF DEBUG}
-	//Log('Console.Reset: ' + SoftReset.ToString);
+	Log('Console.Reset: ' + BoolToStr(SoftReset, 'Soft', 'Hard'));
 	{$ENDIF}
+
+	// set model
+	Model := Configuration.Emulator.NESModel;
+
+	if Model = nesAuto then
+	begin
+		System := Cartridge.RomData.Info.System;
+		case System of
+			TGameSystem.NES_PAL: Model := nesPAL;
+			TGameSystem.Dendy:   Model := nesDendy;
+			else                 Model := nesNTSC;
+		end
+	end
+	else
+		System := TGameSystem.Unknown; // fixme
+
+	{$IFDEF AUDIO}
+	APU.Settings := Configuration.Emulator.APU;
+	APU.SetNesModel(Model, True);
+	{$ENDIF}
+
+	PPU.Settings := Configuration.Emulator.PPU;
+	PPU.SetNesModel(Model);
+	PPU.ConnectCartridge(Cartridge);
+
+	Mapper.SetNesModel(Model);
+	MemoryManager.SetMapper(Mapper);
+
+	{$IFDEF AUDIO}
+	MemoryManager.RegisterIODevice(APU);
+	{$ENDIF}
+	MemoryManager.RegisterIODevice(PPU);
+	MemoryManager.RegisterIODevice(Mapper);
+	MemoryManager.RegisterIODevice(ControlManager);
+
+	if Cartridge.RomData.Info.DatabaseInfo.InputType <> CurrentControllerType then
+	begin
+		CurrentControllerType := Cartridge.RomData.Info.DatabaseInfo.InputType;
+		ControllerSetupChanged;
+	end;
+
+	if (InitMapper) and (not SoftReset) then
+		Mapper.Initialize(Cartridge.RomData);
 
 	MovieManager.Reset;
 	MemoryManager.Reset(SoftReset);
+	ControlManager.Reset;
 	PPU.Reset;
 	{$IFDEF AUDIO}
 	APU.Reset(SoftReset);
 	{$ENDIF}
-
-	ControlManager.Reset;
-	if (InitMapper) and (not SoftReset) and Assigned(Mapper) then
-		Mapper.Initialize(Cartridge.RomData);
-
 	CPU.Reset(SoftReset, Model);
+
+	EmulationMode := NORMAL;
 end;
 
 procedure TConsole.InitializeRam(data: Pointer; length: Cardinal);
@@ -837,7 +836,9 @@ begin
 	CPU.LoadSnapshot;
 	PPU.LoadSnapshot;
 	MemoryManager.LoadSnapshot;
+	{$IFDEF AUDIO}
 	APU.LoadSnapshot;
+	{$ENDIF}
 	ControlManager.LoadSnapshot;
 	Mapper.LoadSnapshot;
 
@@ -861,7 +862,9 @@ begin
 	CPU.SaveSnapshot;
 	PPU.SaveSnapshot;
 	MemoryManager.SaveSnapshot;
+	{$IFDEF AUDIO}
 	APU.SaveSnapshot;
+	{$ENDIF}
 	ControlManager.SaveSnapshot;
 	Mapper.SaveSnapshot;
 end;
@@ -890,7 +893,9 @@ end;
 
 procedure TConsole.SetPaused(B: Boolean);
 begin
+	{$IFDEF AUDIO}
 	APU.Stop;
+	{$ENDIF}
 	OSD('');
 
 	if not B then
@@ -912,20 +917,27 @@ end;
 
 function TConsole.ToggleWAVRecording: Boolean;
 begin
+	{$IFDEF AUDIO}
 	if APU.WavRecording then
 		StopWAVRecording
 	else
 		StartWAVRecording;
 
 	Result := APU.WAVRecording;
+	{$ELSE}
+	Result := False;
+	{$ENDIF}
 end;
 
 function TConsole.StartWAVRecording: Boolean;
+{$IFDEF AUDIO}
 const
 	Ext = '.wav';
 var
 	Fn, Dir: String;
+{$ENDIF}
 begin
+	{$IFDEF AUDIO}
 	if APU.WavRecording then Exit(False);
 
 	if (not GotCartridge) or (LoadedFile.IsEmpty) then
@@ -946,16 +958,21 @@ begin
 		Message('Recording audio to ' + Fn + '.');
 		Window.UpdateMenus;
 	end;
+	{$ELSE}
+	Result := False;
+	{$ENDIF}
 end;
 
 procedure TConsole.StopWAVRecording;
 begin
+	{$IFDEF AUDIO}
 	if APU.WavRecording then
 	begin
 		APU.StopRecording;
 		Message('Audio recording stopped.');
 		Window.UpdateMenus;
 	end;
+	{$ENDIF}
 end;
 
 
