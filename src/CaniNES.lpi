@@ -757,9 +757,9 @@
         <UnitName Value="NES.Mapper_222"/>
       </Unit108>
       <Unit109>
-        <Filename Value="core/mappers/nes.mapper_132.pas"/>
+        <Filename Value="core/mappers/nes.mapper_txc.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="NES.Mapper_132"/>
+        <UnitName Value="NES.Mapper_TXC"/>
       </Unit109>
       <Unit110>
         <Filename Value="core/mappers/nes.txcchip.pas"/>

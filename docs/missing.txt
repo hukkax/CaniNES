@@ -39,8 +39,6 @@ CaniNES known nonworking ROMs
 143 Dancing Blocks (Asia) (Ja) (PAL) (Unl).nes
 143 Magical Mathematics (Asia) (Ja) (NTSC) (Unl).nes
 145 Sidewinder (Asia) (Ja) (Unl).nes
-147 Challenge of the Dragon (Asia) (Ja) (Sachen) (Unl).nes
-147 Chinese KungFu (Asia) (Ja) (Unl).nes
 176 Zhi Li Xiao Zhuang Yuan (Asia) (Unl).nes
 178 San Guo Zhong Lie Zhuan (Asia) (Unl).nes
 188 Karaoke Studio (Japan).nes

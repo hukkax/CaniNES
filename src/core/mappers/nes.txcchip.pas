@@ -29,7 +29,7 @@ type
 		function  Read: Byte;
 		procedure Write(addr: Word; value: Byte);
 
-		constructor Create(Is_Jv001: Boolean); overload;
+		constructor Create(Is_Jv001: Boolean);
 	end;
 
 implementation
@@ -47,8 +47,8 @@ begin
 	staging := 0;
 	output := 0;
 
-	increase := false;
-	yFlag := false;
+	increase := False;
+	yFlag := False;
 
 	isJv001 := is_Jv001;
 	mask   := IfThen(is_Jv001, $0F, $07);
@@ -86,10 +86,10 @@ end;
 
 procedure TTXCChip.Write(addr: Word; value: Byte);
 begin
-
 	if(addr < $8000) then
 	begin
 		case (addr and $E103) of
+
 			$4100:
 				if increase then
 					Inc(accumulator)
@@ -98,7 +98,7 @@ begin
 						(staging and mask)) xor (IfThen(invert, $FF, 0));
 
 			$4101:
-				invert := (value and $01) <> 0;
+				invert := Odd(value);
 
 			$4102:
 			begin
@@ -107,7 +107,8 @@ begin
 			end;
 
 			$4103:
-				increase := (value and $01) <> 0;
+				increase := Odd(value);
+
 		end;
 	end
 	else

@@ -1,7 +1,8 @@
-unit NES.Mapper_132;
+unit NES.Mapper_TXC;
 
 // Mapper 132: TXC22211A
-// Mapper 136: Sachen_136
+// Mapper 136: Sachen 3011
+// Mapper 147: Chinese Kungfu: 少林武者 (TC-011)
 // Mapper 172: TXC22211B
 // Mapper 173: TXC22211C
 // Mapper 036: TXC22000
@@ -13,7 +14,7 @@ uses
 	NES.TXCChip;
 
 type
-	TMapper_132 = class(TMapper)
+	TMapper_TXC = class(TMapper)
 	protected
 		TXC: TTXCChip;
 
@@ -34,26 +35,35 @@ type
 		destructor  Destroy; override;
 	end;
 
-	TMapper_136 = class(TMapper_132)
+	TMapper_132 = TMapper_TXC;
+
+	TMapper_136 = class(TMapper_TXC)
 	protected
 		function  ReadRegister(addr: Word): Byte; override;
 		procedure WriteRegister(addr: Word;  value: Byte); override;
 		procedure UpdateState; override;
 	end;
 
-	TMapper_172 = class(TMapper_132)
+	TMapper_147 = class(TMapper_TXC)
 	protected
 		function  ReadRegister(addr: Word): Byte; override;
 		procedure WriteRegister(addr: Word;  value: Byte); override;
 		procedure UpdateState; override;
 	end;
 
-	TMapper_173 = class(TMapper_132)
+	TMapper_172 = class(TMapper_TXC)
+	protected
+		function  ReadRegister(addr: Word): Byte; override;
+		procedure WriteRegister(addr: Word;  value: Byte); override;
+		procedure UpdateState; override;
+	end;
+
+	TMapper_173 = class(TMapper_TXC)
 	protected
 		procedure UpdateState; override;
 	end;
 
-	TMapper_036 = class(TMapper_132)
+	TMapper_036 = class(TMapper_TXC)
 	protected
 		chrBank: Byte;
 
@@ -75,27 +85,27 @@ uses
 
 { TMapper_132 }
 
-function TMapper_132.GetPRGPageSize: Word;       begin Result := $8000; end;
-function TMapper_132.GetCHRPageSize: Word;       begin Result := $2000; end;
-function TMapper_132.RegisterStartAddress: Word; begin Result := $8000; end;
-function TMapper_132.RegisterEndAddress: Word;   begin Result := $FFFF; end;
-function TMapper_132.AllowRegisterRead: Boolean; begin Result := True;  end;
+function TMapper_TXC.GetPRGPageSize: Word;       begin Result := $8000; end;
+function TMapper_TXC.GetCHRPageSize: Word;       begin Result := $2000; end;
+function TMapper_TXC.RegisterStartAddress: Word; begin Result := $8000; end;
+function TMapper_TXC.RegisterEndAddress: Word;   begin Result := $FFFF; end;
+function TMapper_TXC.AllowRegisterRead: Boolean; begin Result := True;  end;
 
-constructor TMapper_132.Create(cartridge: TCartridge);
+constructor TMapper_TXC.Create(cartridge: TCartridge);
 begin
 	inherited Create(cartridge);
 
-	TXC := TTXCChip.Create(False);
+	TXC := TTXCChip.Create(Self is TMapper_147);
 end;
 
-destructor TMapper_132.Destroy;
+destructor TMapper_TXC.Destroy;
 begin
 	TXC.Free;
 
 	inherited Destroy;
 end;
 
-procedure TMapper_132.InitMapper;
+procedure TMapper_TXC.InitMapper;
 begin
 	AddRegisterRange($4020, $5FFF, moAny);
 	RemoveRegisterRange($8000, $FFFF, moRead);
@@ -103,7 +113,7 @@ begin
 	SelectCHRPage(0, 0);
 end;
 
-function TMapper_132.ReadRegister(addr: Word): Byte;
+function TMapper_TXC.ReadRegister(addr: Word): Byte;
 var
 	openBus: Byte;
 begin
@@ -115,13 +125,13 @@ begin
 	UpdateState;
 end;
 
-procedure TMapper_132.WriteRegister(addr: Word; value: Byte);
+procedure TMapper_TXC.WriteRegister(addr: Word; value: Byte);
 begin
 	TXC.Write(addr, value and $0F);
 	UpdateState;
 end;
 
-procedure TMapper_132.UpdateState;
+procedure TMapper_TXC.UpdateState;
 begin
 	SelectPRGPage(0, (TXC.GetOutput shr 2) and $01);
 	SelectCHRPage(0, TXC.GetOutput and $03);
@@ -151,6 +161,39 @@ procedure TMapper_136.WriteRegister(addr: Word; value: Byte);
 begin
 	TXC.Write(addr, value and $3F);
 	UpdateState;
+end;
+
+
+{ TMapper_147 }
+
+procedure TMapper_147.UpdateState;
+var
+	o: Byte;
+begin
+	o := TXC.GetOutput;
+	SelectPRGPage(0, ((o and $20) shr 4) or (o and $01));
+	SelectCHRPage(0, (o and $1E) shr 1);
+end;
+
+function TMapper_147.ReadRegister(addr: Word): Byte;
+var
+	v: Byte;
+begin
+	if (addr and $103) = $100 then
+	begin
+		v := TXC.Read;
+		Result := ((v and $3F) shl 2) or ((v and $C0) shr 6);
+	end
+	else
+		Result := Console.MemoryManager.GetOpenBus;
+	UpdateState;
+end;
+
+procedure TMapper_147.WriteRegister(addr: Word; value: Byte);
+begin
+	TXC.Write(addr, ((value and $FC) shr 2) or ((value and $03) shl 6));
+	if addr >= $8000 then
+		UpdateState;
 end;
 
 

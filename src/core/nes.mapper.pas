@@ -248,7 +248,8 @@ uses
 	NES.Mapper_FDS,
 	NES.Mapper_VRC2_4,		NES.Mapper_VRC6,		NES.Mapper_VRC7,
 	NES.Mapper_KS202,		NES.Mapper_BandaiFCG,	NES.Mapper_Namco163,
-	NES.Mapper_Sachen,		NES.Mapper_Sachen8259,	NES.Mapper_JyCompany,
+	NES.Mapper_Sachen,		NES.Mapper_Sachen8259,	NES.Mapper_TXC,
+	NES.Mapper_JyCompany,
 
 	NES.Mapper_000, NES.Mapper_001, NES.Mapper_002, NES.Mapper_003, NES.Mapper_004,
 					NES.Mapper_005, NES.Mapper_006, NES.Mapper_007, NES.Mapper_009,
@@ -267,7 +268,6 @@ uses
 	NES.Mapper_093,
 	NES.Mapper_105,
 	NES.Mapper_111, NES.Mapper_112, NES.Mapper_117, NES.Mapper_118,
-	NES.Mapper_132,
 	NES.Mapper_140,
 	NES.Mapper_150, NES.Mapper_152, NES.Mapper_156,
 	NES.Mapper_168,
@@ -387,14 +387,15 @@ begin
 		121: Result := TMapper_121;			// MMC3 variant
 		132: Result := TMapper_132; 		// TXC Corporation TXC22211A
 		133: Result := TMapper_133; 		// Sachen
-		136: Result := TMapper_136; 		// Sachen_136
-		137: Result := TMapper_137; 		// Sachen8259D
-		138: Result := TMapper_138; 		// Sachen8259B
-		139: Result := TMapper_139; 		// Sachen8259C
+		136: Result := TMapper_136; 		// Sachen 3011
+		137: Result := TMapper_137; 		// Sachen 8259D
+		138: Result := TMapper_138; 		// Sachen 8259B
+		139: Result := TMapper_139; 		// Sachen 8259C
 		140: Result := TMapper_140; 		// Jaleco JF-11/JF-14
 		141: Result := TMapper_141; 		// Sachen8259A
 		142: Result := TMapper_KS202; 		// Kaiser KS202
 		144: Result := TMapper_011; 		// Color Dreams
+		147: Result := TMapper_147; 		// Sachen TC-011
 		148: Result := TMapper_148; 		// Sachen
 		149: Result := TMapper_149; 		// Sachen
 		150: Result := TMapper_150; 		// Sachen SA-015
