@@ -2,8 +2,12 @@
 CaniNES TODO
 =============================================================================
 
+Code:
+- Menubar handling needs simplification, code is too hairy
+- A general widget engine wouldn't hurt, could use one for Basement anyway
+
 Bugs:
-- ?
+- Small issues with menubar toggling
 
 Mappers:
 - Missing a number of uncommon Asian mappers that Mesen supports
@@ -12,19 +16,20 @@ Mappers:
 - VRC7 OPLL audio implementation has an unidentified bug that might cause 
   noisy audio on occasion
 
-Missing features:
-- Manually change/turn FDS disks
-- NSF player
-- Patches in other formats than IPS
-- Manual patching of ROMs; only automatic for now
-- Support for more exotic hardware such as paddles/mice, only Zapper
-- Support for NES-based arcade machines
+Missing features to be possibly implemented:
 - Screenshotting
-- Movie capture
+- Manually change/turn FDS disks
+- Manual patching of ROMs; only automatic for now
+- Support for more exotic hardware such as paddles/mice
 
 No plans to implement:
-- Savestates are incompatible with Mesen
 - All the debugging functionality from Mesen (no point in replicating)
+- Savestates are incompatible with Mesen
+- Savestates not supported in movies
+- Non-MMO movie playback tends to desync (in Mesen too)
+- Movie capture
+- NSF player
 - HD pack support
 - Video recording
-- FCEU movie playback tends to desync (in Mesen too, probably unfixable)
+- Patches in other formats than IPS
+- Support for NES-based arcade machines
