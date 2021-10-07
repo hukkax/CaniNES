@@ -211,7 +211,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="173">
+    <Units Count="174">
       <Unit0>
         <Filename Value="CaniNES.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1076,6 +1076,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="MenuPage.AboutDialog"/>
       </Unit172>
+      <Unit173>
+        <Filename Value="core/mappers/nes.mapper_082.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_082"/>
+      </Unit173>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

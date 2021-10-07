@@ -263,7 +263,7 @@ uses
 					NES.Mapper_066, NES.Mapper_067, NES.Mapper_068, NES.Mapper_069,
 	NES.Mapper_071, NES.Mapper_072, NES.Mapper_073, NES.Mapper_075,
 					NES.Mapper_078, NES.Mapper_079,
-	NES.Mapper_080, NES.Mapper_083, NES.Mapper_086, NES.Mapper_087,
+	NES.Mapper_080, NES.Mapper_082, NES.Mapper_083, NES.Mapper_086, NES.Mapper_087,
 	NES.Mapper_093,
 	NES.Mapper_105,
 	NES.Mapper_111, NES.Mapper_112, NES.Mapper_117, NES.Mapper_118,
@@ -363,6 +363,7 @@ begin
 		78:  Result := TMapper_078; 		// Jaleco JF-16
 		79:  Result := TMapper_079; 		// NINA-03/NINA-06
 		80:  Result := TMapper_080; 		// Taito X1005
+		82:  Result := TMapper_082; 		// Taito X1017
 		83:  Result := TMapper_083; 		// Cony/Yoko
 		85:  Result := TMapper_VRC7; 		// VRC7
 		86:  Result := TMapper_086; 		// Jaleco JF-13
@@ -405,7 +406,7 @@ begin
 		158: Result := TMapper_158; 		// Tengen 800037
 		159: Result := TMapper_BandaiFCG; 	// Bandai FCG
 		168: Result := TMapper_168; 		// Racermate
-		172: Result := TMapper_172; 		// TXC Corporation TXC22211B
+		172: Result := TMapper_172; 		// TXC Corporation TXC22211B !!! verify init
 		173: Result := TMapper_173; 		// TXC Corporation TXC22211C
 		177: Result := TMapper_177; 		// Hénggé Diànzǐ
 		180: Result := TMapper_180; 		// UnRom_180

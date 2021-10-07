@@ -30,10 +30,6 @@ CaniNES known nonworking ROMs
 [Unimplemented in CaniNES]
 
 077 Napoleon Senki (Japan).nes
-082 Kyuukyoku Harikiri Koushien (Japan).nes
-082 Kyuukyoku Harikiri Stadium - Heisei Gannen Ban (Japan).nes
-082 Kyuukyoku Harikiri Stadium III (Japan).nes
-082 SD Keiji - Blader (Japan).nes
 089 Tenka no Goikenban - Mito Koumon (Japan).nes
 094 Senjou no Ookami (Japan).nes
 096 Oeka Kids - Anpanman no Hiragana Daisuki (Japan).nes
