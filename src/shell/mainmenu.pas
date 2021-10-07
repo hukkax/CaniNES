@@ -28,7 +28,8 @@ uses
 	MenuPage.BindingsEditor,
 	MenuPage.MRUBrowser,
 	MenuPage.BookmarkBrowser,
-	MenuPage.DebugLog;
+	MenuPage.DebugLog,
+	MenuPage.AboutDialog;
 
 // ============================================================================
 // Main menu
@@ -106,6 +107,9 @@ begin
 
 			TCartInfoBrowser.Create(
 				AddPage('Cart Info', 'Cartridge Information', MainPage));
+
+			TAboutDialog.Create(
+				AddPage('About', 'About CaniNES', MainPage));
 
 			TCheatBrowser.Create(
 				AddPage('Cheats', 'Cheat Browser', MainPage));

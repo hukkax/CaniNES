@@ -32,9 +32,15 @@
         <Resource_9 FileName="res\logo.png" Type="RCDATA" ResourceName="LOGO"/>
       </Resources>
     </General>
+    <MacroValues Count="1">
+      <Macro1 Name="LCLWidgetType" Value="nogui"/>
+    </MacroValues>
     <BuildModes Count="4">
       <Item1 Name="Release-32bit" Default="True"/>
       <Item2 Name="Release-64bit">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -53,7 +59,6 @@
           </Parsing>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
-            <TargetProcessor Value="ATHLON64"/>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="win64"/>
           </CodeGeneration>
@@ -84,8 +89,9 @@
 -OoCSE
 -OoUSELOADMODIFYSTORE
 -OoLOOPUNROLL
--OpCOREAVX
 -CfAVX
+-CpCOREAVX
+-OpCOREAVX
 -Si
 -Sv
 -dAUDIO"/>
@@ -96,6 +102,9 @@
         </CompilerOptions>
       </Item2>
       <Item3 Name="Debug">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -140,6 +149,9 @@
         </CompilerOptions>
       </Item3>
       <Item4 Name="Debug64">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -182,6 +194,9 @@
           </Other>
         </CompilerOptions>
       </Item4>
+      <SharedMatrixOptions Count="1">
+        <Item1 ID="273601247289" Modes="Release-32bit,Release-64bit,Debug,Debug64" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+      </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -196,7 +211,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="172">
+    <Units Count="173">
       <Unit0>
         <Filename Value="CaniNES.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1056,6 +1071,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Graphics32.FreeType"/>
       </Unit171>
+      <Unit172>
+        <Filename Value="shell/menupage.aboutdialog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.AboutDialog"/>
+      </Unit172>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

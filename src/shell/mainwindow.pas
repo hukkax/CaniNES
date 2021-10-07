@@ -1268,13 +1268,12 @@ begin
 	{Help
 		About CaniNES
 	}
-{
 	Item := Root.AddItem('&Help');
 	with Item.AddSubMenu(0) do
 	begin
-		AddItem('&About CaniNES...');
+		AddItem('&About CaniNES'+Dots, actShowPage, 'About');
 	end;
-}
+
 end;
 
 
