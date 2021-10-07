@@ -255,7 +255,7 @@ uses
 	NES.Mapper_010, NES.Mapper_011, NES.Mapper_013, NES.Mapper_015, NES.Mapper_018,
 	NES.Mapper_028,
 	NES.Mapper_030, NES.Mapper_032, NES.Mapper_033, NES.Mapper_034,
-					NES.Mapper_036, NES.Mapper_037, NES.Mapper_038,
+					NES.Mapper_037, NES.Mapper_038,
 	NES.Mapper_040, NES.Mapper_041, NES.Mapper_042, NES.Mapper_043,
 					NES.Mapper_046, NES.Mapper_048,
 	NES.Mapper_050, NES.Mapper_053, NES.Mapper_057, NES.Mapper_058, NES.Mapper_059,
@@ -387,6 +387,7 @@ begin
 		121: Result := TMapper_121;			// MMC3 variant
 		132: Result := TMapper_132; 		// TXC Corporation TXC22211A
 		133: Result := TMapper_133; 		// Sachen
+		136: Result := TMapper_136; 		// Sachen_136
 		137: Result := TMapper_137; 		// Sachen8259D
 		138: Result := TMapper_138; 		// Sachen8259B
 		139: Result := TMapper_139; 		// Sachen8259C

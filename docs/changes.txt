@@ -1,8 +1,11 @@
 =============================================================================
 Changelog
 =============================================================================
+2021-10-07:
+- Implemented mappers 082, 136
+
 2021-09-30:
-- Added a menubar to the window (work in progress)
+- Added a menubar to the window
 
 2021-09-22:
 - Initial release on GitHub

@@ -1,8 +1,10 @@
 unit NES.Mapper_132;
 
 // Mapper 132: TXC22211A
+// Mapper 136: Sachen_136
 // Mapper 172: TXC22211B
 // Mapper 173: TXC22211C
+// Mapper 036: TXC22000
 
 interface
 
@@ -32,6 +34,13 @@ type
 		destructor  Destroy; override;
 	end;
 
+	TMapper_136 = class(TMapper_132)
+	protected
+		function  ReadRegister(addr: Word): Byte; override;
+		procedure WriteRegister(addr: Word;  value: Byte); override;
+		procedure UpdateState; override;
+	end;
+
 	TMapper_172 = class(TMapper_132)
 	protected
 		function  ReadRegister(addr: Word): Byte; override;
@@ -43,6 +52,20 @@ type
 	protected
 		procedure UpdateState; override;
 	end;
+
+	TMapper_036 = class(TMapper_132)
+	protected
+		chrBank: Byte;
+
+		function  ReadRegister(addr: Word): Byte; override;
+		procedure WriteRegister(addr: Word;  value: Byte); override;
+
+		procedure InitMapper; override;
+		procedure UpdateState; override;
+	public
+		constructor Create(cartridge: TCartridge); override;
+	end;
+
 
 implementation
 
@@ -86,7 +109,7 @@ var
 begin
 	openBus := Console.MemoryManager.GetOpenBus;
 	if (addr and $103) = $100 then
-		Result := (openBus and $F0) or (txc.Read and $0F)
+		Result := (openBus and $F0) or (TXC.Read and $0F)
 	else
 		Result := openBus;
 	UpdateState;
@@ -94,14 +117,40 @@ end;
 
 procedure TMapper_132.WriteRegister(addr: Word; value: Byte);
 begin
-	txc.Write(addr, value and $0F);
+	TXC.Write(addr, value and $0F);
 	UpdateState;
 end;
 
 procedure TMapper_132.UpdateState;
 begin
-	SelectPRGPage(0, (txc.GetOutput shr 2) and $01);
-	SelectCHRPage(0, txc.GetOutput and $03);
+	SelectPRGPage(0, (TXC.GetOutput shr 2) and $01);
+	SelectCHRPage(0, TXC.GetOutput and $03);
+end;
+
+
+{ TMapper_136 }
+
+procedure TMapper_136.UpdateState;
+begin
+	SelectCHRPage(0, TXC.GetOutput);
+end;
+
+function TMapper_136.ReadRegister(addr: Word): Byte;
+var
+	openBus: Byte;
+begin
+	openBus := Console.MemoryManager.GetOpenBus;
+	if (addr and $103) = $100 then
+		Result := (openBus and $C0) or (TXC.Read and $3F)
+	else
+		Result := openBus;
+	UpdateState;
+end;
+
+procedure TMapper_136.WriteRegister(addr: Word; value: Byte);
+begin
+	TXC.Write(addr, value and $3F);
+	UpdateState;
 end;
 
 
@@ -120,7 +169,7 @@ var
 begin
 	openBus := Console.MemoryManager.GetOpenBus;
 	if (addr and $103) = $100 then
-		Result := (openBus and $C0) or ConvertValue(txc.Read)
+		Result := (openBus and $C0) or ConvertValue(TXC.Read)
 	else
 		Result := openBus;
 	UpdateState;
@@ -128,15 +177,15 @@ end;
 
 procedure TMapper_172.WriteRegister(addr: Word; value: Byte);
 begin
-	txc.Write(addr, ConvertValue(value));
+	TXC.Write(addr, ConvertValue(value));
 	if addr >= $8000 then
 		UpdateState;
 end;
 
 procedure TMapper_172.UpdateState;
 begin
-	SelectCHRPage(0, txc.GetOutput);
-	ApplyMirroringType(txc.GetInvertFlag, MIRROR_VERTICAL, MIRROR_HORIZONTAL);
+	SelectCHRPage(0, TXC.GetOutput);
+	ApplyMirroringType(TXC.GetInvertFlag, MIRROR_VERTICAL, MIRROR_HORIZONTAL);
 end;
 
 
@@ -146,14 +195,61 @@ procedure TMapper_173.UpdateState;
 begin
 	SelectPRGPage(0, 0);
 	if chrRomSize > $2000 then
-		SelectCHRPage(0, (txc.GetOutput and $01) or (IfThen(txc.GetY, $02, 0)) or ((txc.GetOutput and $02) shl 1))
+		SelectCHRPage(0, (TXC.GetOutput and $01) or
+			(IfThen(TXC.GetY, $02, 0)) or ((TXC.GetOutput and $02) shl 1))
 	else
 	begin
-		if txc.GetY then
+		if TXC.GetY then
 			SelectCHRPage(0, 0)
 		else
 			RemovePpuMemoryMapping(0, $1FFF);
 	end;
 end;
+
+
+{ TMapper_036 }
+
+constructor TMapper_036.Create(cartridge: TCartridge);
+begin
+	inherited Create(cartridge);
+
+	RegisterProperty(8, @chrBank);
+end;
+
+procedure TMapper_036.InitMapper;
+begin
+	AddRegisterRange($4100, $5FFF, moAny);
+	RemoveRegisterRange($8000, $FFFF, moRead);
+	chrBank := 0;
+	SelectPRGPage(0, 0);
+	SelectCHRPage(0, 0);
+end;
+
+function TMapper_036.ReadRegister(addr: Word): Byte;
+var
+	openBus: Byte;
+begin
+	openBus := Console.MemoryManager.GetOpenBus;
+	if (addr and $103) = $100 then
+		Result := (openBus and $CF) or ((TXC.Read shl 4) and $30)
+	else
+		Result := openBus;
+	UpdateState;
+end;
+
+procedure TMapper_036.WriteRegister(addr: Word; value: Byte);
+begin
+	if (addr and $F200) = $4200 then
+		chrBank := value;
+	TXC.Write(addr, (value shr 4) and $03);
+	UpdateState;
+end;
+
+procedure TMapper_036.UpdateState;
+begin
+	SelectPRGPage(0, TXC.GetOutput and $03);
+	SelectCHRPage(0, chrBank);
+end;
+
 
 end.
