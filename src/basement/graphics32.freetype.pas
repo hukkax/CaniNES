@@ -1430,7 +1430,7 @@ begin
     begin
       vector.x := 0;
       vector.y := -round(LineFullHeight * 64);
-      TT_Transform_Vector(vector.x, vector.y, txmatrix);
+      TT_Transform_Vector(vector.x, vector.y, txmatrix{%H-});
       x += vector.x / 64;
       y -= vector.y / 64;
     end else
