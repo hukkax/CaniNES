@@ -95,7 +95,7 @@ constructor TMapper_TXC.Create(cartridge: TCartridge);
 begin
 	inherited Create(cartridge);
 
-	TXC := TTXCChip.Create(Self is TMapper_147);
+	TXC := TTXCChip.Create((Self is TMapper_147) or (Self is TMapper_172));
 end;
 
 destructor TMapper_TXC.Destroy;

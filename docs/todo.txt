@@ -11,10 +11,6 @@ Mappers:
 - Missing 24C01/24C02 EEPROM implementations used by Bandai FCG mapper
 - VRC7 OPLL audio implementation has an unidentified bug that might cause 
   noisy audio on occasion
-- 172 Venice Beach Volleyball (Asia) (En) (Super Mega) (Unl) has
-  initialization problems on first run; reset fixes it;
-  036 Volley Ball (Spain) (Gluk Video) (Unl) has no problem.
-  Works fine in Mesen, mapper seems fine, need to check console init code
 
 Missing features:
 - Manually change/turn FDS disks
