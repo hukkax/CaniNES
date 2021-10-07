@@ -36,8 +36,6 @@ CaniNES known nonworking ROMs
 096 Oeka Kids - Anpanman to Oekaki Shiyou!! (Japan).nes
 097 Kaiketsu Yancha Maru (Japan).nes
 116 AV Mei Shao Nv Zhan Shi (Asia) (Unl).nes
-143 Dancing Blocks (Asia) (Ja) (PAL) (Unl).nes
-143 Magical Mathematics (Asia) (Ja) (NTSC) (Unl).nes
 145 Sidewinder (Asia) (Ja) (Unl).nes
 176 Zhi Li Xiao Zhuang Yuan (Asia) (Unl).nes
 178 San Guo Zhong Lie Zhuan (Asia) (Unl).nes

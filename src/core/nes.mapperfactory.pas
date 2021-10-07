@@ -160,8 +160,9 @@ begin
 		138: Result := TMapper_138; 		// Sachen 8259B
 		139: Result := TMapper_139; 		// Sachen 8259C
 		140: Result := TMapper_140; 		// Jaleco JF-11/JF-14
-		141: Result := TMapper_141; 		// Sachen8259A
+		141: Result := TMapper_141; 		// Sachen 8259A
 		142: Result := TMapper_KS202; 		// Kaiser KS202
+		143: Result := TMapper_143; 		// Sachen NROM
 		144: Result := TMapper_011; 		// Color Dreams
 		147: Result := TMapper_147; 		// Sachen TC-011
 		148: Result := TMapper_148; 		// Sachen
@@ -176,7 +177,7 @@ begin
 		158: Result := TMapper_158; 		// Tengen 800037
 		159: Result := TMapper_BandaiFCG; 	// Bandai FCG
 		168: Result := TMapper_168; 		// Racermate
-		172: Result := TMapper_172; 		// TXC Corporation TXC22211B !!! verify init
+		172: Result := TMapper_172; 		// TXC Corporation TXC22211B
 		173: Result := TMapper_173; 		// TXC Corporation TXC22211C
 		177: Result := TMapper_177; 		// Hénggé Diànzǐ
 		180: Result := TMapper_180; 		// UnRom_180
