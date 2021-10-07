@@ -73,6 +73,7 @@ implementation
 
 uses
 	Basement.Util, Math, SysUtils,
+	{$IFDEF DEBUG}TextOutput,{$ENDIF}
 	NES.Types, NES.Console, NES.CPU;
 
 
