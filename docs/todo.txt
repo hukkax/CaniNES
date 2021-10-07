@@ -3,7 +3,7 @@ CaniNES TODO
 =============================================================================
 
 Bugs:
-- Investigate: had noise/drums channel cutting off in Duck Tales (U) once
+- ?
 
 Mappers:
 - Missing a number of uncommon Asian mappers that Mesen supports
@@ -17,7 +17,6 @@ Missing features:
 - NSF player
 - Patches in other formats than IPS
 - Manual patching of ROMs; only automatic for now
-- Support for loading ROMs from inside archives
 - Support for more exotic hardware such as paddles/mice, only Zapper
 - Support for NES-based arcade machines
 - Screenshotting
