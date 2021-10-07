@@ -43,7 +43,7 @@ implementation
 uses
 	Classes, TextOutput, IPSpatcher,
 	NES.Config, NES.Console, NES.Database, NES.ROM.Header,
-	NES.Mapper, NES.Mapper_FDS;
+	NES.Mapper, NES.MapperFactory, NES.Mapper_FDS;
 
 
 function GetMapperID(const Filename: String): Integer;

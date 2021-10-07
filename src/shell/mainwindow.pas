@@ -421,11 +421,7 @@ begin
 
 		actROMLoadPrevious:
 			if Pressed then
-			if Configuration.Application.LastROMFile <> '' then
-			begin
 				Console.LoadROM(Configuration.Application.LastROMFile);
-				EmulationMode := NORMAL;
-			end;
 
 		actROMLoadFromMenu:
 			if Pressed then // this was called via the Menubar

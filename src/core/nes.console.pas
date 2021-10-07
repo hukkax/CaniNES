@@ -101,6 +101,7 @@ type
 		destructor  Destroy; override;
 
 		function  FindROMFile(Filename: String): String;
+		procedure AddFileToMRU(const Filename: String);
 
 		function  LoadROM(Filename: String): Boolean;
 		procedure InsertCartridge(const ACartridge: TCartridge);
@@ -381,6 +382,32 @@ begin
 	Result := '';
 end;
 
+procedure TConsole.AddFileToMRU(const Filename: String);
+var
+	i: Integer;
+begin
+	MRU.Clear; // transfer from settings
+
+	for i := 0 to MRUcount-1 do
+	begin
+		if Configuration.Application.MRU[i] <> '' then
+			MRU.Add(Configuration.Application.MRU[i]);
+		Configuration.Application.MRU[i] := '';
+	end;
+
+	i := MRU.IndexOf(Filename);
+	if i >= 0 then
+		MRU.Move(i, 0)
+	else
+		MRU.Insert(0, Filename);
+
+	while MRU.Count > MRUcount do
+		MRU.Delete(MRU.Count - 1);
+
+	for i := 0 to MRU.Count-1 do // transfer to settings
+		Configuration.Application.MRU[i] := MRU[i];
+end;
+
 function TConsole.LoadROM(Filename: String): Boolean;
 var
 	TempCartridge: TCartridge;
@@ -389,6 +416,8 @@ var
 	ZipFile: TUnZipperEx;
 	FileData, IPSData: TBytes;
 begin
+	if Filename.IsEmpty then Exit;
+
 	LogVerbose('Console.LoadROM: ' + Filename);
 
 	ZP.GetParts(Filename);
@@ -453,18 +482,11 @@ begin
 	if (GotCartridge) and (Configuration.Application.RestoreROMState) then
 		SaveState(True);
 
-//	Log('Load ROM: ' + Filename);
-
 	// Ensure we save any battery file before loading a new game
 	if Assigned(Mapper) then
 		Mapper.SaveBattery;
 
-	ControlManager.Reset;
-
-	Randomize;
-
 	TempCartridge := TCartridge.Create(Filename, FileData, IPSData);
-
 	Result := TempCartridge.ImageValid;
 
 	// Insert into NES
@@ -476,9 +498,9 @@ begin
 		if not MovieGotROM then
 			Configuration.Application.LastROMFile := LoadedFile;
 
-		InsertCartridge(TempCartridge);
+		AddFileToMRU(LoadedFile);
 
-		Window.ROMLoaded;
+		InsertCartridge(TempCartridge);
 
 		if Configuration.Application.RestoreROMState then
 			LoadState(True);
@@ -498,9 +520,6 @@ begin
 end;
 
 procedure TConsole.InsertCartridge(const ACartridge: TCartridge);
-var
-	i: Integer;
-//ss,s: String;
 begin
 	if not ACartridge.ImageValid then Exit;
 
@@ -508,10 +527,12 @@ begin
 	APU.Stop;
 	{$ENDIF}
 
-	// Connects cartridge to both Main Bus and CPU Bus
-	Cartridge.Free;
-	Cartridge := ACartridge;
-	GotCartridge := True;
+	if Cartridge <> ACartridge then
+	begin
+		Cartridge.Free;
+		Cartridge := ACartridge;
+		GotCartridge := True;
+	end;
 
 	RewindManager.Stop;
 
@@ -526,29 +547,15 @@ begin
 	log('[MD5] '+ss);
 	}
 
-	// MRU
-	MRU.Clear; // transfer from settings
-	for i := 0 to MRUcount-1 do
-	begin
-		if Configuration.Application.MRU[i] <> '' then
-			MRU.Add(Configuration.Application.MRU[i]);
-		Configuration.Application.MRU[i] := '';
-	end;
-	i := MRU.IndexOf(LoadedFile);
-	if i >= 0 then
-		MRU.Move(i, 0)
-	else
-		MRU.Insert(0, LoadedFile);
-	while MRU.Count > MRUcount do
-		MRU.Delete(MRU.Count - 1);
-	for i := 0 to MRU.Count-1 do // transfer to settings
-		Configuration.Application.MRU[i] := MRU[i];
-
 	SaveStateManager.UpdateStateAvailability;
+	ControlManager.Reset;
+	Randomize;
 
 	Reset(False, True);
 
 	RewindManager.Initialize;
+
+	Window.ROMLoaded;
 end;
 
 procedure TConsole.ControllerSetupChanged;
@@ -575,20 +582,25 @@ begin
 	Log('Console.Reset: ' + BoolToStr(SoftReset, 'Soft', 'Hard'));
 	{$ENDIF}
 
-	// set model
 	Model := Configuration.Emulator.NESModel;
+	System := TGameSystem.Unknown;
+	case Model of
+		nesNTSC:  System := TGameSystem.NES_NTSC;
+		nesPAL:   System := TGameSystem.NES_PAL;
+		nesDendy: System := TGameSystem.Dendy;
+		nesAuto:
+		begin
+			System := Cartridge.RomData.Info.System;
+			case System of
+				TGameSystem.NES_PAL: Model := nesPAL;
+				TGameSystem.Dendy:   Model := nesDendy;
+				else                 Model := nesNTSC;
+			end;
+		end;
+	end;
 
-	if Model = nesAuto then
-	begin
-		System := Cartridge.RomData.Info.System;
-		case System of
-			TGameSystem.NES_PAL: Model := nesPAL;
-			TGameSystem.Dendy:   Model := nesDendy;
-			else                 Model := nesNTSC;
-		end
-	end
-	else
-		System := TGameSystem.Unknown; // fixme
+	Mapper.SetNesModel(Model);
+	MemoryManager.SetMapper(Mapper);
 
 	{$IFDEF AUDIO}
 	APU.Settings := Configuration.Emulator.APU;
@@ -598,9 +610,6 @@ begin
 	PPU.Settings := Configuration.Emulator.PPU;
 	PPU.SetNesModel(Model);
 	PPU.ConnectCartridge(Cartridge);
-
-	Mapper.SetNesModel(Model);
-	MemoryManager.SetMapper(Mapper);
 
 	{$IFDEF AUDIO}
 	MemoryManager.RegisterIODevice(APU);

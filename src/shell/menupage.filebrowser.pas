@@ -37,7 +37,7 @@ implementation
 
 uses
 	MainWindow, MainMenu, InputBindings, Basement.Renderer.Overlay,
-	NES.Config, NES.Console, NES.Cartridge, NES.Mapper,
+	NES.Config, NES.Console, NES.Cartridge, NES.Mapper, NES.MapperFactory,
 	{$IFDEF WINDOWS}Windows,{$ENDIF}
 	Logging, Math, FileUtil,
 	Basement.UnZip,
