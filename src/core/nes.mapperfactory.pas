@@ -34,7 +34,7 @@ uses
 	NES.Mapper_071, NES.Mapper_072, NES.Mapper_073, NES.Mapper_075,
 					NES.Mapper_078, NES.Mapper_079,
 	NES.Mapper_080, NES.Mapper_082, NES.Mapper_083, NES.Mapper_086, NES.Mapper_087,
-	NES.Mapper_093,
+	NES.Mapper_093, NES.Mapper_096,
 	NES.Mapper_105,
 	NES.Mapper_111, NES.Mapper_112, NES.Mapper_117, NES.Mapper_118,
 	NES.Mapper_140,
@@ -44,6 +44,7 @@ uses
 	NES.Mapper_180,	NES.Mapper_184,
 	NES.Mapper_190, NES.Mapper_193,
 	NES.Mapper_206,
+	NES.Mapper_216,
 	NES.Mapper_222, NES.Mapper_225,
 					NES.Mapper_226, NES.Mapper_227, NES.Mapper_228, NES.Mapper_229,
 	NES.Mapper_230, NES.Mapper_231, NES.Mapper_232, NES.Mapper_234, NES.Mapper_235,
@@ -142,6 +143,7 @@ begin
 		92:  Result := TMapper_092; 		// Jaleco JF-19
 		93:  Result := TMapper_093; 		// Sunsoft
 		95:  Result := TMapper_095; 		// Namcot 118 variant
+		96:  Result := TMapper_096; 		// Oeka Kids
 		101: Result := TMapper_101;			// Jaleco JF-xx
 		105: Result := TMapper_105; 		// MMC1_105
 		111: Result := TMapper_111; 		// GTROM/Cheapocabra
@@ -193,6 +195,7 @@ begin
 		194: Result := TMapper_004_ChrRam; 	// MMC3 variant
 		195: Result := TMapper_004_ChrRam; 	// MMC3 variant
 		206: Result := TMapper_206; 		// Namcot 118
+		216: Result := TMapper_216; 		// Various Russian Dendy games
 		207: Result := TMapper_207; 		// Taito X1005
 		209: Result := TMapper_209; 		// JyCompany
 		210: Result := TMapper_Namco163; 	// Namco 163
