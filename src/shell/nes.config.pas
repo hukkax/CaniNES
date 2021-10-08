@@ -116,6 +116,7 @@ type
 		ScanlinesEnabled:       Boolean;
 		ScanlineBloom:          Double;
 		DotCrawlSpeed:          Double;
+		NoiseAmount:            Byte;
 		HorizontalBlur:         Byte;
 		ScanlineBrightness:     Double;
 		MaskBrightness:         Double;
@@ -564,8 +565,10 @@ begin
 	.SetInfo('Brightness/sharpness modifier', cfgRendererCRT, 0.0, 1.0, 0.1);
 	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,      60)
 	.SetInfo('Extra contrast', cfgRendererCRT);
+	Cfg.AddByte(Sect,    'NoiseAmount',        @Display.CRT.NoiseAmount,        0)
+	.SetInfo('Noise amount', cfgRendererCRT, 0, 99, [], nil, '%d%%');
 	Cfg.AddByte(Sect,    'HorizontalBlur',     @Display.CRT.HorizontalBlur,     1)
-	.SetInfo('Horizontal blurring', cfgRendererCRT);
+	.SetInfo('Horizontal blurring', cfgRendererCRT, 0, 6, []);
 
 	// -------------------------------------------------------
 

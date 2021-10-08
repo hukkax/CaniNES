@@ -51,18 +51,17 @@ end;
 
 procedure TNTSCRenderer.Render;
 begin
-	if Enabled then
-	begin
-		SrcRect.x := (Window.OverscanRect.Left + 1) * 3;
-		SrcRect.y := Window.OverscanRect.Top;
-		SrcRect.w := FrameBuffer.Width -  SrcRect.x - 1;
-		SrcRect.h := Window.OverscanRect.Height;
+	if not Enabled then Exit;
 
-		SDL_UpdateTexture(Texture, nil, @FrameBuffer.Bits[0], FrameBuffer.Width*4);
-		SDL_RenderCopy(Renderer, Texture, @SrcRect, nil);
+	SrcRect.x := (Window.OverscanRect.Left + 1) * 3;
+	SrcRect.y := Window.OverscanRect.Top;
+	SrcRect.w := FrameBuffer.Width -  SrcRect.x - 1;
+	SrcRect.h := Window.OverscanRect.Height;
 
-		RenderedTexture := Texture;
-	end;
+	SDL_UpdateTexture(Texture, nil, @FrameBuffer.Bits[0], FrameBuffer.Width*4);
+	SDL_RenderCopy(Renderer, Texture, @SrcRect, nil);
+
+	RenderedTexture := Texture;
 end;
 
 

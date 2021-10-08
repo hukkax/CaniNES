@@ -130,7 +130,7 @@ begin
 
 	case ar of
 		arNTSC:       Result :=  8 / 7;
-		arPAL:        Result := 355 / 256; //11 / 8;
+		arPAL:        Result := 11 / 8;
 		arStandard:   Result :=  4 / 3;
 		arWidescreen: Result := 16 / 9;
 		else          Result := 1;
@@ -724,6 +724,7 @@ begin
 			Options.ScanlinesEnabled       := ScanlinesEnabled;
 			Options.ScanlineBloom          := ScanlineBloom;
 			Options.DotCrawlSpeed          := DotCrawlSpeed;
+			Options.NoiseOpacity           := NoiseAmount;
 			Options.HorizontalBlur         := HorizontalBlur;
 			Options.ScanlineBrightness     := ScanlineBrightness;
 			Options.MaskBrightness         := MaskBrightness;

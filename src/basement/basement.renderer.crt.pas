@@ -18,8 +18,10 @@ type
 		MaskCounter:    Single;         // Counter for the dot crawl texture animation
 		Overlay1:       PSDL_Texture;   // The overlay texture for Scanlines
 		Overlay2:       PSDL_Texture;   // The overlay texture for CRT Pixel Mask
+		Overlay3:       PSDL_Texture;   // The overlay texture for CRT Noise
 		ScanlineBitmap: TBitmap32;      // Source bitmaps used for generating the
 		MaskBitmap:     TBitmap32;      // overlay textures as pixel scaling changes
+		NoiseBitmap:    TBitmap32;      //
 	public
 		Enabled: Boolean;
 
@@ -56,6 +58,9 @@ type
 			// Values >0 enable an animated "dot crawl" noise effect.
 			// The subtleness depends on MaskBrightness and other values.
 			DotCrawlSpeed: Double;
+
+			// Noise overlay opacity
+			NoiseOpacity: Byte;
 
 			// Applies a bit of extra contrast to the final image.
 			// Requires a recent SDL2 version with SDL_BLENDMODE_MUL.
@@ -140,6 +145,7 @@ begin
 		MaskBrightness := 1.18;
 		BrightAndSharp := 0.85; // 0=blurriest and darkest, 1.0=sharpest and brightest
 		ExtraContrast := 0;
+		NoiseOpacity := 0;
 	end;
 
 	Init;
@@ -151,9 +157,12 @@ begin
 		SDL_DestroyTexture(Overlay1);
 	if Overlay2 <> nil then
 		SDL_DestroyTexture(Overlay2);
+	if Overlay3 <> nil then
+		SDL_DestroyTexture(Overlay3);
 
 	ScanlineBitmap.Free;
 	MaskBitmap.Free;
+	NoiseBitmap.Free;
 	CRTRenderer := nil;
 
 	inherited;
@@ -195,10 +204,13 @@ procedure TCRTRenderer.Init;
 		Result := (Scale+1) * (Scale-2) div 2;
 	end;
 
+const
+	NoiseSize = 3;
 var
 	DR: TSDL_Rect;
 	Y, Scale: Integer;
 	Tmp: TBitmap32;
+	P: PColor32;
 begin
 	inherited;
 
@@ -240,6 +252,31 @@ begin
 			Tmp.Free;
 		end;
 
+		//if NoiseOpacity > 0 then
+		begin
+			DR.w := Window.Settings.Width;
+			DR.h := Window.Settings.Height;
+
+			NoiseBitmap.Free;
+			NoiseBitmap := TBitmap32.Create(DR.w*NoiseSize, DR.h*NoiseSize);
+
+			for Y := 0 to NoiseBitmap.Height-1 do
+			begin
+				P := NoiseBitmap.PixelPtr[0, Y];
+				for Scale := 0 to NoiseBitmap.Width-1 do
+				begin
+					P^ := Gray32(Random(256));
+					Inc(P);
+				end;
+			end;
+
+			Overlay3 := SDL_CreateTexture(Renderer, UInt32(SDL_PIXELFORMAT_ARGB8888),
+				SInt32(SDL_TEXTUREACCESS_STATIC), NoiseBitmap.Width, NoiseBitmap.Height);
+
+			SDL_UpdateTexture(Overlay3, nil, @NoiseBitmap.Bits[0], NoiseBitmap.Width*4);
+			SDL_SetTextureBlendMode(Overlay3, SDL_BLENDMODE_BLEND);
+			SDL_SetTextureColorMod(Overlay3, 128, 128, 128);
+		end;
 	end;
 
 	OptionsChanged;
@@ -268,6 +305,7 @@ var
 	V, Scale: Integer;
 	X, Y: Single;
 	DR: TSDL_Rect;
+	B: TSDL_Bool;
 begin
 	if not Enabled then Exit;
 
@@ -343,6 +381,16 @@ begin
 		DR.y := Trunc(Scale / 2 * Options.ScanlineBloom);
 		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 22 * Options.ScanlineBloom)));
 		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
+	end;
+
+	if Options.NoiseOpacity > 0 then
+	begin
+		DR.w := Window.Settings.Width;
+		DR.h := Window.Settings.Height;
+		DR.x := Random(NoiseBitmap.Width  - DR.w);
+		DR.y := Random(NoiseBitmap.Height - DR.h);
+		SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);
+		SDL_RenderCopy(Renderer, Overlay3, @DR, nil);
 	end;
 
 	if Options.ExtraContrast > 0 then

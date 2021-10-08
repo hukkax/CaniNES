@@ -178,7 +178,7 @@ procedure TRenderer.SetOpacity(AOpacity: Single);
 begin
 	FOpacity := AOpacity;
 
-	SDL_SetTextureAlphaMod(Texture, Min(255, Trunc(FOpacity * 255)));
+	SDL_SetTextureAlphaMod(Texture, Min(255, Trunc(AOpacity * 255)));
 
 	if AOpacity <= 1.0 then
 		SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_BLEND)
