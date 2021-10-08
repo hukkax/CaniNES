@@ -477,6 +477,7 @@ function SDL_RenderIsClipEnabled(renderer: PSDL_Renderer): TSDL_Bool; cdecl;
 function SDL_RenderSetScale(renderer: PSDL_Renderer; scaleX: Float; scaleY: Float): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RenderSetScale' {$ENDIF} {$ENDIF};
 
 function SDL_RenderSetIntegerScale(renderer: PSDL_Renderer; enable: TSDL_Bool): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RenderSetIntegerScale' {$ENDIF} {$ENDIF};
+function SDL_RenderGetIntegerScale(renderer: PSDL_Renderer): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RenderGetIntegerScale' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the drawing scale for the current target.
