@@ -40,7 +40,7 @@ implementation
 
 uses
 	SysUtils,
-	NES.Config, NES.CPU;
+	NES.Config;
 
 { TMapper_Sachen }
 

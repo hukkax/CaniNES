@@ -305,7 +305,6 @@ var
 	V, Scale: Integer;
 	X, Y: Single;
 	DR: TSDL_Rect;
-	B: TSDL_Bool;
 begin
 	if not Enabled then Exit;
 

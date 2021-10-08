@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-	SysUtils, NES.Config, NES.CPU;
+	SysUtils, NES.Config;
 
 { TMapper_009 }
 

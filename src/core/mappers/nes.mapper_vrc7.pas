@@ -41,7 +41,7 @@ implementation
 
 uses
 	SysUtils, Basement.Util,
-	NES.Config, NES.CPU;
+	NES.Config;
 
 // ============================================================================
 // TMapper_VRC7

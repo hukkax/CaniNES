@@ -59,7 +59,7 @@ implementation
 
 uses
 	SysUtils, Basement.Util,
-	NES.Config, NES.Console, NES.CPU;
+	NES.Config, NES.Console;
 
 // ============================================================================
 // TNamco163Audio

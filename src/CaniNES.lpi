@@ -138,7 +138,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx6060="True"/>
+              <IgnoredMessages idx6060="True" idx5024="True" idx4081="True" idx4079="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dDEBUG
 -dAUDIO"/>

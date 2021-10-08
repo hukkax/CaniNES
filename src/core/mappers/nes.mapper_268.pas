@@ -34,7 +34,7 @@ implementation
 
 uses
 	SysUtils, Math,
-	NES.Config, NES.CPU;
+	NES.Config;
 
 // ============================================================================
 // TMapper_268

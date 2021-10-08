@@ -50,7 +50,7 @@ implementation
 
 uses
 	SysUtils, Math, Basement.Util,
-	NES.Config, NES.CPU;
+	NES.Config;
 
 { TMapper_VRC6b }
 
