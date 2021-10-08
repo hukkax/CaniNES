@@ -64,7 +64,6 @@ type
 	TOverlayRenderer = class(TRenderer)
 	private
 		Width, Height: Word;
-		FOpacity:      Single;
 		OriginalSize:  TPoint;
 		RenderRect,
 		ActiveRect,
@@ -75,7 +74,6 @@ type
 		FMarginX,
 		FMarginY:      Integer;
 
-		procedure	SetOpacity(AOpacity: Single);
 		procedure	SetX(NewX: Integer);
 		procedure	SetY(NewY: Integer);
 		procedure	SetAlignment(AAlignment: TLayerAlignment);
@@ -99,7 +97,6 @@ type
 		procedure	Align(AAlignment: TLayerAlignment; MarginX: Integer = MARGIN_NONE; MarginY: Integer = MARGIN_NONE); overload;
 		procedure	SetActiveArea(R: TRect; Realign: Boolean = True);
 
-		property	Opacity: Single read FOpacity write SetOpacity;
 		property	Left: Integer read FLeft write SetX;
 		property	Top:  Integer read FTop  write SetY;
 		property	ActiveArea: TRect read FActiveArea write SetActiveArea;
@@ -231,9 +228,9 @@ begin
 
 	//Log('TOverlayRenderer.Create(%s): %d*%d', [Title,Width, Height]);
 
-	FOpacity := 1.0;
 	Texture := nil;
 	FAlignment := laTopLeft;
+	Opacity := 1.0;
 
 	FrameBuffer := TBitmap32.Create(Width, Height);
 	Resize(Width, Height);
@@ -250,8 +247,6 @@ end;
 procedure TOverlayRenderer.Init;
 begin
 	inherited;
-
-	SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_BLEND);
 end;
 
 procedure TOverlayRenderer.Resize(W, H: Word);
@@ -376,12 +371,6 @@ end;
 
 // ================================================================================================
 // Setter methods
-
-procedure TOverlayRenderer.SetOpacity(AOpacity: Single);
-begin
-	FOpacity := AOpacity;
-	SDL_SetTextureAlphaMod(Texture, Min(255, Trunc(FOpacity * 255)));
-end;
 
 procedure TOverlayRenderer.SetX(NewX: Integer);
 begin

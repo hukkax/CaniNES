@@ -19,6 +19,9 @@ type
 		SrcRect:         TSDL_Rect;
 	protected
 		Window: 	 TWindow;
+		FOpacity:    Single;
+
+		procedure	 SetOpacity(AOpacity: Single);
 	public
 		FrameBuffer: TBitmap32;
 		Font:        TRendererFont;
@@ -33,6 +36,8 @@ type
 
 		constructor	Create(AWindow: TWindow; ATexture: PSDL_Texture = nil; const Title: String = ''); virtual;
 		destructor	Destroy; override;
+
+		property	Opacity: Single read FOpacity write SetOpacity;
 	end;
 
 	function AddRenderer(Renderer: TRenderer): Boolean;
@@ -47,7 +52,7 @@ var
 implementation
 
 uses
-	Basement.Util;
+	Math, Basement.Util;
 
 // ================================================================================================
 // Utility
@@ -143,6 +148,7 @@ begin
     else
 	    Texture := ATexture;
 	Visible := True;
+	Opacity := 1.1;
 
 	AddRenderer(Self);
 end;
@@ -166,6 +172,18 @@ end;
 procedure TRenderer.Resize(W, H: Word);
 begin
 	//
+end;
+
+procedure TRenderer.SetOpacity(AOpacity: Single);
+begin
+	FOpacity := AOpacity;
+
+	SDL_SetTextureAlphaMod(Texture, Min(255, Trunc(FOpacity * 255)));
+
+	if AOpacity <= 1.0 then
+		SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_BLEND)
+	else
+		SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_NONE);
 end;
 
 procedure TRenderer.Render;
