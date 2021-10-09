@@ -11,7 +11,8 @@ interface
 uses
 	Classes, Graphics32, FileStreamEx,
 	NES.Types, NES.SaveState, NES.RewindManager, NES.MovieManager,
-	NES.Cartridge, NES.Controllers, NES.MemoryManager,
+	NES.Cartridge, NES.MemoryManager,
+	NES.Controllers, NES.Controller.Standard,
 	NES.CPU, NES.PPU, NES.APU,
 	NES.Database, NES.Cheats;
 

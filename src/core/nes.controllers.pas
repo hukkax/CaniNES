@@ -37,6 +37,10 @@ type
 
 	TBaseControlDevice = class(TSnapshotable)
 	protected
+		strobe: Boolean;
+		port:   Byte;
+		State:  array[0..7] of Byte;
+
 		function  IsCurrentPort(addr: Word): Boolean;
 		function  IsExpansionDevice: Boolean;
 
@@ -47,16 +51,19 @@ type
 		procedure StrobeProcessRead;
 		procedure StrobeProcessWrite(value: Byte);
 
-		{procedure SetPressedState(bit: Byte; keyCode: Cardinal);
-		procedure SetPressedState(bit: Byte; enabled: Boolean);
-		procedure ClearState;}
-		procedure RefreshStateBuffer; virtual;
+		procedure EnsureCapacity(minBitCount: Integer);
+		function  GetByteIndex(bit: Byte): Cardinal;
 
+		procedure SetBit(bit: Byte);
+		procedure ClearBit(bit: Byte);
+		procedure InvertBit(bit: Byte);
+
+		function  IsPressed(bit: Byte): Boolean;
+		procedure SetPressedState(bit: Byte; keyCode: Cardinal);
+		procedure SetPressedState(bit: Byte; enabled: Boolean);
+		procedure RefreshStateBuffer; virtual;
+		procedure ClearState;
 		procedure InternalSetStateFromInput(B: Byte); virtual;
-	private
-		strobe: Boolean;
-		port:   Byte;
-		State:  array[0..7] of Byte;
 	public
 		procedure SetStateFromInput(B: Byte);
 
@@ -69,41 +76,6 @@ type
 		constructor Create(PortNumber: Byte); overload;
 		destructor  Destroy; override;
 	end;
-
-
-	TStandardController = class(TBaseControlDevice)
-	private
-		stateBuffer: Cardinal;
-	protected
-		procedure RefreshStateBuffer; override;
-		procedure InternalSetStateFromInput(B: Byte); override;
-	public
-		ControllerState: TStandardControllerState;
-		Visual: TPadVisual;
-
-		constructor Create(PortNumber: Byte); overload;
-
-		procedure Visualize; override;
-
-		function  ReadRAM(address: Word): Byte; override;
-		procedure WriteRAM(address: Word; value: Byte); override;
-		procedure Reset; override;
-	end;
-
-
-	TZapperController = class(TBaseControlDevice)
-	protected
-		FirePressed: Boolean;
-
-		function  IsLightFound: Boolean;
-		function  HasCoordinates: Boolean; override;
-
-		procedure InternalSetStateFromInput(B: Byte); override;
-	public
-		function  ReadRAM(address: Word): Byte; override;
-		procedure WriteRAM(address: Word; value: Byte); override;
-	end;
-
 
 	TControlManager = class(TIMemoryHandler)
 	private
@@ -136,9 +108,11 @@ var
 implementation
 
 uses
-	Math,
+	Basement.Window, Math,
 	NES.Config, NES.Console, NES.Mapper,
-	NES.InputManager, Basement.Window;
+	NES.Controller.Standard,
+	NES.Controller.Zapper,
+	NES.Controller.OekaKidsTablet;
 
 var
 	CtrlColor: array[Boolean] of Cardinal;
@@ -216,6 +190,8 @@ begin
 
 	ControlDevices := TObjectList<TBaseControlDevice>.Create(True);
 
+	SecondaryController := nil;
+
 	case InputType of
 
 		gitZapper, gitTwoZappers:
@@ -226,6 +202,12 @@ begin
 				PrimaryController := TStandardController.Create(0);
 			SecondaryController := TZapperController.Create(1);
 		end;
+
+		gitOekaKidsTablet:
+		begin
+			PrimaryController   := TOekaKidsTablet.Create(0);
+			SecondaryController := TStandardController.Create(1);
+		end
 
 	else
 		PrimaryController   := TStandardController.Create(0);
@@ -389,18 +371,11 @@ begin
 		RefreshStateBuffer;
 end;
 
-(*procedure TBaseControlDevice.SetPressedState(bit: Byte; keyCode: Cardinal);
-begin
-end;
-
-procedure TBaseControlDevice.SetPressedState(bit: Byte; enabled: Boolean);
-begin
-end;
-
 procedure TBaseControlDevice.ClearState;
 begin
-//	state := ControlDeviceState;
-end;*)
+	//State := ControlDeviceState;
+	FillByte(State[0], SizeOf(State), 0);
+end;
 
 procedure TBaseControlDevice.RefreshStateBuffer;
 begin
@@ -412,7 +387,7 @@ end;
 
 procedure TBaseControlDevice.SetStateFromInput(B: Byte);
 begin
-	//ClearState;
+	ClearState;
 	InternalSetStateFromInput(B);
 end;
 
@@ -436,139 +411,71 @@ begin
 	// nothing
 end;
 
-// ================================================================================================
-// TStandardController
-// ================================================================================================
-
-constructor TStandardController.Create(PortNumber: Byte);
+procedure TBaseControlDevice.SetPressedState(bit: Byte; enabled: Boolean);
 begin
-	inherited Create(PortNumber);
-
-	RegisterProperty(32, @stateBuffer);
-	RegisterProperty(8,  @ControllerState.value);
-
-	Visual.Init(PortNumber);
+	if Enabled then SetBit(bit);
 end;
 
-procedure TStandardController.RefreshStateBuffer;
+procedure TBaseControlDevice.SetPressedState(bit: Byte; keyCode: Cardinal);
 begin
-	if (Configuration.Input.FourScore) and (Console.System <> Famicom) then
-	begin
-		if port >= 2 then
-			stateBuffer := ControllerState.value << 8
-		else
-			//Add some 0 bit padding to allow P3/P4 controller bits + signature bits
-			stateBuffer := $FF000000 or ControllerState.value;
-	end
-	else
-		stateBuffer := $FFFFFF00 or ControllerState.value;
+//	if(IsKeyboard() && keyCode < 0x200 && !_console->GetSettings()->IsKeyboardMode()) {
+//		//Prevent keyboard device input when keyboard mode is off
+//		return;
+
+//	if(_console->GetSettings()->InputEnabled() && (!_console->GetSettings()->IsKeyboardMode() || keyCode >= 0x200 || IsKeyboard()) && KeyManager::IsKeyPressed(keyCode)) {
+//		SetBit(bit);
 end;
 
-procedure TStandardController.InternalSetStateFromInput(B: Byte);
+procedure TBaseControlDevice.EnsureCapacity(minBitCount: Integer);
 begin
-	ControllerState.value := B;
-	Visual.ControllerState.value := B;
+//	uint32_t minByteCount = minBitCount / 8 + 1 + (HasCoordinates() ? 32 : 0);
+//	int32_t gap = minByteCount - (int32_t)_state.State.size();
+
+//	if gap > 0 then
+//		State.insert(_state.State.end(), gap, 0);
 end;
 
-function TStandardController.ReadRAM(address: Word): Byte;
+function TBaseControlDevice.GetByteIndex(bit: Byte): Cardinal;
 begin
-	if ((address = $4016) and (not Odd(port))) or ((address = $4017) and (Odd(port))) then
-	begin
-		StrobeProcessRead;
-
-		Result := stateBuffer and 1;
-		if (port >= 2) and (Console.System = Famicom) then
-			Result := Result << 1; // Famicom outputs P3 & P4 on bit 1
-		stateBuffer := stateBuffer >> 1;
-		// "All subsequent reads will return D=1 on an authentic controller
-		// but may return D=0 on third party controllers."
-		stateBuffer := stateBuffer or $80000000;
-	end
-	else
-		Result := 0;
+	Result := (bit div 8) + IfThen(HasCoordinates, 4, 0);
 end;
 
-procedure TStandardController.WriteRAM(address: Word; value: Byte);
-begin
-	StrobeProcessWrite(value);
-end;
-
-procedure TStandardController.Reset;
-begin
-	stateBuffer := 0;
-	InternalSetStateFromInput(0);
-end;
-
-procedure TStandardController.Visualize;
-begin
-	Visual.Draw;
-end;
-
-// ================================================================================================
-// TZapperController
-// ================================================================================================
-
-function TZapperController.HasCoordinates: Boolean;
-begin
-	Result := True;
-end;
-
-procedure TZapperController.InternalSetStateFromInput(B: Byte);
-begin
-	FirePressed := InputManager.Mouse.Buttons[mbLeft];
-
-	if InputManager.Mouse.Buttons[mbRight] then
-		SetCoordinates(Point(-1, -1))
-	else
-		SetCoordinates(InputManager.Mouse.Pos);
-end;
-
-function TZapperController.ReadRAM(address: Word): Byte;
-begin
-	if (IsExpansionDevice and (address = $4017)) or IsCurrentPort(address) then
-		Result := IfThen(IsLightFound, 0, 8) or IfThen(FirePressed, $10, $00)
-	else
-		Result := 0;
-end;
-
-procedure TZapperController.WriteRAM(address: Word; value: Byte);
-begin
-	// nothing
-end;
-
-function TZapperController.IsLightFound: Boolean;
+procedure TBaseControlDevice.SetBit(bit: Byte);
 var
-	pos: TPoint;
-	scanline, cycle, radius,
-	xOffset, yOffset, xPos, yPos: Integer;
+	n, BitMask: Byte;
 begin
-	Result := False;
+	EnsureCapacity(bit);
+	BitMask := 1 shl (bit mod 8);
+	n := GetByteIndex(bit);
+	State[n] := State[n] or BitMask;
+end;
 
-	pos := InputManager.Mouse.Pos;
-	if (pos.X < 0) or (pos.Y < 0) then Exit;
+procedure TBaseControlDevice.ClearBit(bit: Byte);
+var
+	n, BitMask: Byte;
+begin
+	EnsureCapacity(bit);
+	BitMask := 1 shl (bit mod 8);
+	n := GetByteIndex(bit);
+	State[n] := State[n] and (not BitMask);
+end;
 
-	scanline := NES_PPU.scanline;
-	cycle := NES_PPU.cycle;
-	radius := Configuration.Input.Zapper.DetectionRadius;
+procedure TBaseControlDevice.InvertBit(bit: Byte);
+begin
+	if IsPressed(bit) then
+		ClearBit(bit)
+	else
+		SetBit(bit);
+end;
 
-	for yOffset := -radius to radius do
-	begin
-		yPos := pos.Y + yOffset;
-		if (yPos >= 0) and (yPos < NES_PPU.ScreenHeight) then
-		begin
-			for xOffset := -radius to radius do
-			begin
-				xPos := pos.X + xOffset;
-				// Light cannot be detected if the Y/X position is further ahead
-				// than the PPU, or if the PPU drew a dark color
-				if (xPos >= 0) and (xPos < NES_PPU.ScreenWidth) then
-					if (scanline >= yPos) and (scanline - yPos <= 20) and
-						( (scanline <> yPos) or (cycle > xPos) ) and
-						(NES_PPU.GetPixelBrightness(xPos, yPos) >= 85) then
-							Exit(True);
-			end;
-		end;
-	end;
+function TBaseControlDevice.IsPressed(bit: Byte): Boolean;
+var
+	n, BitMask: Byte;
+begin
+	EnsureCapacity(bit);
+	BitMask := 1 shl (bit mod 8);
+	n := GetByteIndex(bit);
+	Result := (State[GetByteIndex(bit)] and BitMask) <> 0;
 end;
 
 

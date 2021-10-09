@@ -198,12 +198,21 @@ type
 	);
 
 var
+	// APU channels to enable by default
 	APUChannelUsed: array[0..MaxChannelCount] of Boolean = (
 		True, True, True,  True, True,
 		False, False, False, False, False, False,
 		True, True );
 
 const
+	// controller types that use the mouse for emulated input
+	MouseControllers: set of TGameInputType = [
+		gitZapper, gitTwoZappers,
+		gitOekaKidsTablet,
+		gitSuborKeyboardMouse1, gitSuborKeyboardMouse2,
+		gitSnesMouse
+	];
+
 	NESSystemNames: array[TGameSystem] of String = (
 		'NES NTSC', 'NES PAL', 'Famicom', 'Dendy',
 		'VsSystem', 'Playchoice', 'Famicom Disk System', 'Unknown' );

@@ -27,7 +27,7 @@ type
 	private
 		Controller: array[0..1] of TStandardControllerState;
 		IgnoreStartButton: Boolean;
-		GotZapper:         Boolean;
+		ControllerUsesMouse:         Boolean;
 		MouseHiddenPos:    Types.TPoint;
 
 		procedure RendererChanged;
@@ -311,7 +311,7 @@ begin
 		Dec(Mouse.Timer);
 		if (Mouse.Timer = 0) or (not Mouse.InWindow) then
 			EnableMouse(MenuBar.RefreshActiveState or
-				(GotZapper and not Configuration.Input.Zapper.HidePointer));
+				(ControllerUsesMouse and not Configuration.Input.Zapper.HidePointer));
 	end;
 end;
 
@@ -402,7 +402,7 @@ begin
 					MenuRenderer.Opacity := 1.0;
 				end
 				else
-				if GotZapper then
+				if ControllerUsesMouse then
 					HideMenubar;
 				UpdateCursor;
 			end;
@@ -928,7 +928,7 @@ procedure TNESWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
 var
 	B: Boolean;
 begin
-	if not GotZapper then
+	if not ControllerUsesMouse then
 	begin
 		B := Mouse.Visible;
 		if not B then
@@ -963,13 +963,15 @@ end;
 
 procedure TNESWindow.OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);
 begin
+	inherited;
+
 	if Menu.Visible then
 		Menu.OnMouseButton(Button, Pressed)
 	else
 	if Menubar.Active then
 	begin
 		Menubar.OnMouseButton(Button, Pressed);
-		if (GotZapper) and (not Menubar.Active) then
+		if (ControllerUsesMouse) and (not Menubar.Active) then
 			HideMenubar;
 		OnMouseMove(Mouse.Pos, Mouse.UnscaledPos);
 	end
@@ -1019,7 +1021,7 @@ end;
 
 procedure TNESWindow.UpdateCursor;
 begin
-	SetSystemCursor(IfThen((not GotZapper) or (Menubar.Active),
+	SetSystemCursor(IfThen((not ControllerUsesMouse) or (Menubar.Active),
 		SDL_SYSTEM_CURSOR_ARROW, SDL_SYSTEM_CURSOR_CROSSHAIR));
 end;
 
@@ -1027,13 +1029,13 @@ procedure TNESWindow.ControllerSetupChanged;
 begin
 	if not Assigned(Menu) then Exit;
 
-	GotZapper := Console.CurrentControllerType in [gitZapper, gitTwoZappers];
-	if GotZapper then
+	ControllerUsesMouse := Console.CurrentControllerType in MouseControllers;
+	if ControllerUsesMouse then
 		HideMenubar;
 	UpdateCursor;
 
 	Mouse.Enabled := True;
-	Mouse.Visible := (Console <> nil) and (GotZapper) and
+	Mouse.Visible := (Console <> nil) and (ControllerUsesMouse) and
 		(not Configuration.Input.Zapper.HidePointer);
 	ShowMouse;
 

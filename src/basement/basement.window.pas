@@ -28,36 +28,37 @@ type
 	end;
 
 	TBasementInitSettings = packed record
-		X, Y:			Integer;
-		Width, Height:	Word;
+		X, Y:           Integer;
+		Width, Height:  Word;
 //		FrameBufferWidth,
 //		FrameBufferHeight: Word;
-		MaxScale:		Byte;
-		VSyncMode:		Byte;
-		Framerate:		Double;
+		MaxScale:       Byte;
+		VSyncMode:      Byte;
+		Framerate:      Double;
 		AspectRatioWidthMultiplier:	Single;
-		VSyncLimits:	TMinMax;
-		FullScreen:		Boolean;
+		VSyncLimits:    TMinMax;
+		FullScreen:     Boolean;
 		ScalingQuality: Boolean; // nearest/linear
-		HighPriority: 	Boolean;
-		CloseOnAltF4:	Boolean;
-		UseGamepads:	Boolean;
+		HighPriority:   Boolean;
+		CloseOnAltF4:   Boolean;
+		UseGamepads:    Boolean;
 		AutoswitchResolution: Boolean;
-		Overscan:		Types.TRect;
-		Backend:		String;
-		Caption:		AnsiString;
+		Overscan:       Types.TRect;
+		Backend:        String;
+		Caption:        AnsiString;
 	end;
 	PBasementInitSettings = ^TBasementInitSettings;
 
 	TMouseInfo = record
-		Enabled:	Boolean;
-		Visible:	Boolean;
-		Timer:		Cardinal;
+		Enabled:     Boolean;
+		Visible:     Boolean;
+		ButtonState: array [TMouseButton] of Boolean;
+		Timer:       Cardinal;
 		Pos,
 		UnscaledPos,
 		OldPos,
-		Scaling:	Types.TPoint;
-		InWindow:	Boolean;
+		Scaling:     Types.TPoint;
+		InWindow:    Boolean;
 		CurrentCursor: record
 			Kind:   TSDL_SystemCursor;
 			Cursor: PSDL_Cursor;
@@ -248,6 +249,7 @@ end;
 
 	procedure TWindow.OnMouseButton(Button: TMouseButton; Pressed: Boolean);
 	begin
+		Mouse.ButtonState[Button] := Pressed;
 	//SetTitle(format('Button %d %d', [Ord(Button), ButtonDown.ToInteger]));
 	end;
 
