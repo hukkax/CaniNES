@@ -377,13 +377,13 @@ begin
 
 	// Phase generator
 	RegisterProperty(16, @pg_out);
-	RegisterArray(Length(pg_phase), @pg_phase[0]);
+	RegisterArray(Length(pg_phase) * SizeOf(pg_phase[0]), @pg_phase[0]);
 	RegisterProperty(32, @pg_inc);
 	RegisterProperty(32, @pg_phase_next);
 
 	// Operator
-	RegisterArray(Length(op_fb1), @op_fb1[0]);
-	RegisterArray(Length(op_fb2), @op_fb2[0]);
+	RegisterArray(Length(op_fb1) * SizeOf(op_fb1[0]), @op_fb1[0]);
+	RegisterArray(Length(op_fb2) * SizeOf(op_fb2[0]), @op_fb2[0]);
 	RegisterProperty(16, @op_fbsum);
 	RegisterProperty(16, @op_mod);
 	RegisterProperty(8,  @op_neg);
@@ -410,7 +410,7 @@ begin
 	RegisterArray(Length(son),   @son[0]);
 	RegisterArray(Length(vol),   @vol[0]);
 	RegisterArray(Length(inst),  @inst[0]);
-	RegisterArray(Length(fnum),  @fnum[0]);
+	RegisterArray(Length(fnum) * SizeOf(fnum[0]), @fnum[0]);
 
 	RegisterProperty(8, @rhythm);
 	RegisterProperty(8, @testmode);
