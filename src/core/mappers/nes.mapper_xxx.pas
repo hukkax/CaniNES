@@ -56,7 +56,9 @@ type
 
 implementation
 
+uses
+	Basement.Util;
+
 // RegisterArray(Length(someArray), @someArray[0]);
-// FillByte(someArray[0], SizeOf(someArray), 0);
 
 end.

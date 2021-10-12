@@ -87,7 +87,7 @@ type
 implementation
 
 uses
-	SysUtils, Math,
+	SysUtils, Math, Basement.Util,
 	NES.Config, NES.Console, NES.CPU;
 
 // ============================================================================
@@ -146,9 +146,9 @@ begin
 	chrLatch[0] := 0;
 	chrLatch[1] := 4;
 
-	FillByte(prgRegs[0],     SizeOf(prgRegs), 0);
-	FillByte(chrLowRegs[0],  SizeOf(chrLowRegs), 0);
-	FillByte(chrHighRegs[0], SizeOf(chrHighRegs), 0);
+	ClearArray(prgRegs);
+	ClearArray(chrLowRegs);
+	ClearArray(chrHighRegs);
 
 	prgMode := 0;
 	enablePrgAt6000 := False;
@@ -164,8 +164,8 @@ begin
 	disableNtRam := False;
 
 	ntRamSelectBit := 0;
-	FillByte(ntLowRegs[0],  SizeOf(ntLowRegs), 0);
-	FillByte(ntHighRegs[0], SizeOf(ntHighRegs), 0);
+	ClearArray(ntLowRegs);
+	ClearArray(ntHighRegs);
 
 	irqEnabled := False;
 	irqSource := Byte(CpuClock);

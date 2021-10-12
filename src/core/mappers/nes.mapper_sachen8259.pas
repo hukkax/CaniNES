@@ -48,7 +48,8 @@ type
 
 implementation
 
-uses Math;
+uses
+	Basement.Util, Math;
 
 { TMapper_141 / Sachen8259A }
 
@@ -128,7 +129,7 @@ end;
 
 procedure TMapper_Sachen8259.InitMapper;
 begin
-	FillByte(regs[0], SizeOf(regs), 0);
+	ClearArray(regs);
 	currentReg := 0;
 	SelectPRGPage(0, 0);
 end;

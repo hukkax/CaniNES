@@ -30,7 +30,7 @@ type
 implementation
 
 uses
-	NES.Types, Math;
+	Basement.Util, NES.Types, Math;
 
 
 function TMapper_028.GetPRGPageSize: Word;
@@ -58,7 +58,7 @@ begin
 	selectedReg := 0;
 	mirroringBit := 0;
 
-	FillByte(regs[0], SizeOf(regs), 0);
+	ClearArray(regs);
 
 	AddRegisterRange($5000, $5FFF, moWrite);
 

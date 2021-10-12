@@ -40,7 +40,8 @@ type
 
 implementation
 
-uses NES.CPU;
+uses
+	Basement.Util, NES.CPU;
 
 { TMapper_018 }
 
@@ -69,9 +70,9 @@ end;
 
 procedure TMapper_018.InitMapper;
 begin
-	FillByte(prgBanks[0], SizeOf(prgBanks), 0);
-	FillByte(chrBanks[0], SizeOf(chrBanks), 0);
-	FillByte(irqReloadValue[0], SizeOf(irqReloadValue), 0);
+	ClearArray(prgBanks);
+	ClearArray(chrBanks);
+	ClearArray(irqReloadValue);
 
 	irqCounter := 0;
 	irqCounterSize := 0;

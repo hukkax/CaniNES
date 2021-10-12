@@ -30,7 +30,8 @@ type
 
 implementation
 
-uses Math;
+uses
+	Basement.Util, Math;
 
 { TMapper_156 }
 
@@ -52,8 +53,8 @@ end;
 
 procedure TMapper_156.InitMapper;
 begin
-	FillByte(chrLow[0],  SizeOf(chrLow),  0);
-	FillByte(chrHigh[0], SizeOf(chrHigh), 0);
+	ClearArray(chrLow);
+	ClearArray(chrHigh);
 
 	SelectPRGPage(1, -1);
 	SetMirroringType(MIRROR_SCREENAONLY);

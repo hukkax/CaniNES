@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-	NES.Console, NES.CPU;
+	Basement.Util, NES.Console, NES.CPU;
 
 { TMapper_083 }
 
@@ -74,8 +74,8 @@ begin
 	irqCounter := 0;
 	irqEnabled := False;
 
-	FillByte(regs[0],   SizeOf(regs),   0);
-	FillByte(exRegs[0], SizeOf(exRegs), 0);
+	ClearArray(regs);
+	ClearArray(exRegs);
 
 	AddRegisterRange($5000, $5000, TMemoryOperation.moRead);
 	AddRegisterRange($5100, $5103, TMemoryOperation.moAny);

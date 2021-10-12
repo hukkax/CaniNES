@@ -169,8 +169,8 @@ constructor TMapper_005.Create(cartridge: TCartridge);
 begin
 	inherited Create(cartridge);
 
-	RegisterArray(Length(prgBanks)*1, @prgBanks[0]);
-	RegisterArray(Length(chrBanks)*2, @chrBanks[0]);
+	RegisterArray(Length(prgBanks)*SizeOf(Byte), @prgBanks[0]);
+	RegisterArray(Length(chrBanks)*SizeOf(Word), @chrBanks[0]);
 
 	RegisterProperty(8, @prgRamProtect1);
 	RegisterProperty(8, @prgRamProtect2);
@@ -550,7 +550,7 @@ begin
 	// Override the 2000-2007 registers to catch all writes to the PPU registers (but not their mirrors)
 	// MemoryHandler.Reset;
 
-	FillByte(chrBanks[0], SizeOf(chrBanks), 0);
+	ClearArray(chrBanks);
 
 	ppuIdleCounter := 0;
 	lastPpuReadAddr := 0;

@@ -32,7 +32,8 @@ type
 
 implementation
 
-uses NES.CPU;
+uses
+	Basement.Util, NES.CPU;
 
 { TMapper_KS202 }
 
@@ -64,7 +65,7 @@ begin
 	irqCounter := 0;
 	irqEnabled := False;
 	selectedReg := 0;
-	FillByte(prgRegs[0], SizeOf(prgRegs), 0);
+	ClearArray(prgRegs);
 
 	SelectPRGPage(3, -1);
 end;

@@ -328,7 +328,7 @@ begin
 	Framebuffer := Buffer;
 
 	// This should (presumably) persist across resets
-	FillByte(corruptOamRow[0], SizeOf(corruptOamRow), 0);
+	ClearArray(corruptOamRow);
 
 	with Settings do
 	begin
@@ -423,15 +423,15 @@ begin
 	scanline := -1;
 	cycle := 340;
 
-	FillByte(oamDecayCycles[0],    SizeOf(oamDecayCycles), 0);
-	FillByte(openBusDecayStamp[0], SizeOf(openBusDecayStamp), 0);
+	ClearArray(oamDecayCycles);
+	ClearArray(openBusDecayStamp);
 
-	FillByte(spriteRAM[0],          SizeOf(spriteRAM), 0);
-	FillByte(secondarySpriteRAM[0], SizeOf(secondarySpriteRAM), 0);
-	CopyMemory(@paletteram[0], @PaletteRamBootValues[0], SizeOf(PaletteRamBootValues));
+	ClearArray(spriteRAM);
+	ClearArray(secondarySpriteRAM);
+	CopyMemory(@paletteram[0], @PaletteRamBootValues[0], Length(PaletteRamBootValues)*1);
 
-	FillByte(hasSprite[0],   SizeOf(hasSprite), 0);
-	FillByte(spriteTiles[0], SizeOf(spriteTiles), 0);
+	ClearArray(hasSprite);
+	FillByte(spriteTiles[0], Length(spriteTiles) * SizeOf(spriteTiles[0]), 0);
 
 	UpdateMinimumDrawCycles;
 end;
@@ -1607,7 +1607,7 @@ begin
 		if cycle = 257 then
 		begin
 			spriteIndex := 0;
-			FillByte(hasSprite[0], SizeOf(hasSprite), 0);
+			ClearArray(hasSprite);
 			if prevRenderingEnabled then
 			begin
 				//copy horizontal scrolling value from t
@@ -2112,7 +2112,7 @@ begin
 	for i := 0 to $1F do
 		oamDecayCycles[i] := CPUGetCycleCount;
 
-	FillByte(corruptOamRow[0], SizeOf(corruptOamRow), 0);
+	ClearArray(corruptOamRow);
 
 	for i := 0 to 256 do
 		hasSprite[i] := True;

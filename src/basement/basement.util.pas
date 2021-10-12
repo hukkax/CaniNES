@@ -86,6 +86,13 @@ var
 	function  GetPtr16(const S: PArrayOfByte): Word; inline;
 	function  GetPtr32(const S: PArrayOfByte): Cardinal; inline;
 
+	procedure ClearArray(var Arr: array of Byte);    overload; inline;
+	procedure ClearArray(var Arr: array of Word);    overload; inline;
+	procedure ClearArray(var Arr: array of DWord);   overload; inline;
+	procedure ClearArray(var Arr: array of QWord);   overload; inline;
+	procedure ClearArray(var Arr: array of Integer); overload; inline;
+	procedure ClearArray(var Arr: array of Boolean); overload; inline;
+
 var
 	OnLog: procedure (const Msg: AnsiString) of Object;
 
@@ -160,6 +167,46 @@ end;
 procedure LogFatal(const Msg: AnsiString);
 begin
 	LogDebug('FATAL: ' + Msg);
+end;
+
+// ==========================================================================
+// Array
+// ==========================================================================
+
+procedure ClearArray(var Arr: array of Byte);
+begin
+	if Length(Arr) > 0 then
+		FillByte(Arr[0], Length(Arr), 0);
+end;
+
+procedure ClearArray(var Arr: array of Word);
+begin
+	if Length(Arr) > 0 then
+		FillWord(Arr[0], Length(Arr), 0);
+end;
+
+procedure ClearArray(var Arr: array of DWord);
+begin
+	if Length(Arr) > 0 then
+		FillDWord(Arr[0], Length(Arr), 0);
+end;
+
+procedure ClearArray(var Arr: array of QWord);
+begin
+	if Length(Arr) > 0 then
+		FillQWord(Arr[0], Length(Arr), 0);
+end;
+
+procedure ClearArray(var Arr: array of Integer);
+begin
+	if Length(Arr) > 0 then
+		FillByte(Arr[0], Length(Arr) * SizeOf(Integer), 0);
+end;
+
+procedure ClearArray(var Arr: array of Boolean);
+begin
+	if Length(Arr) > 0 then
+		FillByte(Arr[0], Length(Arr) * SizeOf(Arr[0]), 0);
 end;
 
 // ==========================================================================

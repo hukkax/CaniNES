@@ -34,7 +34,8 @@ type
 
 implementation
 
-uses Math, NES.Console;
+uses
+	Basement.Util, Math, NES.Console;
 
 { TMapper_150 }
 
@@ -58,7 +59,7 @@ end;
 procedure TMapper_150.InitMapper;
 begin
 	currentRegister := 0;
-	FillByte(regs[0], SizeOf(regs), 0);
+	ClearArray(regs);
 	UpdateState;
 end;
 

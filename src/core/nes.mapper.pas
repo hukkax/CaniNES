@@ -998,8 +998,8 @@ begin
 
 	_AllowRegisterRead := AllowRegisterRead;
 
-	FillByte(IsReadRegisterAddr[0],  SizeOf(IsReadRegisterAddr),  0);
-	FillByte(IsWriteRegisterAddr[0], SizeOf(IsWriteRegisterAddr), 0);
+	ClearArray(IsReadRegisterAddr);
+	ClearArray(IsWriteRegisterAddr);
 	AddRegisterRange(RegisterStartAddress, RegisterEndAddress, moAny);
 
 	prgSize    := Length(romData.PrgRom);

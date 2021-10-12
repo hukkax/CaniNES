@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-	SysUtils, Math,
+	SysUtils, Math, Basement.Util,
 	NES.Console, NES.CPU, NES.PPU;
 
 { TMapper_064 }
@@ -128,7 +128,7 @@ begin
 	needIrqDelay := 0;
 	forceClock := False;
 
-	FillByte(registers, SizeOf(registers), 0);
+	ClearArray(registers);
 	SelectPRGPage(3, -1);
 end;
 

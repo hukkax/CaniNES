@@ -31,6 +31,9 @@ type
 
 implementation
 
+uses
+	Basement.Util;
+
 { TMapper_112 }
 
 function TMapper_112.GetPRGPageSize: Word; begin Result := $2000; end;
@@ -52,7 +55,7 @@ begin
 	currentReg   := 0;
 	outerChrBank := 0;
 
-	FillByte(registers[0], SizeOf(registers), 0);
+	ClearArray(registers);
 
 	SetMirroringType(MIRROR_VERTICAL);
 	AddRegisterRange($4020, $5FFF, moWrite);

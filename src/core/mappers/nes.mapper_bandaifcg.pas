@@ -48,7 +48,7 @@ type
 implementation
 
 uses
-	NES.Console, NES.CPU;
+	Basement.Util, NES.Console, NES.CPU;
 
 { TMapper_BandaiFCG }
 
@@ -84,7 +84,7 @@ end;
 
 procedure TMapper_BandaiFCG.InitMapper;
 begin
-	FillByte(chrRegs[0], SizeOf(chrRegs), 0);
+	ClearArray(chrRegs);
 
 	irqEnabled := False;
 	irqCounter := 0;

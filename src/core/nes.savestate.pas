@@ -150,7 +150,7 @@ begin
 	RegisteredProperties.Add(P);
 end;
 
-// Example: RegisterArray(Length(someArray), @someArray[0]);
+// Example: RegisterArray(Length(someArray) * SizeOf(someArray[0]), @someArray[0]);
 //
 procedure TSnapshotable.RegisterArray(Size: Word; Data: Pointer);
 begin

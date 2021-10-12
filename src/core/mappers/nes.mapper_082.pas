@@ -37,6 +37,9 @@ type
 
 implementation
 
+uses
+	Basement.Util;
+
 { TMapper_082 }
 
 constructor TMapper_082.Create(cartridge: TCartridge);
@@ -52,8 +55,8 @@ end;
 procedure TMapper_082.InitMapper;
 begin
 	chrMode := 0;
-	FillByte(ramPermission[0], SizeOf(ramPermission), 0);
-	FillByte(chrRegs[0], SizeOf(chrRegs), 0);
+	ClearArray(ramPermission);
+	ClearArray(chrRegs);
 
 	SelectPRGPage(3, -1);
 	UpdateRamAccess;

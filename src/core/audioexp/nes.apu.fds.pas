@@ -194,7 +194,7 @@ begin
 	RegisterProperty(16, @overflowCounter);
 	RegisterProperty(32, @output);
 
-	RegisterArray(SizeOf(modTable), @modTable[0]);
+	RegisterArray(Length(modTable), @modTable[0]);
 end;
 
 procedure TModChannel.WriteReg(addr: Word; value: Byte);
@@ -322,7 +322,7 @@ begin
 	RegisterProperty(08, @wavePosition);
 	RegisterProperty(08, @lastOutput);
 
-	RegisterArray(SizeOf(waveTable), @waveTable[0]);
+	RegisterArray(Length(waveTable), @waveTable[0]);
 
 	volume := TBaseFDSChannel.Create('FDSVOL');
 	modChannel := TModChannel.Create('FDSMOD');

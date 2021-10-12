@@ -319,7 +319,7 @@ type
 implementation
 
 uses
-	SysUtils, Math,
+	SysUtils, Math, Basement.Util,
 	NES.Config, NES.Console, NES.CPU, NES.PPU;
 
 // ============================================================================
@@ -888,7 +888,7 @@ procedure TMapper_045.Reset(SoftReset: Boolean);
 begin
 	AddRegisterRange($6000, $7FFF);
 	_regIndex := 0;
-	FillByte(_reg[0], SizeOf(_reg), 0);
+	ClearArray(_reg);
 	_reg[2] := $0F;
 	UpdateState;
 end;
@@ -1260,7 +1260,7 @@ end;
 
 procedure TMapper_121.Reset(SoftReset: Boolean);
 begin
-	FillByte(exRegs[0], SizeOf(exRegs), 0);
+	ClearArray(exRegs);
 	exRegs[3] := $80;
 end;
 

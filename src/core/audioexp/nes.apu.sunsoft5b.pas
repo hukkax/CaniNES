@@ -66,7 +66,7 @@ begin
 
 	RegisterArray(Length(volumeLut), @volumeLut[0]);
 	RegisterArray(Length(registers), @registers[0]);
-	RegisterArray(Length(timer)*2,   @timer[0]);
+	RegisterArray(Length(timer)*SizeOf(timer[0]), @timer[0]);
 	RegisterArray(Length(toneStep),  @toneStep[0]);
 
 	volumeLut[0] := 0;

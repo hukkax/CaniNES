@@ -374,7 +374,7 @@ end;
 procedure TBaseControlDevice.ClearState;
 begin
 	//State := ControlDeviceState;
-	FillByte(State[0], SizeOf(State), 0);
+	FillByte(State[0], Length(State)*1, 0);
 end;
 
 procedure TBaseControlDevice.RefreshStateBuffer;

@@ -33,8 +33,7 @@ type
 implementation
 
 uses
-	SysUtils, Math,
-	NES.Config;
+	SysUtils, Math, Basement.Util, NES.Config;
 
 // ============================================================================
 // TMapper_268
@@ -59,7 +58,7 @@ end;
 
 procedure TMapper_268.Reset(SoftReset: Boolean);
 begin
-	FillByte(exRegs[0], SizeOf(exRegs), 0);
+	ClearArray(exRegs);
 	inherited Reset(softReset);
 	ResetMmc3;
 	UpdateState;
