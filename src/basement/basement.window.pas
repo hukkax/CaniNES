@@ -464,6 +464,13 @@ function TWindow.SetupVideo: Boolean;
 		end;
 	end;
 
+	procedure FatalError(S: String);
+	begin
+		S := S + ': ' + SDL_GetError;
+		LogFatal(S);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, 'Init Failure', PChar(S), Video.Window);
+	end;
+
 var
 	dm: TSDL_DisplayMode;
 	windowFlags: TSDL_WindowFlags;
@@ -540,7 +547,7 @@ begin
 
 		if SDL_Init(Initflags) <> 0 then
 		begin
-			LogFatal('Error initializing SDL: ' + SDL_GetError);
+			FatalError('Error initializing SDL');
 			Exit;
 		end;
 
@@ -604,7 +611,7 @@ begin
 	WindowSize := Types.Point(sx, sy);
 	if Video.Window = nil then
 	begin
-		LogFatal('Error setting up window: ' + SDL_GetError);
+		FatalError('Error setting up window');
 		Exit;
 	end;
 
@@ -624,7 +631,7 @@ begin
 
 	if Video.Renderer = nil then
 	begin
-		LogFatal('Error creating renderer: ' + SDL_GetError);
+		FatalError('Error creating renderer');
 		Exit;
 	end;
 
@@ -638,7 +645,7 @@ begin
 
 	if SDL_RenderSetLogicalSize(Video.Renderer, Trunc(screenW * Settings.AspectRatioWidthMultiplier), screenH) <> 0 then
 	begin
-		LogFatal('Error setting renderer size: ' + SDL_GetError);
+		FatalError('Error setting renderer size');
 		Exit;
 	end;
 	{$IFNDEF DISABLE_SDL2_2_0_5}
@@ -655,7 +662,7 @@ begin
 		UInt32(SDL_PIXELFORMAT_ARGB8888), SInt32(SDL_TEXTUREACCESS_STREAMING), fbx, fby);
 	if Video.Texture = nil then
 	begin
-		LogFatal('Error initializing streaming texture: ' + SDL_GetError);
+		FatalError('Error initializing streaming texture');
 		Exit;
 	end
 	else
