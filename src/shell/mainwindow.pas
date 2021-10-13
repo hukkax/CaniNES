@@ -910,7 +910,7 @@ begin
 		Menubar.Hovering := False;
 		if not Menu.Visible then
 			if (MenuBar.RootMenu.ActiveItem = nil) or
-				(not MenuBar.RootMenu.ActiveItem.SubmenuActive) then
+				(not MenuBar.RootMenu.Sticky) then
 				begin
 					MenuRenderer.Opacity := 0;
 					Menubar.Active := False;
@@ -922,7 +922,7 @@ end;
 procedure TNESWindow.OnMouseEnterLeave(Entered: Boolean);
 begin
 	inherited;
-	EnableMouse(Entered);
+	EnableMouse(Mouse.InWindow);
 end;
 
 procedure TNESWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
@@ -1109,6 +1109,7 @@ begin
 
 	UpdateMenus;
 	ControllerSetupChanged;
+	Mouse.InWindow := True;
 end;
 
 procedure TNESWindow.PixelScalingChanged;

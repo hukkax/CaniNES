@@ -253,7 +253,10 @@ end;
 
 	procedure TWindow.OnMouseEnterLeave(Entered: Boolean);
 	begin
-		Mouse.InWindow := Entered;
+		if Video.IsFullScreen then
+			Mouse.InWindow := True
+		else
+			Mouse.InWindow := Entered;
 	end;
 
 	procedure TWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
@@ -829,6 +832,7 @@ begin
 			SDL_SetWindowDisplayMode(Video.Window, @DispMode);
 			SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_FULLSCREEN);
 			Video.IsCustomRes := True;
+			Mouse.InWindow := True;
 		end;
 
     	{$ELSE}
