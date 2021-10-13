@@ -34,6 +34,7 @@ type
 		FrameBufferWidth,
 		FrameBufferHeight: Word;
 		Scale:          Byte;
+		MinScale:       Byte;
 		VSyncMode:      Byte;
 		Framerate:      Double;
 		AspectRatioWidthMultiplier:	Single;
@@ -599,12 +600,18 @@ begin
 	Video.Window := SDL_CreateWindow(PAnsiChar(Settings.Caption),
 		GetWindowPosValue(Settings.X), GetWindowPosValue(Settings.Y),
 		sx, sy, windowFlags);
+
 	WindowSize := Types.Point(sx, sy);
 	if Video.Window = nil then
 	begin
 		LogFatal('Error setting up window: ' + SDL_GetError);
 		Exit;
 	end;
+
+	Settings.MinScale := Max(1, Settings.MinScale);
+	SDL_SetWindowMinimumSize(Video.Window,
+		Trunc(screenW * Settings.MinScale * Settings.AspectRatioWidthMultiplier),
+		screenH * Settings.MinScale);
 
 	Video.Renderer := SDL_CreateRenderer(Video.Window, -1, rendererFlags);
 	if (Video.Renderer = nil) and (Video.HaveVSync) then
@@ -1064,6 +1071,7 @@ initialization
 		FramebufferWidth  := 320;
 		FramebufferHeight := 200;
 		Scale := 0;
+		MinScale := 1;
 
 		X := WINDOWPOS_CENTERED;
 		Y := WINDOWPOS_CENTERED;

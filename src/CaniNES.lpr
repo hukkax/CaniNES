@@ -64,6 +64,7 @@ begin
 
 		FramebufferWidth  := NES_RESOLUTION_X;
 		FramebufferHeight := NES_RESOLUTION_Y;
+		MinScale := 2; // x1 too small for menu fonts
 
 		GetSettings(@BasementOptions);
 	end;
