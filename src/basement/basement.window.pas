@@ -16,6 +16,7 @@ type
 		Window:			PSDL_Window;
 		Texture:		PSDL_Texture;
 		IsFullScreen: 	Boolean;
+		IsMaximized:	Boolean;
 		IsCustomRes:	Boolean;
 		HaveVSync:		Boolean;
 		DesiredFramerate,
@@ -119,7 +120,7 @@ type
 		procedure	OnMouseWheel(WheelDelta: Types.TPoint); virtual;
 		procedure	OnMouseButton(Button: TMouseButton; Pressed: Boolean); virtual;
 		procedure	OnJoyButton(Pressed: Boolean; PadNum: Integer; Button: Byte); virtual;
-
+		procedure	OnWindowResized(NewSize: Types.TPoint); virtual;
 		procedure	OnUserEvent(EventCode: Integer); virtual;
 		procedure	OnFileDropped(const Filename: String); virtual;
 	end;
@@ -223,10 +224,17 @@ end;
 
 	procedure TWindow.OnUserEvent(EventCode: Integer);
 	begin
+	//
 	end;
 
 	procedure TWindow.OnFileDropped(const Filename: String);
 	begin
+	//
+	end;
+
+	procedure TWindow.OnWindowResized(NewSize: Types.TPoint);
+	begin
+	//
 	end;
 
 	// ============================================================================================
@@ -239,22 +247,23 @@ end;
 
 	procedure TWindow.OnMouseMove(Pos, UnscaledPos: Types.TPoint);
 	begin
-	//SetTitle(format('Pos=(%d,%d) (%d,%d)', [Pos.X,Pos.Y, UnscaledPos.X,UnscaledPos.Y]));
+		//SetTitle(format('Pos=(%d,%d) (%d,%d)', [Pos.X,Pos.Y, UnscaledPos.X,UnscaledPos.Y]));
 	end;
 
 	procedure TWindow.OnMouseWheel(WheelDelta: Types.TPoint);
 	begin
-	//SetTitle(format('Wheel delta=(%d,%d)', [WheelDelta.X,WheelDelta.Y]));
+		//SetTitle(format('Wheel delta=(%d,%d)', [WheelDelta.X,WheelDelta.Y]));
 	end;
 
 	procedure TWindow.OnMouseButton(Button: TMouseButton; Pressed: Boolean);
 	begin
 		Mouse.ButtonState[Button] := Pressed;
-	//SetTitle(format('Button %d %d', [Ord(Button), ButtonDown.ToInteger]));
+		//SetTitle(format('Button %d %d', [Ord(Button), ButtonDown.ToInteger]));
 	end;
 
 	procedure TWindow.OnJoyButton(Pressed: Boolean; PadNum: Integer; Button: Byte);
 	begin
+	//
 	end;
 
 	// ============================================================================================
@@ -382,10 +391,28 @@ begin
 			case InputEvent.window.event of
 		        SDL_WINDOWEVENT_ENTER:      OnMouseEnterLeave(True);
 		        SDL_WINDOWEVENT_LEAVE:      OnMouseEnterLeave(False);
+
 				SDL_WINDOWEVENT_SHOWN,
-				SDL_WINDOWEVENT_RESTORED:   Visible := True;
-				SDL_WINDOWEVENT_HIDDEN,
-				SDL_WINDOWEVENT_MINIMIZED:  Visible := False;
+				SDL_WINDOWEVENT_EXPOSED:    Visible := True;
+
+				SDL_WINDOWEVENT_MINIMIZED,
+				SDL_WINDOWEVENT_HIDDEN:     Visible := False;
+
+				SDL_WINDOWEVENT_MAXIMIZED:
+				begin
+					Video.IsMaximized := True;
+					Visible := True;
+				end;
+
+				SDL_WINDOWEVENT_RESTORED:
+				begin
+					Video.IsMaximized := False;
+					Visible := True;
+				end;
+
+				SDL_WINDOWEVENT_RESIZED:
+					OnWindowResized(Types.Point(
+						InputEvent.window.data1, InputEvent.window.data2));
 			end;
 
 		SDL_DROPFILE:
@@ -473,7 +500,7 @@ begin
 
 	Video.DesiredFramerate := Settings.Framerate;
 
-	windowFlags := 0;
+	windowFlags := UInt32(SDL_WINDOW_SHOWN) or UInt32(SDL_WINDOW_RESIZABLE);
 	rendererFlags := UInt32(SDL_RENDERER_ACCELERATED or SDL_RENDERER_TARGETTEXTURE);
 
 	if Video.NewSDL then
@@ -562,7 +589,6 @@ begin
 		sy := screenH * Scale;
 	end;
 
-	windowFlags := UInt32(SDL_WINDOW_SHOWN);
 	Video.Window := SDL_CreateWindow(PAnsiChar(Settings.Caption),
 		GetWindowPosValue(Settings.X), GetWindowPosValue(Settings.Y),
 		sx, sy, windowFlags);

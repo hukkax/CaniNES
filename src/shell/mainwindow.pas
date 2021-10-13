@@ -72,6 +72,7 @@ type
 		procedure OnMouseWheel(WheelDelta: Types.TPoint); override;
 		procedure OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean); override;
 		procedure OnJoyButton(Pressed: Boolean; PadNum: Integer; Button: Byte); override;
+		procedure OnWindowResized(NewSize: Types.TPoint); override;
 		procedure OnFileDropped(const Filename: String); override;
 
 		constructor Create;
@@ -1279,6 +1280,29 @@ begin
 		AddItem('&About CaniNES'+Dots, actShowPage, 'About');
 	end;
 
+end;
+
+procedure TNESWindow.OnWindowResized(NewSize: Types.TPoint);
+var
+	sx, sy: Integer;
+begin
+	inherited;
+
+	Renderers.Clear;
+
+	sx := NewSize.X div Trunc(NES_RESOLUTION_X * Settings.AspectRatioWidthMultiplier);
+	sy := NewSize.Y div NES_RESOLUTION_Y;
+	Scale := Max(2, Min(sx, sy));
+
+	if (SDL_GetWindowFlags(Video.Window) and SDL_WINDOW_MAXIMIZED) = 0 then
+	begin
+		sx := Trunc(Scale * NES_RESOLUTION_X * Settings.AspectRatioWidthMultiplier);
+		sy := Scale * NES_RESOLUTION_Y;
+		SDL_SetWindowSize(Video.Window, sx, sy);
+	end;
+
+	InitRendering;
+	PixelScalingChanged;
 end;
 
 
