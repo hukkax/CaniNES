@@ -1,6 +1,10 @@
 =============================================================================
 Changelog
 =============================================================================
+2021-10-13:
+- The window can now be resized and maximized; removed the max scale setting
+- An error dialog is now displayed in case of an initialization error
+
 2021-10-08:
 - Implemented mappers 96, 216
 
