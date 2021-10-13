@@ -196,22 +196,31 @@ end;
 
 function TWindow.GetMaxScaling(MaxScale: Byte = 0): Byte;
 var
-	w, h: Integer;
+	w, h, di: Integer;
 	R: TSDL_Rect;
 begin
+	if Video.Window <> nil then
+		di := SDL_GetWindowDisplayIndex(Video.Window)
+	else
+		di := 0;
+
 	if MaxScale = 0 then MaxScale := High(Byte); //Max(Settings.MaxScale, 1);
+
 	{$IFNDEF DISABLE_SDL2_2_0_5}
 	if Video.NewSDL then
-		SDL_GetDisplayUsableBounds({SDL_GetWindowDisplayIndex(Video.Window)}0, @R)
+		SDL_GetDisplayUsableBounds(di, @R)
 	else
 	{$ENDIF}
-		SDL_GetDisplayBounds({SDL_GetWindowDisplayIndex(Video.Window)}0, @R);
+		SDL_GetDisplayBounds(di, @R);
+
 	repeat
-		w := FrameBuffer.Width  * MaxScale;
-		h := FrameBuffer.Height * MaxScale;
+		w := OverscanRect.Width  * MaxScale;
+		h := OverscanRect.Height * MaxScale;
+
 		if (w <= R.w) and (h <= R.h) then Break;
 		Dec(MaxScale);
 	until MaxScale <= 1;
+
 	Result := Max(MaxScale, 1);
 end;
 
