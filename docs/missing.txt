@@ -1,5 +1,5 @@
 =============================================================================
-CaniNES known nonworking ROMs
+CaniNES known nonworking ROMs (in the No-Intro collection)
 =============================================================================
 
 [Broken in Mesen]
@@ -32,8 +32,6 @@ CaniNES known nonworking ROMs
 077 Napoleon Senki (Japan).nes
 089 Tenka no Goikenban - Mito Koumon (Japan).nes
 094 Senjou no Ookami (Japan).nes
-096 Oeka Kids - Anpanman no Hiragana Daisuki (Japan).nes
-096 Oeka Kids - Anpanman to Oekaki Shiyou!! (Japan).nes
 097 Kaiketsu Yancha Maru (Japan).nes
 116 AV Mei Shao Nv Zhan Shi (Asia) (Unl).nes
 145 Sidewinder (Asia) (Ja) (Unl).nes
@@ -42,7 +40,6 @@ CaniNES known nonworking ROMs
 188 Karaoke Studio (Japan).nes
 188 Karaoke Studio Senyou Cassette Vol. 1 (Japan).nes
 188 Karaoke Studio Senyou Cassette Vol. 2 (Japan).nes
-216 Magic Jewelry 2 (Asia) (Ja) (Unl).nes
 240 Sheng Huo Lie Zhuan (Asia) (Ja) (Unl).nes
 242 Wai Xing Zhan Shi (Asia) (Unl).nes
 244 Decathlon (Asia) (Ja) (Unl).nes
