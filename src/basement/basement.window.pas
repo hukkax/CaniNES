@@ -482,8 +482,6 @@ begin
 
 	screenW := OverscanRect.Width;
 	screenH := OverscanRect.Height;
-	sx := Trunc(screenW * Scale * Settings.AspectRatioWidthMultiplier);
-	sy := screenH * Settings.MaxScale;
 
 	if not Assigned(FrameBuffer) then
 		FrameBuffer := TBitmap32.Create;

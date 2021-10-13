@@ -1290,14 +1290,14 @@ begin
 
 	Renderers.Clear;
 
-	sx := NewSize.X div Trunc(NES_RESOLUTION_X * Settings.AspectRatioWidthMultiplier);
-	sy := NewSize.Y div NES_RESOLUTION_Y;
+	sx := NewSize.X div Trunc(OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
+	sy := NewSize.Y div OverscanRect.Height;
 	Scale := Max(2, Min(sx, sy));
 
 	if (SDL_GetWindowFlags(Video.Window) and SDL_WINDOW_MAXIMIZED) = 0 then
 	begin
-		sx := Trunc(Scale * NES_RESOLUTION_X * Settings.AspectRatioWidthMultiplier);
-		sy := Scale * NES_RESOLUTION_Y;
+		sx := Trunc(Scale * OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
+		sy := Scale * OverscanRect.Height;
 		SDL_SetWindowSize(Video.Window, sx, sy);
 	end;
 
