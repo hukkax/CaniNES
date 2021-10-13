@@ -254,8 +254,8 @@ begin
 
 		//if NoiseOpacity > 0 then
 		begin
-			DR.w := Window.Settings.Width;
-			DR.h := Window.Settings.Height;
+			DR.w := Window.Settings.FramebufferWidth;
+			DR.h := Window.Settings.FramebufferHeight;
 
 			NoiseBitmap.Free;
 			NoiseBitmap := TBitmap32.Create(DR.w*NoiseSize, DR.h*NoiseSize);
@@ -384,8 +384,8 @@ begin
 
 	if Options.NoiseOpacity > 0 then
 	begin
-		DR.w := Window.Settings.Width;
-		DR.h := Window.Settings.Height;
+		DR.w := Window.Settings.FrameBufferWidth;
+		DR.h := Window.Settings.FrameBufferHeight;
 		DR.x := Random(NoiseBitmap.Width  - DR.w);
 		DR.y := Random(NoiseBitmap.Height - DR.h);
 		SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);

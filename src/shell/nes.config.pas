@@ -89,7 +89,7 @@ type
 		X, Y:        Integer;
 		FullScreen:  Boolean;
 		AspectRatio: Byte;
-		MaxScale:    Byte;
+		Scale:       Byte;
 	end;
 
 	TUIConfig = record
@@ -432,8 +432,9 @@ begin
 	Cfg.AddInteger(Sect, 'Y', @Display.Window.Y, WINDOWPOS_DEFAULT);
 	Cfg.AddByte(Sect, 'AspectRatio', @Display.Window.AspectRatio, 0)
 	.SetInfo('Aspect ratio', cfgInitWindow, Ord(arNoStretching), Ord(arWidescreen), AspectRatioNames );
-	Cfg.AddByte(Sect, 'MaxScale', @Display.Window.MaxScale, 5)
-	.SetInfo('Window size', cfgInitWindow, 2, 99, [], nil, '%dx');
+	Cfg.AddByte(Sect, 'Scale', @Display.Window.Scale, 0);
+	//Cfg.AddByte(Sect, 'MaxScale', @Display.Window.MaxScale, 5)
+	//.SetInfo('Window size', cfgInitWindow, 2, 99, [], nil, '%dx');
 	Cfg.AddBoolean(Sect, 'FullScreen', @Display.Window.FullScreen).ID := cfgFullScreen;
 
 	// -------------------------------------------------------

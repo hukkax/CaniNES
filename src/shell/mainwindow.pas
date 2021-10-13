@@ -951,7 +951,7 @@ begin
 		if (Menubar.Active) or (UnScaledPos.Y < MenuRenderer.Font.GlyphHeight) then
 			MenuRenderer.Opacity := 1.0
 		else
-			MenuRenderer.Opacity := Max(0, 1 - (UnScaledPos.Y / (BasementOptions.Height / 2)));
+			MenuRenderer.Opacity := Max(0, 1 - (UnScaledPos.Y / (BasementOptions.FramebufferHeight / 2)));
 		Menubar.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale));
 	end
 	else
@@ -1007,7 +1007,9 @@ procedure GetSettings(Settings: PBasementInitSettings);
 begin
 	with Settings^ do
 	begin
-		MaxScale := Max(1, Configuration.Display.Window.MaxScale);
+		X := Configuration.Display.Window.X;
+		Y := Configuration.Display.Window.Y;
+		Scale := Configuration.Display.Window.Scale;
 		AspectRatioWidthMultiplier := GetAspectRatioWidthMultiplier;
 		AutoswitchResolution := Configuration.Display.Renderer.AutoswitchResolution;
 		ScalingQuality := Configuration.Display.Renderer.ScalingQuality;
@@ -1288,19 +1290,18 @@ var
 begin
 	inherited;
 
-	Renderers.Clear;
-
 	sx := NewSize.X div Trunc(OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
 	sy := NewSize.Y div OverscanRect.Height;
 	Scale := Max(2, Min(sx, sy));
 
 	if (SDL_GetWindowFlags(Video.Window) and SDL_WINDOW_MAXIMIZED) = 0 then
 	begin
-		sx := Trunc(Scale * OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
+		sx := Scale * Trunc(OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
 		sy := Scale * OverscanRect.Height;
 		SDL_SetWindowSize(Video.Window, sx, sy);
 	end;
 
+	Renderers.Clear;
 	InitRendering;
 	PixelScalingChanged;
 end;

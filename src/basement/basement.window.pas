@@ -30,15 +30,16 @@ type
 
 	TBasementInitSettings = packed record
 		X, Y:           Integer;
-		Width, Height:  Word;
-//		FrameBufferWidth,
-//		FrameBufferHeight: Word;
-		MaxScale:       Byte;
+		//Width, Height,
+		FrameBufferWidth,
+		FrameBufferHeight: Word;
+		Scale:          Byte;
 		VSyncMode:      Byte;
 		Framerate:      Double;
 		AspectRatioWidthMultiplier:	Single;
 		VSyncLimits:    TMinMax;
 		FullScreen:     Boolean;
+		Maximized:      Boolean;
 		ScalingQuality: Boolean; // nearest/linear
 		HighPriority:   Boolean;
 		CloseOnAltF4:   Boolean;
@@ -198,7 +199,7 @@ var
 	w, h: Integer;
 	R: TSDL_Rect;
 begin
-	if MaxScale = 0 then MaxScale := Max(Settings.MaxScale, 1);
+	if MaxScale = 0 then MaxScale := High(Byte); //Max(Settings.MaxScale, 1);
 	{$IFNDEF DISABLE_SDL2_2_0_5}
 	if Video.NewSDL then
 		SDL_GetDisplayUsableBounds({SDL_GetWindowDisplayIndex(Video.Window)}0, @R)
@@ -472,8 +473,8 @@ begin
 
 	if Initialized then Renderers.Clear;
 
-	screenW := Settings.Width;
-	screenH := Settings.Height;
+	screenW := Settings.FrameBufferWidth; //Max(Settings.Width, Settings.FrameBufferWidth);
+	screenH := Settings.FrameBufferHeight; //Max(Settings.Height, Settings.FrameBufferHeight);
 	fbx := screenW;
 	fby := screenH;
 
@@ -493,7 +494,7 @@ begin
 		Video.NewSDL := sdlVersion.patch >= 5; // we want SDL 2.0.5 or newer
 		Video.LibraryVersion := Format('%d.%d.%d',
 			[sdlVersion.major, sdlVersion.minor, sdlVersion.patch]);
-//		LogIfDebug('Loaded SDL ' + Video.LibraryVersion);
+		//LogIfDebug('Loaded SDL ' + Video.LibraryVersion);
 	end;
 
 	Video.DesiredFramerate := Settings.Framerate;
@@ -580,12 +581,11 @@ begin
 	end;
 
 	// make sure not to exceed display bounds
-	Scale := GetMaxScaling;
-	//if Scale <> Settings.MaxScale then
-	begin
-		sx := Trunc(screenW * Scale * Settings.AspectRatioWidthMultiplier);
-		sy := screenH * Scale;
-	end;
+	i := GetMaxScaling(Scale);
+	if (Scale = 0) or (Scale > i) then
+		Scale := i;
+	sx := Trunc(screenW * Scale * Settings.AspectRatioWidthMultiplier);
+	sy := screenH * Scale;
 
 	Video.Window := SDL_CreateWindow(PAnsiChar(Settings.Caption),
 		GetWindowPosValue(Settings.X), GetWindowPosValue(Settings.Y),
@@ -710,7 +710,7 @@ begin
 			if (dm.refresh_rate in [48..52]) and (dm.w <= sx) and (dm.h <= sy) then
 			begin
 				CustomRes50 := dm;
-				LogDebug(Format('50Hz custom mode: %d * %d @ %d Hz', [dm.w, dm.h, dm.refresh_rate]));
+				LogDebug(Format('50Hz custom mode: %d*%d @ %dHz', [dm.w, dm.h, dm.refresh_rate]));
 				Break;
 			end;
 		end;
@@ -722,7 +722,7 @@ begin
 			if (dm.refresh_rate in [58..62]) and (dm.w <= sx) and (dm.h <= sy) then
 			begin
 				CustomRes60 := dm;
-				LogDebug(Format('60Hz custom mode: %d * %d @ %d Hz', [dm.w, dm.h, dm.refresh_rate]));
+				LogDebug(Format('60Hz custom mode: %d*%d @ %dHz', [dm.w, dm.h, dm.refresh_rate]));
 				Break;
 			end;
 		end;
@@ -821,7 +821,7 @@ begin
 		//SDL_GetDesktopDisplayMode(0, @DispMode);
 		//SDL_SetWindowDisplayMode(Video.Window, @DispMode);
 
-		h := GetMaxScaling;
+		h := GetMaxScaling(Scale);
 		w := Trunc(OverscanRect.Width * h * Settings.AspectRatioWidthMultiplier);
 		h := OverscanRect.Height * h;
 
@@ -938,6 +938,8 @@ begin
 	ConfigPath := IncludeTrailingPathDelimiter(ConfigPath);
 	ForceDirectories(ConfigPath);}
 
+	Scale := Settings.Scale;
+
 	GamePads := TFPList.Create;
 
 	Logo := TBitmap32.Create(1, 1);
@@ -1050,13 +1052,14 @@ initialization
 
 	with BasementOptions do
 	begin
-		Width  := 320;
-		Height := 200;
+		FramebufferWidth  := 320;
+		FramebufferHeight := 200;
+		Scale := 0;
 
 		X := WINDOWPOS_CENTERED;
 		Y := WINDOWPOS_CENTERED;
 		FullScreen := False;
-		MaxScale := 3;
+		Maximized := False;
 		AspectRatioWidthMultiplier := 1;
 		Overscan := Types.Rect(0, 0, 0, 0);
 

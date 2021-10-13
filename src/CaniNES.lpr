@@ -60,14 +60,10 @@ begin
 
 	with BasementOptions do
 	begin
-		{$IFDEF CPU32} Caption := APPNAME; {$ENDIF}
-		{$IFDEF CPU64} Caption := APPNAME + ' x64'; {$ENDIF}
+		{$IFDEF CPU64} Caption := APPNAME; {$ELSE} Caption := APPNAME + ' x64'; {$ENDIF}
 
-		Width  := NES_RESOLUTION_X;
-		Height := NES_RESOLUTION_Y;
-
-		X := Configuration.Display.Window.X;
-		Y := Configuration.Display.Window.Y;
+		FramebufferWidth  := NES_RESOLUTION_X;
+		FramebufferHeight := NES_RESOLUTION_Y;
 
 		GetSettings(@BasementOptions);
 	end;
@@ -166,7 +162,7 @@ begin
 
 	Configuration.Display.Window.X := Window.Video.Window.x;
 	Configuration.Display.Window.Y := Window.Video.Window.y;
-	Configuration.Display.CRT.Enabled := CRTRenderer.Enabled;
+	Configuration.Display.Window.Scale := Window.Scale;
 
 	InfoBox.Free;
 	Menu.Free;
