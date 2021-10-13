@@ -1286,7 +1286,7 @@ end;
 
 procedure TNESWindow.OnWindowResized(NewSize: Types.TPoint);
 var
-	sx, sy: Integer;
+	i, sx, sy: Integer;
 begin
 	inherited;
 
@@ -1301,7 +1301,9 @@ begin
 		SDL_SetWindowSize(Video.Window, sx, sy);
 	end;
 
-	Renderers.Clear;
+	for i := Renderers.Count-1 downto 1 do
+		Renderers.Delete(i);
+
 	InitRendering;
 	PixelScalingChanged;
 end;
