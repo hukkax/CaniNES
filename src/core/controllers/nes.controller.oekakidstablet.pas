@@ -28,7 +28,7 @@ implementation
 
 uses
 	Math, Basement.Window,
-	NES.Config, NES.Console, NES.InputManager;
+	NES.Config, NES.InputManager;
 
 // ================================================================================================
 // TOekaKidsTablet

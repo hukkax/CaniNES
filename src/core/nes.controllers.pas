@@ -470,11 +470,10 @@ end;
 
 function TBaseControlDevice.IsPressed(bit: Byte): Boolean;
 var
-	n, BitMask: Byte;
+	BitMask: Byte;
 begin
 	EnsureCapacity(bit);
 	BitMask := 1 shl (bit mod 8);
-	n := GetByteIndex(bit);
 	Result := (State[GetByteIndex(bit)] and BitMask) <> 0;
 end;
 
