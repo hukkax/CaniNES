@@ -909,14 +909,14 @@ end;
 procedure TFreeTypeFontCollection.AddFolder(AFolder: string;
   AIncludeSubdirs: Boolean = false);
 var
-  files: TStringListUTF8Fast;
+  files: TStringList{UTF8Fast};
   i: integer;
 begin
   AFolder := ExpandFileName(AFolder);
   if (length(AFolder) <> 0) and (AFolder[length(AFolder)] <> PathDelim) then
     AFolder += PathDelim;
 
-  files := TStringListUTF8Fast.Create;
+  files := TStringList{UTF8Fast}.Create;
   BeginUpdate;
   try
     FindAllFiles(files, AFolder, '*.ttf', AIncludeSubdirs);
@@ -944,7 +944,7 @@ begin
   begin
     with TCustomFontCollectionItem(enumerator.Current.Data) do
     begin
-      if LazStartsStr(AFolder, Filename) then
+      if Filename.StartsWith(AFolder) then
         toBeDeleted.Add(Filename);
     end;
   end;
