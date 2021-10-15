@@ -618,11 +618,6 @@ begin
 		Exit;
 	end;
 
-	Settings.MinScale := Max(1, Settings.MinScale);
-	SDL_SetWindowMinimumSize(Video.Window,
-		Trunc(screenW * Settings.MinScale * Settings.AspectRatioWidthMultiplier),
-		screenH * Settings.MinScale);
-
 	Video.Renderer := SDL_CreateRenderer(Video.Window, -1, rendererFlags);
 	if (Video.Renderer = nil) and (Video.HaveVSync) then
 	begin
@@ -660,6 +655,11 @@ begin
 			SDL_RenderSetIntegerScale(Video.Renderer, SDL_FALSE);
 	end;
 	{$ENDIF}
+
+	Settings.MinScale := Max(1, Settings.MinScale);
+	SDL_SetWindowMinimumSize(Video.Window,
+		Trunc(screenW * Settings.MinScale * Settings.AspectRatioWidthMultiplier),
+		screenH * Settings.MinScale);
 
 	Video.Texture := SDL_CreateTexture(Video.Renderer,
 		UInt32(SDL_PIXELFORMAT_ARGB8888), SInt32(SDL_TEXTUREACCESS_STREAMING), fbx, fby);
