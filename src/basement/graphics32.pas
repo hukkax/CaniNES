@@ -316,7 +316,7 @@ end;
 function Bitmap32FromData(Width, Height: Word; Data: PCardinal): TBitmap32;
 begin
 	Result := TBitmap32.Create(Width, Height);
-	Move(Data^, Result.Bits[0], Width * 4 * Height - 1);
+	Move(Data^, Result.Bits[0], Width * 4 * Height);
 end;
 
 { ============================================================================}
@@ -776,9 +776,9 @@ end;
 procedure TBitmap32.SetSize(W, H: Cardinal);
 begin
 	if (W = Width) and (H = Height) then Exit;
-	Width  := W;
-	Height := H;
-	SetLength(Bits, W * H);
+	Width  := Max(1, W);
+	Height := Max(1, H);
+	SetLength(Bits, Width * Height);
 	ResetClipRect;
 	Changed;
 end;
