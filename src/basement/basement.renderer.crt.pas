@@ -340,8 +340,11 @@ begin
 	if (Scale >= 3) and (Options.ScanlineBloom >= 0.01) then
 	begin
 		DR.x := 0;
-		DR.y := Trunc(Scale / 2 * Options.ScanlineBloom);
-		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 22 * Options.ScanlineBloom)));
+		DR.y := 1;
+		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 190 * Options.ScanlineBloom)));
+		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
+		DR.y := -1;
+		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 70 * Options.ScanlineBloom)));
 		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
 	end;
 
