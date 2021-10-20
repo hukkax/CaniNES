@@ -132,12 +132,12 @@ begin
 			SDL_SetTextureAlphaMod(Texture, A);
 
 		SDL_BLENDMODE_MOD:
-		begin
 			SDL_SetTextureColorMod(Texture, A, A, A);
-			{Brightness := Brightness + 1.5;
-			for Y := 0 to Height-1 do
-			for X := 0 to Width-1 do
-				Tmp.Pixel[X,Y] := Graphics32.Brightness(Tmp.Pixel[X,Y], Brightness);}
+
+		SDL_BLENDMODE_MUL:
+		begin
+			SDL_SetTextureAlphaMod(Texture, A);
+			SDL_SetTextureColorMod(Texture, A, A, A);
 		end;
 	end;
 end;

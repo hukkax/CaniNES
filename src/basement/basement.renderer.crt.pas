@@ -40,12 +40,6 @@ type
 			ScanlineOpacity: Double;
 			MaskOpacity:     Double;
 
-			// Simply changes the color modulation values of the
-			// Mask overlay blit (thus MaskEnabled must be True).
-			// Lower values increase blurriness but darken the image.
-			// Higher values sharpen and brighten the image.
-			BrightAndSharp: Double; // 0..1
-
 			// This is a simple semitransparent, vertically offset blit of
 			// the framebuffer onto itself. Increases brightness slightly.
 			ScanlineBloom: Double;
@@ -79,9 +73,9 @@ type
 	end;
 
 const
-	COL_MASK_R = $FFCC0000;
-	COL_MASK_G = $FF00AA00;
-	COL_MASK_B = $FF0000CC;
+	COL_MASK_R = $FFFF0000;
+	COL_MASK_G = $FF00FF00;
+	COL_MASK_B = $FF0000FF;
 
 	// The default image used for MaskBitmap
 	DefaultMaskData: array[0..3*6-1] of Cardinal = (
@@ -133,7 +127,6 @@ begin
 		HorizontalBlur := 2;
 		ScanlineOpacity := 0.5;
 		MaskOpacity := 0.1;
-		BrightAndSharp := 0.85; // 0=blurriest and darkest, 1.0=sharpest and brightest
 		ExtraContrast := 0;
 		NoiseOpacity := 0;
 	end;
@@ -240,7 +233,7 @@ begin
 				Inc(DR.h, MaskBitmap.Height);
 
 			Overlay2 := CreateTiledTexture(Renderer,
-				Tmp, DR.w, DR.h, SDL_BLENDMODE_BLEND, MaskOpacity);
+				Tmp, DR.w, DR.h, SDL_BLENDMODE_MUL, MaskOpacity);
 			Tmp.Free;
 		end;
 
@@ -282,20 +275,10 @@ begin
 end;
 
 procedure TCRTRenderer.OptionsChanged;
-var
-	i: Integer;
 begin
-	if Overlay2 <> nil then
-	begin
-		i := Min(Trunc(Options.BrightAndSharp * 255), 255);
-		SDL_SetTextureColorMod(Overlay2, i,i,i);
-		SetBlending(Overlay2, SDL_BLENDMODE_BLEND, Options.MaskOpacity);
-	end;
-
-	if Overlay3 <> nil then
-		SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);
-
 	SetBlending(Overlay1, SDL_BLENDMODE_BLEND, Options.ScanlineOpacity);
+	SetBlending(Overlay2, SDL_BLENDMODE_MUL, Options.MaskOpacity);
+	SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);
 end;
 
 procedure TCRTRenderer.Render;

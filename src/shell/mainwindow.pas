@@ -730,7 +730,6 @@ begin
 			Options.ScanlineBloom          := ScanlineBloom;
 			Options.DotCrawlSpeed          := DotCrawlSpeed;
 			Options.HorizontalBlur         := HorizontalBlur;
-			Options.BrightAndSharp         := BrightAndSharp;
 			Options.ExtraContrast          := ExtraContrast;
 			Options.EnlargeMaskAtZoomLevel := EnlargeMaskAtZoomLevel;
 		end;
