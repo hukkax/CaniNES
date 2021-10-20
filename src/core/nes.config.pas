@@ -545,17 +545,17 @@ begin
 	Cfg.AddBoolean(Sect, 'Enabled',            @Display.CRT.Enabled,            False)
 	.SetInfo('Enable filter', cfgRendererCRT);
 
-	Cfg.AddFloat(Sect,   'ScanlineOpacity', @Display.CRT.ScanlineOpacity,  0.5)
+	Cfg.AddFloat(Sect,   'ScanlineOpacity', @Display.CRT.ScanlineOpacity,  0.7)
 	.SetInfo('Scanline opacity', cfgRendererCRT, 0.0, 1.0, 0.05);
-	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom, 1.3)
-	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 2.0, 0.1);
-	Cfg.AddFloat(Sect,   'MaskOpacity',     @Display.CRT.MaskOpacity,      0.3)
+	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom, 0.25)
+	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 1.0, 0.05);
+	Cfg.AddFloat(Sect,   'MaskOpacity',     @Display.CRT.MaskOpacity,      0.4)
 	.SetInfo('Mask opacity', cfgRendererCRT,     0.0, 1.0, 0.05);
-	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 9);
+	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 5);
 //	.SetInfo('Enlarge mask at zoom level', cfgRendererCRTReinit);
 	Cfg.AddFloat(Sect,   'DotCrawlSpeed',      @Display.CRT.DotCrawlSpeed,  0.50)
 	.SetInfo('Dot crawl speed', cfgRendererCRT,  0.0, 5.0, 0.1);
-	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,  50)
+	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,  80)
 	.SetInfo('Extra contrast', cfgRendererCRT);
 	Cfg.AddByte(Sect,    'NoiseAmount',        @Display.CRT.NoiseAmount,    8)
 	.SetInfo('Noise amount', cfgRendererCRT, 0, 99, [], nil, '%d%%');
