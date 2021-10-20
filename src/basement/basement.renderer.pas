@@ -43,7 +43,9 @@ type
 	function AddRenderer(Renderer: TRenderer): Boolean;
 	function RemoveRenderer(Renderer: TRenderer): Boolean;
 	function CreateTiledTexture(Renderer: PSDL_Renderer; const Tile: TBitmap32;
-	         Width, Height: Word; Brightness: Single = 1.0): PSDL_Texture;
+	         Width, Height: Word; BlendMode: TSDL_BlendMode;
+	         Brightness: Single = 1.0): PSDL_Texture;
+	procedure SetBlending(Texture: PSDL_Texture; BlendMode: TSDL_BlendMode; Brightness: Single = 1.0);
 
 var
 	Renderers: TFPGObjectList<TRenderer>;
@@ -85,7 +87,8 @@ begin
 end;
 
 function CreateTiledTexture(Renderer: PSDL_Renderer; const Tile: TBitmap32;
-	Width, Height: Word; Brightness: Single = 1.0): PSDL_Texture;
+	Width, Height: Word; BlendMode: TSDL_BlendMode;
+	Brightness: Single = 1.0): PSDL_Texture;
 var
 	X, Y: Integer;
 	Tmp: TBitmap32;
@@ -108,18 +111,35 @@ begin
 		Inc(Y, Tile.Height);
 	end;
 
-	if Brightness <> 1.0 then
-	begin
-		for Y := 0 to Height-1 do
-		for X := 0 to Width-1 do
-			Tmp.Pixel[X,Y] := Graphics32.Brightness(Tmp.Pixel[X,Y], Brightness);
-	end;
-
 	SDL_UpdateTexture(Result, nil, @Tmp.Bits[0], Width*4);
-	SDL_SetTextureBlendMode(Result, SDL_BLENDMODE_MOD);
-	SDL_SetTextureColorMod(Result, 255, 255, 255);
-
 	Tmp.Free;
+
+	SetBlending(Result, BlendMode, Brightness);
+end;
+
+procedure SetBlending(Texture: PSDL_Texture; BlendMode: TSDL_BlendMode; Brightness: Single = 1.0);
+var
+	A: Integer;
+begin
+	if Texture = nil then Exit;
+
+	A := Min(255, Trunc(255 * Brightness));
+
+	SDL_SetTextureBlendMode(Texture, BlendMode);
+
+	case BlendMode of
+		SDL_BLENDMODE_BLEND:
+			SDL_SetTextureAlphaMod(Texture, A);
+
+		SDL_BLENDMODE_MOD:
+		begin
+			SDL_SetTextureColorMod(Texture, A, A, A);
+			{Brightness := Brightness + 1.5;
+			for Y := 0 to Height-1 do
+			for X := 0 to Width-1 do
+				Tmp.Pixel[X,Y] := Graphics32.Brightness(Tmp.Pixel[X,Y], Brightness);}
+		end;
+	end;
 end;
 
 // ================================================================================================

@@ -28,7 +28,7 @@ type
 		Options: record
 
 			// Enable or disable the overlay textures.
-			MaskEnabled: Boolean;
+			MaskEnabled:      Boolean;
 			ScanlinesEnabled: Boolean;
 
 			// Doubles the pixel size of the CRT mask overlay starting
@@ -37,8 +37,8 @@ type
 
 			// The brightness of the overlay images, applied while
 			// (re)generating the overlay texture.
-			ScanlineBrightness: Double;
-			MaskBrightness: Double;
+			ScanlineOpacity: Double;
+			MaskOpacity:     Double;
 
 			// Simply changes the color modulation values of the
 			// Mask overlay blit (thus MaskEnabled must be True).
@@ -79,43 +79,33 @@ type
 	end;
 
 const
+	COL_MASK_R = $FFCC0000;
+	COL_MASK_G = $FF00AA00;
+	COL_MASK_B = $FF0000CC;
+
 	// The default image used for MaskBitmap
 	DefaultMaskData: array[0..3*6-1] of Cardinal = (
-		$FFFFCDCD, $FFBDFBD9, $FFDDD5FF,
-		$FFFFCDCD, $FFBDFBD9, $FFDDD5FF,
-		$FFDDD5FF, $FFFFCDCD, $FFBDFBD9,
-		$FFDDD5FF, $FFFFCDCD, $FFBDFBD9,
-		$FFBDFBD9, $FFDDD5FF, $FFFFCDCD,
-		$FFBDFBD9, $FFDDD5FF, $FFFFCDCD
+		COL_MASK_R, COL_MASK_G, COL_MASK_B,
+		COL_MASK_R, COL_MASK_G, COL_MASK_B,
+		COL_MASK_B, COL_MASK_R, COL_MASK_G,
+		COL_MASK_B, COL_MASK_R, COL_MASK_G,
+		COL_MASK_G, COL_MASK_B, COL_MASK_R,
+		COL_MASK_G, COL_MASK_B, COL_MASK_R
 	 );
 
 	// The default image used for ScanlineBitmap
-	DefaultScanlineData: array[0..20*2-1] of Cardinal =
+	DefaultScanlineData: array[0..20-1] of Cardinal =
 	(
-		$FFFFEEFF, $FFE5FFF6,	// 2x2 pixel bitmap
-		$FF92609B, $FF609268,	// for 2X zoom
-
-		$FF65346E, $FF34653C,	// 2x3 pixel bitmap
-		$FFFFEEFF, $FFE5FFF6,	// for 3X zoom
-		$FFBE95BE, $FF8CBE9D,
-
-		$FF92609B, $FF609268,	// 2x4 pixel bitmap
-		$FFFFEEFF, $FFE5FFF6,	// for 4X zoom
-		$FFFFD6FF, $FFCDFFDE,
-		$FF65346E, $FF34653C,
-
-		$FFBF8DC8, $FF8DBF95,	// 2x5 pixel bitmap
-		$FFF1D2F1, $FFC9F1DA,	// for 5X zoom
-		$FFFFEBFF, $FFE2FFF3,
-		$FFE0B7E0, $FFAEE0BF,
-		$FF92609B, $FF609268,
-
-		$FF92609B, $FF609268,	// 2x6 pixel bitmap
-		$FFFFD6FF, $FFCDFFDE,	// for 6X zoom and further
-		$FFFFEEFF, $FFE5FFF6,
-		$FFFFD6FF, $FFCDFFDE,
-		$FF92609B, $FF609268,
-		$FF65346E, $FF34653C
+		// 1x2 pixel bitmap for 2X zoom
+		$00000000, $FF000000,
+		// 1x3 pixel bitmap for 3X zoom
+		$66000000, $00000000, $FF000000,
+		// 1x4 pixel bitmap for 4X zoom
+		$55000000, $00000000, $CC000000, $FF000000,
+		// 1x5 pixel bitmap for 5X zoom
+		$55000000, $00000000, $88000000, $CC000000, $FF000000,
+		// 1x6 pixel bitmap for 6X zoom and further
+		$44000000, $00000000, $66000000, $AA000000, $DD000000, $FF000000
 	);
 
 var
@@ -141,14 +131,14 @@ begin
 		ScanlineBloom := 0.0;
 		DotCrawlSpeed := 0.0;
 		HorizontalBlur := 2;
-		ScanlineBrightness := 1.15;
-		MaskBrightness := 1.18;
+		ScanlineOpacity := 0.5;
+		MaskOpacity := 0.1;
 		BrightAndSharp := 0.85; // 0=blurriest and darkest, 1.0=sharpest and brightest
 		ExtraContrast := 0;
 		NoiseOpacity := 0;
 	end;
 
-	Init;
+	//Init;
 end;
 
 destructor TCRTRenderer.Destroy;
@@ -226,11 +216,12 @@ begin
 			// Get the offset to the relevant scanlines bitmap
 			Y := GetScanlinePixY(Scale);
 			ScanlineBitmap.Free;
-			ScanlineBitmap := Bitmap32FromData(2, 20, @DefaultScanlineData[0]);
+			ScanlineBitmap := Bitmap32FromData(1, 20, @DefaultScanlineData[0]);
 			if (ScanlineBitmap <> nil) and (Y < ScanlineBitmap.Height) then
 			begin
-				Tmp := Bitmap32FromData(2, Scale, ScanlineBitmap.PixelPtr[0,Y]);
-				Overlay1 := CreateTiledTexture(Renderer, Tmp, DR.w, DR.h, ScanlineBrightness);
+				Tmp := Bitmap32FromData(1, Scale, ScanlineBitmap.PixelPtr[0,Y]);
+				Overlay1 := CreateTiledTexture(Renderer,
+					Tmp, DR.w, DR.h, SDL_BLENDMODE_BLEND, ScanlineOpacity);
 				Tmp.Free;
 			end;
 		end;
@@ -248,7 +239,8 @@ begin
 			if DotCrawlSpeed >= 0.01 then
 				Inc(DR.h, MaskBitmap.Height);
 
-			Overlay2 := CreateTiledTexture(Renderer, Tmp, DR.w, DR.h, MaskBrightness);
+			Overlay2 := CreateTiledTexture(Renderer,
+				Tmp, DR.w, DR.h, SDL_BLENDMODE_BLEND, MaskOpacity);
 			Tmp.Free;
 		end;
 
@@ -297,7 +289,13 @@ begin
 	begin
 		i := Min(Trunc(Options.BrightAndSharp * 255), 255);
 		SDL_SetTextureColorMod(Overlay2, i,i,i);
+		SetBlending(Overlay2, SDL_BLENDMODE_BLEND, Options.MaskOpacity);
 	end;
+
+	if Overlay3 <> nil then
+		SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);
+
+	SetBlending(Overlay1, SDL_BLENDMODE_BLEND, Options.ScanlineOpacity);
 end;
 
 procedure TCRTRenderer.Render;
@@ -321,9 +319,48 @@ begin
 	SDL_RenderSetScale(Renderer, 1.0, 1.0);
 	Scale := Window.Scale;
 
+	SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_BLEND);
+
+	// "Blurring"
+	if Scale > 1 then
+	begin
+		SDL_RenderGetViewport(Renderer, @DR);
+
+		// Crappy but cheap "horizontal blurring"
+		V := Options.HorizontalBlur;
+		if V > 0 then
+		begin
+			DR.y := 0;
+			DR.x := -1;
+			SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
+			SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
+			if V >= 2 then
+			begin
+				DR.x := V - 1;
+				SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
+				SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
+				if V >= 3 then
+				begin
+					DR.x := -2;
+					SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD div 2);
+					SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
+				end;
+			end;
+		end;
+	end;
+
 	// Render scanlines
 	if (Scale > 1) and (Options.ScanlinesEnabled) then
 		SDL_RenderCopy(Renderer, Overlay1, nil, nil);
+
+	// Simple vertical blur for larger zoom levels
+	if (Scale >= 3) and (Options.ScanlineBloom >= 0.01) then
+	begin
+		DR.x := 0;
+		DR.y := Trunc(Scale / 2 * Options.ScanlineBloom);
+		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 22 * Options.ScanlineBloom)));
+		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
+	end;
 
 	// Fake CRT mask
 	if Options.MaskEnabled then
@@ -342,45 +379,6 @@ begin
 			SDL_RenderCopy(Renderer, Overlay2, nil, nil);
 	end;
 
-	SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_BLEND);
-
-	// "Blurring"
-	if Scale > 1 then
-	begin
-		SDL_RenderGetViewport(Renderer, @DR);
-
-		// Crappy but cheap "horizontal blurring"
-		V := Options.HorizontalBlur;
-		if V > 0 then
-		begin
-			DR.y := 0;
-			DR.x := -2;
-			SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
-			SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
-			if V >= 2 then
-			begin
-				DR.x := V - 1;
-				SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
-				SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
-				if V >= 3 then
-				begin
-					DR.x := V + 1;
-					SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD div 2);
-					SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
-				end;
-			end;
-		end;
-
-	end;
-
-	// Also a simple vertical blur for larger zoom levels
-	if (Scale >= 3) and (Options.ScanlineBloom >= 0.01) then
-	begin
-		DR.x := 0;
-		DR.y := Trunc(Scale / 2 * Options.ScanlineBloom);
-		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 22 * Options.ScanlineBloom)));
-		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
-	end;
 
 	if Options.NoiseOpacity > 0 then
 	begin
@@ -388,7 +386,6 @@ begin
 		DR.h := Window.Settings.FrameBufferHeight;
 		DR.x := Random(NoiseBitmap.Width  - DR.w);
 		DR.y := Random(NoiseBitmap.Height - DR.h);
-		SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);
 		SDL_RenderCopy(Renderer, Overlay3, @DR, nil);
 	end;
 

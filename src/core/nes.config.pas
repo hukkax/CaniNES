@@ -112,14 +112,12 @@ type
 
 	TFilterCRTConfig = record
 		Enabled:                Boolean;
-		MaskEnabled:            Boolean;
-		ScanlinesEnabled:       Boolean;
 		ScanlineBloom:          Double;
 		DotCrawlSpeed:          Double;
 		NoiseAmount:            Byte;
 		HorizontalBlur:         Byte;
-		ScanlineBrightness:     Double;
-		MaskBrightness:         Double;
+		ScanlineOpacity:        Double;
+		MaskOpacity:            Double;
 		BrightAndSharp:         Double;
 		ExtraContrast:          Byte;
 		EnlargeMaskAtZoomLevel: Byte;
@@ -548,28 +546,24 @@ begin
 	Cfg.AddBoolean(Sect, 'Enabled',            @Display.CRT.Enabled,            False)
 	.SetInfo('Enable filter', cfgRendererCRT);
 
-	Cfg.AddBoolean(Sect, 'ScanlinesEnabled',   @Display.CRT.ScanlinesEnabled,   True)
-	.SetInfo('Enable scanlines', cfgRendererCRT);
-	Cfg.AddFloat(Sect,   'ScanlineBrightness', @Display.CRT.ScanlineBrightness, 1.3)
-	.SetInfo('Scanline brightness', cfgRendererCRTReinit, 0.0, 2.0, 0.1);
-	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom,      1.0)
-	.SetInfo('Scanline bloom', cfgRendererCRT, 0.0, 2.0, 0.1);
-	Cfg.AddBoolean(Sect, 'MaskEnabled',        @Display.CRT.MaskEnabled,        True)
-	.SetInfo('Enable mask', cfgRendererCRT);
-	Cfg.AddFloat(Sect,   'MaskBrightness',     @Display.CRT.MaskBrightness,     1.5)
-	.SetInfo('Mask brightness', cfgRendererCRTReinit, 0.0, 5.0, 0.1);
-	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 2)
-	.SetInfo('Enlarge mask at zoom level', cfgRendererCRTReinit);
-	Cfg.AddFloat(Sect,   'DotCrawlSpeed',      @Display.CRT.DotCrawlSpeed,      0.5)
-	.SetInfo('Dot crawl speed', cfgRendererCRT, 0.0, 5.0, 0.1);
-	Cfg.AddFloat(Sect,   'BrightAndSharp',     @Display.CRT.BrightAndSharp,     1.0)
+	Cfg.AddFloat(Sect,   'ScanlineOpacity', @Display.CRT.ScanlineOpacity,  0.5)
+	.SetInfo('Scanline opacity', cfgRendererCRT, 0.0, 1.0, 0.05);
+	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom, 1.3)
+	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 2.0, 0.1);
+	Cfg.AddFloat(Sect,   'MaskOpacity',     @Display.CRT.MaskOpacity,      0.3)
+	.SetInfo('Mask opacity', cfgRendererCRT,     0.0, 1.0, 0.05);
+	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 9);
+//	.SetInfo('Enlarge mask at zoom level', cfgRendererCRTReinit);
+	Cfg.AddFloat(Sect,   'DotCrawlSpeed',      @Display.CRT.DotCrawlSpeed,  0.0)
+	.SetInfo('Dot crawl speed', cfgRendererCRT,  0.0, 5.0, 0.1);
+	Cfg.AddFloat(Sect,   'BrightAndSharp',     @Display.CRT.BrightAndSharp, 0.8)
 	.SetInfo('Brightness/sharpness modifier', cfgRendererCRT, 0.0, 1.0, 0.1);
-	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,      60)
+	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,  75)
 	.SetInfo('Extra contrast', cfgRendererCRT);
-	Cfg.AddByte(Sect,    'NoiseAmount',        @Display.CRT.NoiseAmount,        0)
+	Cfg.AddByte(Sect,    'NoiseAmount',        @Display.CRT.NoiseAmount,    9)
 	.SetInfo('Noise amount', cfgRendererCRT, 0, 99, [], nil, '%d%%');
-	Cfg.AddByte(Sect,    'HorizontalBlur',     @Display.CRT.HorizontalBlur,     1)
-	.SetInfo('Horizontal blurring', cfgRendererCRT, 0, 6, []);
+	Cfg.AddByte(Sect,    'HorizontalBlur',     @Display.CRT.HorizontalBlur, 1)
+	.SetInfo('Horizontal blurring', cfgRendererCRT, 0, 3, []);
 
 	// -------------------------------------------------------
 

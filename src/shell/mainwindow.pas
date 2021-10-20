@@ -721,14 +721,15 @@ begin
 		Enabled := NES.Config.Configuration.Display.CRT.Enabled;
 		with NES.Config.Configuration.Display.CRT do
 		begin
-			Options.MaskEnabled            := MaskEnabled;
-			Options.ScanlinesEnabled       := ScanlinesEnabled;
+			Options.ScanlinesEnabled := ScanlineOpacity >= 0.05;
+			Options.MaskEnabled      := MaskOpacity >= 0.05;
+
+			Options.ScanlineOpacity        := ScanlineOpacity;
+			Options.MaskOpacity            := MaskOpacity * 0.5;
+			Options.NoiseOpacity           := NoiseAmount;
 			Options.ScanlineBloom          := ScanlineBloom;
 			Options.DotCrawlSpeed          := DotCrawlSpeed;
-			Options.NoiseOpacity           := NoiseAmount;
 			Options.HorizontalBlur         := HorizontalBlur;
-			Options.ScanlineBrightness     := ScanlineBrightness;
-			Options.MaskBrightness         := MaskBrightness;
 			Options.BrightAndSharp         := BrightAndSharp;
 			Options.ExtraContrast          := ExtraContrast;
 			Options.EnlargeMaskAtZoomLevel := EnlargeMaskAtZoomLevel;
@@ -1080,9 +1081,8 @@ begin
 	NTSCRenderer := TNTSCRenderer.Create(Self, 602, 240, 'NTSC');
 
 	CRTRenderer := TCRTRenderer.Create(Self, nil, 'CRT');
-
 	GetCRTRendererConfig;
-	CRTRenderer.OptionsChanged;
+	CRTRenderer.Init;
 
 	RendererChanged;
 
