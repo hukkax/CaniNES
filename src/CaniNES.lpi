@@ -1092,6 +1092,7 @@
       <Unit177>
         <Filename Value="shell/mainmenu/menuhandler.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuHandler"/>
       </Unit177>
       <Unit178>
         <Filename Value="core/nes.config.pas"/>

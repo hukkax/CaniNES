@@ -26,6 +26,7 @@ type
 		Kind:       TMenuEntryKind;
 		Caption,
 		Data:       AnsiString;
+		DataPtr:    Pointer;
 		IsFile,
 		IsFavourited,
 		IsLoaded,
@@ -1088,6 +1089,7 @@ begin
 	if (CurrentPage = nil) or (i < 0) then Exit;
 
 	i := Max(0, Min(i, CurrentPage.Items.Count-1));
+	if i = 0 then CurrentPage.Offset := 0;
 
 	if i <> CurrentPage.ItemIndex then
 	begin
@@ -1203,7 +1205,7 @@ begin
 	begin
 		if ShowAsWindow then
 		begin
-			if CurrentPage.ParentPage = MainPage then
+			if (CurrentPage.ParentPage = MainPage) and (not MainPage.FullScreen) then
 			begin
 				Show(False);
 				Exit;

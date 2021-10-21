@@ -17,10 +17,7 @@ type
 		procedure CmdOpenFile(Entry: TMenuEntry);
 		procedure CmdBrowseToParent(Entry: TMenuEntry);
 		procedure CmdBrowseToDirectory(Entry: TMenuEntry);
-		procedure CmdSetRomPath(Entry: TMenuEntry);
-		procedure CmdSetBoxArtPath(Entry: TMenuEntry);
-		procedure CmdSetSnapsPath(Entry: TMenuEntry);
-		procedure CmdSetTitlesPath(Entry: TMenuEntry);
+		procedure CmdSetPath(Entry: TMenuEntry);
 
 		{$IFDEF WINDOWS}
 		procedure CmdListDrives(Entry: TMenuEntry);
@@ -83,27 +80,10 @@ begin
 	end;
 end;
 
-procedure TFileBrowser.CmdSetRomPath(Entry: TMenuEntry);
+procedure TFileBrowser.CmdSetPath(Entry: TMenuEntry);
 begin
-	Configuration.Application.Paths.ROM := Directory;
-	BrowseTo(Directory);
-end;
-
-procedure TFileBrowser.CmdSetBoxArtPath(Entry: TMenuEntry);
-begin
-	Configuration.Application.Paths.Images.Boxart := Directory;
-	BrowseTo(Directory);
-end;
-
-procedure TFileBrowser.CmdSetSnapsPath(Entry: TMenuEntry);
-begin
-	Configuration.Application.Paths.Images.Snaps := Directory;
-	BrowseTo(Directory);
-end;
-
-procedure TFileBrowser.CmdSetTitlesPath(Entry: TMenuEntry);
-begin
-	Configuration.Application.Paths.Images.Titles := Directory;
+	if Entry.DataPtr <> nil then
+		PString(Entry.DataPtr)^ := Directory;
 	BrowseTo(Directory);
 end;
 
@@ -123,19 +103,22 @@ begin
 	end;
 end;
 
-{$IFDEF WINDOWS}
-
 procedure TFileBrowser.CmdListDrives(Entry: TMenuEntry);
 var
+	{$IFDEF WINDOWS}
 	Drive: Char;
 	DriveLetter: String;
 	OldMode: Word;
 	MaxFileNameLength, VolFlags, {%H-}SerNum: DWord;
 	Buf: array [0..MAX_PATH] of Char;
+	{$ENDIF}
 begin
 	Page.Items.Clear;
+	Page.AddEntry(STR_PAGE_PREV, 0, Palette[COLOR_MENU_BACKBUTTON], CmdBrowseToDirectory)
+		.Data := Directory;
+
+	{$IFDEF WINDOWS}
 	Page.HeaderCaption := 'Drives';
-	Page.AddBackCommand;
 
 	OldMode := SetErrorMode(SEM_FAILCRITICALERRORS);
 	try
@@ -154,10 +137,45 @@ begin
 		SetErrorMode(OldMode);
 	end;
 
+	Page.AddHeader('Browse to Path');
+
+	{$ELSE}
+	Page.HeaderCaption := 'Browse to Path';
+	{$ENDIF}
+
+	Page.AddEntry('Default ROM path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+		.Data := Configuration.Application.Paths.ROM;
+	Page.AddEntry('Palette file path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+		.Data := Configuration.Application.Paths.Palette;
+	Page.AddEntry('Audio recording path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+		.Data := Configuration.Application.Paths.AudioRecording;
+	//Page.AddEntry('Images: Box art', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+	//	.Data := Configuration.Application.Paths.Images.Boxart;
+	//Page.AddEntry('Images: Title screens', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+	//	.Data := Configuration.Application.Paths.Images.Titles;
+	//Page.AddEntry('Images: Ingame Screenshots', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+	//	.Data := Configuration.Application.Paths.Images.Snaps;
+
+	Page.AddHeader('Set Path');
+
+	Page.AddEntry('Set as default ROM path', 0, Palette[COLOR_FILE_EXTRA], CmdSetPath)
+		.DataPtr := @Configuration.Application.Paths.ROM;
+	Page.AddEntry('Set as palette file path', 0, Palette[COLOR_FILE_EXTRA], CmdSetPath)
+		.DataPtr := @Configuration.Application.Paths.Palette;
+	Page.AddEntry('Set as audio recording path', 0, Palette[COLOR_FILE_EXTRA], CmdSetPath)
+		.DataPtr := @Configuration.Application.Paths.AudioRecording;
+	Page.AddEntry('Set as box art path', 0,       Palette[COLOR_FILE_EXTRA], CmdSetPath)
+		.DataPtr := @Configuration.Application.Paths.Images.Boxart;
+	Page.AddEntry('Set as ingame screenshots path', 0,  Palette[COLOR_FILE_EXTRA], CmdSetPath)
+		.DataPtr := @Configuration.Application.Paths.Images.Snaps;
+	//Page.AddEntry('Set as Titlescreens path', 0, Palette[COLOR_FILE_EXTRA], CmdSetPath)
+	//	.DataPtr := @Configuration.Application.Paths.Images.Titles;
+
 	Menu.SwitchPage(Page);
 	Menu.SetItemIndex(0);
 end;
 
+{$IFDEF WINDOWS}
 procedure TFileBrowser.CmdBrowseToDrive(Entry: TMenuEntry);
 var
 	X: Integer;
@@ -169,7 +187,6 @@ begin
 		S := Copy(S, 1, X-1);
 	BrowseTo(S, ShiftDown);
 end;
-
 {$ENDIF}
 
 procedure TFileBrowser.CmdBrowseToParent(Entry: TMenuEntry);
@@ -193,10 +210,18 @@ procedure TFileBrowser.CmdBrowseToDirectory(Entry: TMenuEntry);
 var
 	S: String;
 begin
-	S := Entry.Caption;
-	S := S.Replace('<', '');
-	S := S.Replace('>', '');
-	BrowseTo(Directory + S, ShiftDown);
+	S := Entry.Data;
+	if (not S.IsEmpty) and (DirectoryExists(S)) then
+	begin
+		BrowseTo(S, ShiftDown);
+	end
+	else
+	begin
+		S := Entry.Caption;
+		S := S.Replace('<', '');
+		S := S.Replace('>', '');
+		BrowseTo(Directory + S, ShiftDown);
+	end;
 end;
 
 procedure TFileBrowser.BrowseTo(const Dir: String; ShowMappers: Boolean; AllowLoadRom: Boolean);
@@ -268,14 +293,17 @@ begin
 	Page.HeaderCaption := Directory;
 
 	{$IFDEF WINDOWS}
-	Page.AddEntry('[Drives]', 0, Palette[COLOR_FILE_DRIVES], CmdListDrives);
+	S := '[Drives and paths]';
+	{$ELSE}
+	S := '[Paths]';
 	{$ENDIF}
+	Page.AddEntry(S, 0, Palette[COLOR_FILE_DRIVES], CmdListDrives);
 
 	if Directory.CountChar(PathDelim) > 1 then
 		Page.AddEntry('[Parent directory]', 0, Palette[COLOR_FILE_PARENT], CmdBrowseToParent);
 
-	if (not PathIsZip) and (Directory <> Configuration.Application.Paths.ROM) then
-		Page.AddEntry('[Set as default ROM path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetRomPath);
+//	if (not PathIsZip) and (Directory <> Configuration.Application.Paths.ROM) then
+//		Page.AddEntry('[Set as default ROM path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetPath);
 
 	if Rescan then
 	begin
@@ -404,7 +432,7 @@ begin
 		end;
 
 	finally
-
+		{
 		// if we find some png images allow the option to set the boxart path
 		if Files.Count = 0 then
 		begin
@@ -424,6 +452,7 @@ begin
 					Page.AddEntry('[Set as Titlescreens path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetTitlesPath);
 			end;
 		end;
+		}
 
 		Files.Free;
 	end;
