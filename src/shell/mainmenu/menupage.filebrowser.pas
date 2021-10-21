@@ -85,25 +85,25 @@ end;
 
 procedure TFileBrowser.CmdSetRomPath(Entry: TMenuEntry);
 begin
-	Configuration.Application.DefaultROMPath := Directory;
+	Configuration.Application.Paths.ROM := Directory;
 	BrowseTo(Directory);
 end;
 
 procedure TFileBrowser.CmdSetBoxArtPath(Entry: TMenuEntry);
 begin
-	Configuration.Application.ImagePath_Boxart := Directory;
+	Configuration.Application.Paths.Images.Boxart := Directory;
 	BrowseTo(Directory);
 end;
 
 procedure TFileBrowser.CmdSetSnapsPath(Entry: TMenuEntry);
 begin
-	Configuration.Application.ImagePath_Snaps := Directory;
+	Configuration.Application.Paths.Images.Snaps := Directory;
 	BrowseTo(Directory);
 end;
 
 procedure TFileBrowser.CmdSetTitlesPath(Entry: TMenuEntry);
 begin
-	Configuration.Application.ImagePath_Titles := Directory;
+	Configuration.Application.Paths.Images.Titles := Directory;
 	BrowseTo(Directory);
 end;
 
@@ -235,7 +235,7 @@ begin
 			Directory := Dir
 		else
 		begin
-			Directory := Configuration.Application.DefaultROMPath;
+			Directory := Configuration.Application.Paths.ROM;
 			if not DirectoryExists(Directory) then
 				Directory := GetCurrentDir;
 		end;
@@ -274,7 +274,7 @@ begin
 	if Directory.CountChar(PathDelim) > 1 then
 		Page.AddEntry('[Parent directory]', 0, Palette[COLOR_FILE_PARENT], CmdBrowseToParent);
 
-	if (not PathIsZip) and (Directory <> Configuration.Application.DefaultROMPath) then
+	if (not PathIsZip) and (Directory <> Configuration.Application.Paths.ROM) then
 		Page.AddEntry('[Set as default ROM path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetRomPath);
 
 	if Rescan then
@@ -412,15 +412,15 @@ begin
 			Files := FindAllFiles(Directory, ImageFileExts, False);
 			if Files.Count > 10 then
 			begin
-				if Directory <> Configuration.Application.ImagePath_Boxart then
+				if Directory <> Configuration.Application.Paths.Images.Boxart then
 					Page.AddEntry('[Set as BoxArt path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetBoxArtPath);
 
 				if caLastIndex >= caSnaps then
-				if Directory <> Configuration.Application.ImagePath_Snaps then
+				if Directory <> Configuration.Application.Paths.Images.Snaps then
 					Page.AddEntry('[Set as Screenshots path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetSnapsPath);
 
 				if caLastIndex >= caTitles then
-				if Directory <> Configuration.Application.ImagePath_Titles then
+				if Directory <> Configuration.Application.Paths.Images.Titles then
 					Page.AddEntry('[Set as Titlescreens path]', 0, Palette[COLOR_FILE_EXTRA], CmdSetTitlesPath);
 			end;
 		end;

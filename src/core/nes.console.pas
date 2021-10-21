@@ -318,7 +318,7 @@ begin
 	if RomDirs.Count < 1 then
 	begin
 		//FindAllFiles(RomDirs, Configuration.Application.DefaultROMPath, RomFileExts, True);
-		FindAllDirectories(RomDirs, Configuration.Application.DefaultROMPath, False);
+		FindAllDirectories(RomDirs, Configuration.Application.Paths.ROM, False);
 
 		tmp2 := TStringList.Create;
 
@@ -336,7 +336,7 @@ begin
 			end;
 		end;
 
-		RomDirs.Insert(0, Configuration.Application.DefaultROMPath);
+		RomDirs.Insert(0, Configuration.Application.Paths.ROM);
 		RomDirs.AddStrings(tmp);
 		for i := 0 to RomDirs.Count-1 do
 			RomDirs[i] := IncludeTrailingPathDelimiter(RomDirs[i]);
@@ -955,7 +955,7 @@ begin
 	else
 		Fn := ChangeFileExt(ExtractFilename(LoadedFile), Ext);
 
-	Dir := Configuration.Application.RecordingPath;
+	Dir := Configuration.Application.Paths.AudioRecording;
 	if (Dir.IsEmpty) or (not DirectoryExists(Dir)) then
 		Dir := ConfigPath;
 

@@ -74,13 +74,18 @@ type
 		IPSAutoPatch:     0..2;    // Auto-apply IPS patches?
 		ShowFrameTime:    0..2;
 		DateTimeFormat:   String;
-		DefaultROMPath:   String;
-		RecordingPath:    String;
-		ImagePath_Boxart,
-		ImagePath_Snaps,
-		ImagePath_Titles: String;
 		LastROMFile:      String;  // Path to most recently opened ROM
 		MRU:              array[0..MRUcount-1] of String;
+		Paths: record
+			ROM,
+			AudioRecording,
+			Palette: String;
+			Images: record
+				Boxart,
+				Snaps,
+				Titles: String;
+			end;
+		end;
 	end;
 
 	// -----------------------------------------------
@@ -381,23 +386,20 @@ begin
 
 	// -------------------------------------------------------
 
+	Sect := 'Paths';
+
+	Cfg.AddString(Sect, 'ROM',              @Application.Paths.ROM);
+	Cfg.AddString(Sect, 'Palette',          @Application.Paths.Palette);
+	Cfg.AddString(Sect, 'Audio.Recordings', @Application.Paths.AudioRecording);
+	Cfg.AddString(Sect, 'Images.Boxart',    @Application.Paths.Images.Boxart);
+	Cfg.AddString(Sect, 'Images.Snaps',     @Application.Paths.Images.Snaps);
+	Cfg.AddString(Sect, 'Images.Titles',    @Application.Paths.Images.Titles);
+
+	// -------------------------------------------------------
+
 	Sect := 'Application';
 
-	Cfg.AddString(Sect, 'DefaultROMPath', @Application.DefaultROMPath);
-
 	Cfg.AddString(Sect, 'LastROMFile', @Application.LastROMFile);
-
-	Cfg.AddString(Sect, 'RecordingPath', @Application.RecordingPath);
-
-	Cfg.AddString(Sect, 'DateTimeFormat', @Application.DateTimeFormat,
-		'ddddd hh":"nn":"ss', False);
-
-	Cfg.AddString(Sect, 'ImagePath.Boxart', @Application.ImagePath_Boxart);
-	Cfg.AddString(Sect, 'ImagePath.Snaps',  @Application.ImagePath_Snaps);
-	Cfg.AddString(Sect, 'ImagePath.Titles', @Application.ImagePath_Titles);
-
-	Cfg.AddBoolean(Sect, 'HighPriority', @Application.HighPriority, False)
-	{$IFDEF WINDOWS}.SetInfo('Application task priority', cfgDefault, 0, 1, ['Normal', 'High']){$ENDIF};
 
 	Cfg.AddBoolean(Sect, 'RestoreROMOnStartup', @Application.RestoreROMOnStartup, False)
 	.SetInfo('Restore last ROM on startup', cfgDefault, 0, 1, ['No', 'Yes']);
@@ -411,8 +413,14 @@ begin
 	Cfg.AddByte(Sect, 'AutoPatching', @Application.IPSAutoPatch, 2)
 	.SetInfo('Auto-apply IPS patches', cfgDefault, 0, 2, ['No', 'Yes', 'Yes, use old CRC']);
 
+	Cfg.AddBoolean(Sect, 'HighPriority', @Application.HighPriority, False)
+	{$IFDEF WINDOWS}.SetInfo('Application task priority', cfgDefault, 0, 1, ['Normal', 'High']){$ENDIF};
+
 	Cfg.AddByte(Sect, 'ShowFrameTime', @Application.ShowFrameTime, 0)
 	.SetInfo('Info display', cfgDefault, 0, 2, ['Hidden', 'Small', 'Full']);
+
+	Cfg.AddString(Sect, 'DateTimeFormat', @Application.DateTimeFormat,
+		'ddddd hh":"nn":"ss', False);
 
 	// -------------------------------------------------------
 

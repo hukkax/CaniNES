@@ -235,7 +235,7 @@ begin
 		TMRUBrowser.Create;
 		TFileBrowser.Create(
 			AddPage('Load ROM', 'File Browser', MainPage),
-				Configuration.Application.DefaultROMPath);
+				Configuration.Application.Paths.ROM);
 
 		// done
 		//

@@ -154,9 +154,9 @@ begin
 	for i := caBoxArt to caLastIndex do
 	begin
 		case i of
-			caBoxArt: Dir := Configuration.Application.ImagePath_Boxart;
-			caSnaps:  Dir := Configuration.Application.ImagePath_Snaps;
-			caTitles: Dir := Configuration.Application.ImagePath_Titles;
+			caBoxArt: Dir := Configuration.Application.Paths.Images.Boxart;
+			caSnaps:  Dir := Configuration.Application.Paths.Images.Snaps;
+			caTitles: Dir := Configuration.Application.Paths.Images.Titles;
 			else      Dir := '';
 		end;
 		if Dir = '' then Continue;

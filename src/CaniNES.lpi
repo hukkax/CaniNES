@@ -1078,6 +1078,7 @@
       <Unit174>
         <Filename Value="shell/mainmenu/menupage.filebrowser.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.FileBrowser"/>
       </Unit174>
       <Unit175>
         <Filename Value="shell/mainmenu/menupage.mrubrowser.pas"/>
@@ -1086,6 +1087,7 @@
       <Unit176>
         <Filename Value="shell/mainmenu/mainmenu.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MainMenu"/>
       </Unit176>
       <Unit177>
         <Filename Value="shell/mainmenu/menuhandler.pas"/>
