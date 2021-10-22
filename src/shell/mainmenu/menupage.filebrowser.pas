@@ -145,10 +145,10 @@ begin
 
 	Page.AddEntry('Default ROM path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
 		.Data := Configuration.Application.Paths.ROM;
-	Page.AddEntry('Palette file path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
-		.Data := Configuration.Application.Paths.Palette;
-	Page.AddEntry('Audio recording path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
-		.Data := Configuration.Application.Paths.AudioRecording;
+	//Page.AddEntry('Palette file path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+	//	.Data := Configuration.Application.Paths.Palette;
+	//Page.AddEntry('Audio recording path', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
+	//	.Data := Configuration.Application.Paths.AudioRecording;
 	//Page.AddEntry('Images: Box art', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
 	//	.Data := Configuration.Application.Paths.Images.Boxart;
 	//Page.AddEntry('Images: Title screens', 0, Palette[COLOR_FILE_DRIVE], CmdBrowseToDirectory)
