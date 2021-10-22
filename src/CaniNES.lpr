@@ -77,11 +77,17 @@ begin
 
 	ROMPath := IncludeTrailingPathDelimiter(AppPath + 'rom');
 
+	if Configuration.Application.Paths.Palette.IsEmpty then
+		Configuration.Application.Paths.Palette := DataPath + 'palettes';
+	Configuration.Application.Paths.Palette :=
+		IncludeTrailingPathDelimiter(Configuration.Application.Paths.Palette);
+
 	Console := TConsole.Create(AppPath, Window.FrameBuffer);
 
-	if Configuration.Display.Palette.Filename <> '' then
+	if not Configuration.Display.Palette.Filename.IsEmpty then
 	begin
-		S := GetDataFile(Configuration.Display.Palette.Filename);
+		S := GetDataFile(Configuration.Application.Paths.Palette +
+			Configuration.Display.Palette.Filename);
 		if S <> '' then
 			NES_PPU.Palette.LoadFromFile(S);
 	end
@@ -89,7 +95,7 @@ begin
 	with Configuration.Display.Palette do
 	begin
 		NES_PPU.Palette.Generate(Saturation, HueShift, Contrast, Brightness, Gamma);
-		DebugLn('Generated NTSC palette.');
+		Log('Generated NTSC palette.');
 	end;
 
 	Window.UpdatePalette;

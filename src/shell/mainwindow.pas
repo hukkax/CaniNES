@@ -692,6 +692,14 @@ begin
 
 	NES_PPU.Palette.Editor.Changed;
 	NES_PPU.ConfigureNTSCFilter(Configuration.Display.NTSC);
+
+	if (Assigned(Console)) and (Assigned(NES_PPU)) then
+	begin
+		if NTSCRenderer.Enabled then
+			NES_PPU.FillNTSCbuffer(NTSCRenderer.FrameBuffer)
+		else
+			NES_PPU.FillFrameBuffer;
+	end;
 end;
 
 procedure TNESWindow.RendererChanged;

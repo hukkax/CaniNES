@@ -43,13 +43,14 @@ type
 	private
 		procedure SetRawColors;
 	public
+		Editor: TPaletteEditor;
 		Colors: TNESColors;
 		RawColors: array[0..63] of array[0..2] of Byte;
-		Editor: TPaletteEditor;
+		PaletteFileUsed: Boolean;
 
 		constructor Create; overload;
 
-		procedure LoadFromFile(const Filename: String);
+		function  LoadFromFile(const Filename: String): Boolean;
 		procedure Fill;
 		procedure Generate(saturation, hue_tweak, contrast, brightness, gamma: Double);
 	end;
@@ -92,11 +93,12 @@ end;
 
 // Loads a 64/512 entry RGB palette from file
 //
-procedure TNesPaletteClass.LoadFromFile(const Filename: String);
+function TNesPaletteClass.LoadFromFile(const Filename: String): Boolean;
 var
 	Pal: TBytes;
 	p, i, x: Integer;
 begin
+	Result := False;
 	i := FileToBytes(Filename, Pal{%H-});
 	if i < (64*3) then Exit;
 
@@ -120,6 +122,9 @@ begin
 		Fill;
 		Log('Loaded NES palette from %s.', [Filename]);
 	end;
+
+	PaletteFileUsed := True;
+	Result := True;
 end;
 
 // Generates an NTSC palette programmatically
@@ -128,6 +133,8 @@ procedure TNesPaletteClass.Generate(saturation, hue_tweak, contrast, brightness,
 var
 	p, i: Integer;
 begin
+	if PaletteFileUsed then Exit;
+
 	for p := 0 to 7 do    // emphasis bits
 	for i := 0 to 63 do   // palette index
 	begin

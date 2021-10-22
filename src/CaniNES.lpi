@@ -211,7 +211,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="179">
+    <Units Count="180">
       <Unit0>
         <Filename Value="CaniNES.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1062,6 +1062,7 @@
       <Unit170>
         <Filename Value="shell/mainmenu/menupage.bookmarkbrowser.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.BookmarkBrowser"/>
       </Unit170>
       <Unit171>
         <Filename Value="shell/mainmenu/menupage.cartinfo.pas"/>
@@ -1070,6 +1071,7 @@
       <Unit172>
         <Filename Value="shell/mainmenu/menupage.cheatbrowser.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.CheatBrowser"/>
       </Unit172>
       <Unit173>
         <Filename Value="shell/mainmenu/menupage.debuglog.pas"/>
@@ -1083,6 +1085,7 @@
       <Unit175>
         <Filename Value="shell/mainmenu/menupage.mrubrowser.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.MRUBrowser"/>
       </Unit175>
       <Unit176>
         <Filename Value="shell/mainmenu/mainmenu.pas"/>
@@ -1099,6 +1102,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="NES.Config"/>
       </Unit178>
+      <Unit179>
+        <Filename Value="shell/mainmenu/menupage.palette.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MenuPage.Palette"/>
+      </Unit179>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

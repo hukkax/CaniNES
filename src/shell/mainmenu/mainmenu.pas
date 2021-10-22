@@ -26,6 +26,7 @@ uses
 	MenuPage.CheatBrowser,
 	MenuPage.CartInfo,
 	MenuPage.BindingsEditor,
+	MenuPage.Palette,
 	MenuPage.MRUBrowser,
 	MenuPage.BookmarkBrowser,
 	MenuPage.DebugLog,
@@ -181,6 +182,9 @@ begin
 
 				Page.AddHeader('Palette');
 				Page.AddSettings('Palette.NTSC');
+				S := 'Palette presets';
+				TPalettePage.Create(AddPage(S, '', Page));
+				Page.AddPageEntry(S);
 
 				Page.AddHeader('Filters');
 				S := 'CRT simulation';

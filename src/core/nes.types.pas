@@ -27,6 +27,7 @@ const
 	ArchiveFileExts = '*.zip';
 	ImageFileExts   = '*.png;*.jpg;*.jpeg';
 	MovieFileExts   = '*.mmo;*.fm2;*.fm3'; // .bk2
+	PaletteFileExts = '*.pal';
 	RomFileExts     = '*.nes;*.fds' + ';' + ArchiveFileExts;
 	FileBrowserExts = RomFileExts + ';' + MovieFileExts;
 
