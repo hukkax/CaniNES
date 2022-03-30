@@ -191,7 +191,7 @@ implementation
 {$R-}
 
 uses
-	Math, SysUtils, FileUtils;
+	Math, SysUtils, FileUtils, TextOutput;
 
 { TConfigurationManager }
 
@@ -646,16 +646,19 @@ var
 	S: String;
 	Val: Cardinal;
 begin
+	PCardinal(Value)^ := DefaultValue;
 	S := Ini.ReadString(Section, Name, '');
 	if S <> '' then
 	begin
-		Val := Cardinal(StrToInt(S));
-		if (Val < Min) or (Val > Max) then
-			Val := DefaultValue;
-	end
-	else
-		Val := DefaultValue;
-	PCardinal(Value)^ := Val;
+		try
+			Val := Cardinal(StrToInt64(S));
+		except
+			Log('Error parsing config item of type Cardinal: ' + Format('"[%s] %s=%s"', [Section, Name, S]));
+			Exit;
+		end;
+		if (Val >= Min) and (Val <= Max) then
+			PCardinal(Value)^ := Val;
+	end;
 end;
 
 procedure TConfigItemCardinal.Save(const Ini: TIniFile);
