@@ -163,7 +163,6 @@ begin
 				Page.AddSetting('Renderer', 'Vsync');
 				Page.AddSetting('Renderer', 'AutoswitchResolution');
 				Page.AddSetting('Window', 'AspectRatio');
-				Page.AddSetting('Window', 'MaxScale');
 				Page.AddSetting('Renderer', 'ScalingMethod');
 				Page.AddSetting('GUI', 'BoxArtUpscale');
 
