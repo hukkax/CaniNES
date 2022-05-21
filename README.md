@@ -6,7 +6,7 @@ the Mesen emulator core, using the SDL2 framework.
 - Mesen is Copyright (C) 2014-2019 M. Bibaud, https://github.com/SourMesen/Mesen
 - Currently active fork by various contributors: https://github.com/NovaSquirrel/Mesen
 - nes_ntsc is Copyright (C) 2006-2007 Shay Green, http://www.slack.net/~ant/
-- FreePascal ports by Joel Toivonen (hukka) 2019-2021, http://hukka.ncn.fi
+- FreePascal ports by Joel Toivonen (hukka) 2019-2022, http://hukka.ncn.fi
 
 Donate to the original author of Mesen: [![Donate](https://www.mesen.ca/images/donate.png)](https://www.mesen.ca/Donate.php)
 
