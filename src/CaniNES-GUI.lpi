@@ -33,23 +33,23 @@
       </Resources>
     </General>
     <MacroValues Count="1">
-      <Macro1 Name="LCLWidgetType" Value="nogui"/>
+      <Macro1 Name="LCLWidgetType" Value="win32"/>
     </MacroValues>
     <BuildModes Count="4">
       <Item1 Name="Release-32bit" Default="True"/>
       <Item2 Name="Release-64bit">
         <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+          <Macro1 Name="LCLWidgetType" Value="win32"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\bin\$(TargetCPU)\canines"/>
+            <Filename Value="..\bin\$(TargetCPU)\canines-gui"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
-            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu"/>
+            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu;forms"/>
             <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -94,7 +94,8 @@
 -OpCOREAVX
 -Si
 -Sv
--dAUDIO"/>
+-dAUDIO
+-dUSE_LCL"/>
             <OtherDefines Count="1">
               <Define0 Value="AUDIO"/>
             </OtherDefines>
@@ -103,17 +104,17 @@
       </Item2>
       <Item3 Name="Debug">
         <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+          <Macro1 Name="LCLWidgetType" Value="win32"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\bin\$(TargetCPU)\canines-debug"/>
+            <Filename Value="..\bin\$(TargetCPU)\canines-gui-debug"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
-            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu"/>
+            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu;forms"/>
             <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -141,7 +142,8 @@
               <IgnoredMessages idx6060="True" idx5026="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True" idx3124="True" idx3123="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dDEBUG
--dAUDIO"/>
+-dAUDIO
+-dUSE_LCL"/>
             <OtherDefines Count="1">
               <Define0 Value="AUDIO"/>
             </OtherDefines>
@@ -150,17 +152,17 @@
       </Item3>
       <Item4 Name="Debug64">
         <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+          <Macro1 Name="LCLWidgetType" Value="win32"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\bin\$(TargetCPU)\canines-debug"/>
+            <Filename Value="..\bin\$(TargetCPU)\canines-gui-debug"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
-            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu"/>
+            <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu;forms"/>
             <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -188,7 +190,8 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG
--dAUDIO"/>
+-dAUDIO
+-dUSE_LCL"/>
             <OtherDefines Count="1">
               <Define0 Value="AUDIO"/>
             </OtherDefines>
@@ -196,7 +199,7 @@
         </CompilerOptions>
       </Item4>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="273601247289" Modes="Release-32bit,Release-64bit,Debug,Debug64" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+        <Item1 ID="647324950933" Modes="Release-32bit,Release-64bit,Debug,Debug64" Type="IDEMacro" MacroName="LCLWidgetType" Value="win32"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -214,7 +217,7 @@
     </RequiredPackages>
     <Units Count="181">
       <Unit0>
-        <Filename Value="CaniNES.lpr"/>
+        <Filename Value="CaniNES-GUI.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -1109,9 +1112,12 @@
         <UnitName Value="MenuPage.Palette"/>
       </Unit179>
       <Unit180>
-        <Filename Value="core/canines.main.pas"/>
+        <Filename Value="forms/form.main.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Canines.Main"/>
+        <ComponentName Value="FormMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Form.Main"/>
       </Unit180>
     </Units>
   </ProjectOptions>
@@ -1119,11 +1125,11 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\bin\$(TargetCPU)\canines"/>
+      <Filename Value="..\bin\$(TargetCPU)\canines-gui"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines"/>
-      <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu"/>
+      <OtherUnitFiles Value="core;core\utility;core\mappers;core\audioexp;shell;basement;basement\sdl2;basement\playroutines;core\controllers;shell\mainmenu;forms"/>
       <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -1170,10 +1176,8 @@
 -CfSSE2
 -Si
 -Sv
--dAUDIO"/>
-      <OtherDefines Count="1">
-        <Define0 Value="AUDIO"/>
-      </OtherDefines>
+-dAUDIO
+-dUSE_LCL"/>
     </Other>
   </CompilerOptions>
   <Debugging>

@@ -1,0 +1,21 @@
+object FormMain: TFormMain
+  Left = 510
+  Height = 720
+  Top = 30
+  Width = 768
+  AutoSize = True
+  Caption = 'CaniNES'
+  Menu = Menu
+  OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
+  OnShow = FormShow
+  Scaled = False
+  object Menu: TMainMenu
+    Left = 72
+    Top = 15
+    object miDummy: TMenuItem
+      Caption = 'Dummy'
+      Enabled = False
+    end
+  end
+end

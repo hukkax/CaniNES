@@ -23,6 +23,9 @@ const
 	MouseHideThreshold = 3;
 
 type
+	TMenuCreationCallback = procedure (Finished: Boolean) of Object;
+	TMenuUpLevelCallback  = procedure of Object;
+
 	TNESWindow = class(TWindow)
 	private
 		Controller: array[0..1] of TStandardControllerState;
@@ -37,9 +40,17 @@ type
 		procedure HideMenubar;
 		procedure UpdateCursor;
 	public
+		MenuBar:      TMenuBar;
 		FontFilePath: String;
 		Framecounter: Word;
 		Icons:        TBitmap32;
+
+		OnUpdateMenu:    TMenuCreationCallback;
+		OnAddSubMenu,
+		OnAddMenuItem:   TMenuItemAddCallback;
+		OnMenuUpLevel:   TMenuUpLevelCallback;
+		OnCheckMenuItem: TMenuItemCheckCallback;
+		OnReinitWindow:  TNotifyEvent;
 
 		procedure ROMLoaded;
 		procedure UpdateControllers;
@@ -48,7 +59,7 @@ type
 		procedure InitRendering;
 		procedure InitMenubar;
 		procedure UpdateMenus;
-		procedure ReinitWindow; override;
+		function  ReinitWindow: Boolean; override;
 
 		procedure UpdateOSD; inline;
 		procedure DrawIcon(Index: Byte; OldIcon: Byte = 255); inline;
@@ -108,7 +119,6 @@ var
 
 	CurrentIcon: Byte = 0;
 	IconOverlay: TOverlayRenderer;
-	MenuBar: TMenuBar;
 
 	{$IFDEF MEASURETIMING}
 	FrameTimer: TTimeMeasurer;
@@ -145,6 +155,8 @@ var
 	S: String;
 begin
 	inherited Create;
+
+	if QuitFlag then Exit;
 
 	Window := Self;
 
@@ -311,7 +323,8 @@ begin
 		if (Menubar.Hovering) or (Menu.Visible) then Exit;
 		Dec(Mouse.Timer);
 		if (Mouse.Timer = 0) or (not Mouse.InWindow) then
-			EnableMouse(MenuBar.RefreshActiveState or
+			EnableMouse(
+				{$IFNDEF USE_LCL}MenuBar.RefreshActiveState or{$ENDIF}
 				(ControllerUsesMouse and not Configuration.Input.Zapper.HidePointer));
 	end;
 end;
@@ -390,6 +403,7 @@ begin
 		end;
 		actPadSelect: Controller[Ctrl].Select := Pressed;
 
+		{$IFNDEF USE_LCL}
 		actMenubarFocus:
 			if Pressed then
 			begin
@@ -407,6 +421,7 @@ begin
 					HideMenubar;
 				UpdateCursor;
 			end;
+		{$ENDIF}
 
 		actAppExit:
 			if Pressed then
@@ -779,7 +794,9 @@ begin
 		cfgFullScreen:
 		begin
 			NES_APU.Stop;
+			{$IFNDEF USE_LCL}
 			SetFullScreen(Configuration.Display.Window.FullScreen);
+			{$ENDIF}
 		end;
 
 		cfgGUIAlign:
@@ -824,12 +841,14 @@ begin
 		if Menu.ProcessKey(Key, Shift, Pressed, Repeated) then
 			Exit;
 	end
+	{$IFNDEF USE_LCL}
 	else
 	if Menubar.Active then
 	begin
 		if Menubar.ProcessKey(Key, Shift, Pressed, Repeated) then
 			Exit;
-	end;
+	end
+	{$ENDIF};
 
 	if (Key = 0) or (Repeated) then Exit;
 
@@ -916,6 +935,7 @@ begin
 		ShowMouse;
 
 		Menubar.Hovering := False;
+		{$IFNDEF USE_LCL}
 		if not Menu.Visible then
 			if (MenuBar.RootMenu.ActiveItem = nil) or
 				(not MenuBar.RootMenu.Sticky) then
@@ -924,6 +944,7 @@ begin
 					Menubar.Active := False;
 					Menubar.RootMenu.Sticky := False;
 				end;
+		{$ENDIF}
 	end;
 end;
 
@@ -954,6 +975,7 @@ begin
 	if Menu.Visible then
 		Menu.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale))
 	else
+	{$IFNDEF USE_LCL}
 	if Menubar.Visible then
 	begin
 		if (Menubar.Active) or (UnScaledPos.Y < MenuRenderer.Font.GlyphHeight) then
@@ -963,6 +985,7 @@ begin
 		Menubar.OnMouseMove(Point(UnscaledPos.X*Scale, UnscaledPos.Y*Scale));
 	end
 	else
+	{$ENDIF}
 	begin
 		UnscaledPos.X := Trunc(UnscaledPos.X / Settings.AspectRatioWidthMultiplier);
 		InputManager.Mouse.Pos := UnscaledPos;
@@ -977,6 +1000,7 @@ begin
 	if Menu.Visible then
 		Menu.OnMouseButton(Button, Pressed)
 	else
+	{$IFNDEF USE_LCL}
 	if Menubar.Active then
 	begin
 		Menubar.OnMouseButton(Button, Pressed);
@@ -988,6 +1012,7 @@ begin
 	if (Pressed) and (Button = Basement.Window.mbRight) then
 		Perform(actMenubarFocus, Pressed)
 	else
+	{$ENDIF}
 	begin
 		InputManager.Mouse.Buttons[Button] := Pressed;
 		UpdateControllers;
@@ -1001,9 +1026,11 @@ begin
 		Menu.CurrentPage.Scroll(-WheelDelta.Y * 3); // scroll amount per wheel rotation
 		Menu.Draw;
 	end
+	{$IFNDEF USE_LCL}
 	else
 	if (MenuBar.Hovering) and (MenuBar.ActiveMenu <> nil) then
 		MenuBar.ActiveMenu.OnMouseWheel(WheelDelta.Y);
+	{$ENDIF}
 end;
 
 procedure TNESWindow.OnFileDropped(const Filename: String);
@@ -1032,8 +1059,10 @@ end;
 
 procedure TNESWindow.UpdateCursor;
 begin
+	{$IFNDEF USE_LCL}
 	SetSystemCursor(IfThen((not ControllerUsesMouse) or (Menubar.Active),
 		SDL_SYSTEM_CURSOR_ARROW, SDL_SYSTEM_CURSOR_CROSSHAIR));
+	{$ENDIF}
 end;
 
 procedure TNESWindow.ControllerSetupChanged;
@@ -1053,16 +1082,6 @@ begin
 	Console.ControlManager.PadVisualizationChanged;
 end;
 
-procedure TNESWindow.ReinitWindow;
-begin
-	MenuRenderer := nil;
-
-	GetSettings(@Settings);
-
-	SetupVideo;
-	InitRendering;
-end;
-
 procedure TNESWindow.RealignOverlays;
 var
 	M: Integer;
@@ -1074,6 +1093,22 @@ begin
 	PadOverlay.Align(Configuration.Display.GUI.OSD.Alignments.Pads, M);
 	IconOverlay.Align(Configuration.Display.GUI.OSD.Alignments.Icons, M);
 	InfoBox.Realign;
+end;
+
+function TNESWindow.ReinitWindow: Boolean;
+begin
+	MenuRenderer := nil;
+
+	if Assigned(OnReinitWindow) then OnReinitWindow(Self);
+
+	GetSettings(@Settings);
+	Tick := 0;
+
+	Result := SetupVideo;
+	if Result then
+		InitRendering
+	else
+		Close;
 end;
 
 procedure TNESWindow.InitRendering;
@@ -1148,13 +1183,25 @@ var
 	Root: TSubMenu;
 	i: Integer;
 	S: String;
+
+	procedure MenuUpLevel;
+	begin
+		if Assigned(OnMenuUpLevel) then OnMenuUpLevel;
+	end;
+
 begin
 	if Console = nil then Exit;
+
+	if Assigned(OnUpdateMenu) then
+		OnUpdateMenu(False);
 
 	MenuBar.Free;
 	MenuBar := TMenuBar.Create(MenuRenderer.FrameBuffer, MenuRenderer.Font);
 
 	Root := MenuBar.RootMenu;
+	MenuBar.OnAddItem    := OnAddMenuItem;
+	MenuBar.OnAddSubMenu := OnAddSubMenu;
+	MenuBar.OnCheckItem  := OnCheckMenuItem;
 
 	{File
 		Open
@@ -1178,6 +1225,7 @@ begin
 				AddItem(ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
 					actROMLoadFromMenu, Configuration.Application.MRU[i]);
 
+		MenuUpLevel;
 		Item := AddItem('&Favourites');
 		with Item.AddSubMenu(0) do
 		begin
@@ -1197,6 +1245,7 @@ begin
 						AddItem(ChangeFileExt(ExtractFilename(S), ''), actROMLoadFromMenu, S);
 		end;
 
+		MenuUpLevel;
 		AddSeparator;
 		Item := AddItem('&Save State', actStateSave);
 		Item := AddItem('&Load State', actStateLoad);
@@ -1290,6 +1339,8 @@ begin
 		AddItem('&About CaniNES'+Dots, actShowPage, 'About');
 	end;
 
+	if Assigned(OnUpdateMenu) then
+		OnUpdateMenu(True);
 end;
 
 procedure TNESWindow.OnWindowResized(NewSize: Types.TPoint);
@@ -1298,16 +1349,21 @@ var
 begin
 	inherited;
 
+	if NES_APU <> nil then
+		NES_APU.Stop;
+
 	sx := NewSize.X div Trunc(OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
 	sy := NewSize.Y div OverscanRect.Height;
 	Scale := Max(2, Min(sx, sy));
 
+	{$IFNDEF USE_LCL}
 	if (SDL_GetWindowFlags(Video.Window) and SDL_WINDOW_MAXIMIZED) = 0 then
 	begin
 		sx := Scale * Trunc(OverscanRect.Width * Settings.AspectRatioWidthMultiplier);
 		sy := Scale * OverscanRect.Height;
 		SDL_SetWindowSize(Video.Window, sx, sy);
 	end;
+	{$ENDIF}
 
 	for i := Renderers.Count-1 downto 1 do
 		Renderers.Delete(i);

@@ -44,6 +44,7 @@ type
 		Caption:     String;
 		KeyCaption:  String;
 		Data:        String;
+		MnemonicCaption: String;
 		Mnemonic:    Char;
 		MnemonicPos: Word;
 		ParentMenu:  TSubMenu;
@@ -66,7 +67,12 @@ type
 		constructor Create(AParent: TSubMenu; const ACaption: String; AAction: TAction = actNone);
 
 		property    Checked: Boolean read GetChecked write SetChecked;
+		property    IsCheckItem: Boolean read Flags.IsCheckbox;
+		property    IsSeparator: Boolean read Flags.IsSeparator;
 	end;
+
+	TMenuItemAddCallback = procedure(const SubMenu: TSubMenu; const Item: TMenuItem) of Object;
+	TMenuItemCheckCallback = procedure(const Item: TMenuItem; Checked: Boolean) of Object;
 
 	TSubMenu = class
 	private
@@ -138,6 +144,10 @@ type
 		Metrics:    TMenuMetrics;
 		MaxItemCount: Byte;
 
+		OnAddSubMenu,
+		OnAddItem:    TMenuItemAddCallback;
+		OnCheckItem:  TMenuItemCheckCallback;
+
 		function    ProcessKey(Key: Integer; Shift: TShiftState; Pressed, Repeated: Boolean): Boolean;
 		procedure   OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);
 		procedure   OnMouseMove(P: TPoint);
@@ -202,6 +212,7 @@ begin
 			Mnemonic := LowerCase(ACaption[X+2]);
 			MnemonicPos := X+1;
 		end;
+		MnemonicCaption := ACaption;
 		Caption := ACaption.Replace(MnemonicChar, '');
 	end
 	else
@@ -222,6 +233,9 @@ begin
 		SubMenu := TSubMenu.Create(ParentMenu, nID);
 	SubMenu.Caption := Self.Caption;
 	Result := SubMenu;
+
+	if Assigned(MenuBar.OnAddSubMenu) then
+		MenuBar.OnAddSubMenu(Result, Self);
 end;
 
 function TMenuItem.SubmenuActive: Boolean;
@@ -338,7 +352,11 @@ begin
 			Menubar.Recreated := False;
 			B := Configuration.ToggleBool(ValuePtr);
 			if not Menubar.Recreated then
-				Checked := B
+			begin
+				Checked := B;
+				if Assigned(Menubar.OnCheckItem) then
+					Menubar.OnCheckItem(Self, B);
+			end
 			else
 			begin
 				Menubar.Recreated := False;
@@ -448,12 +466,14 @@ var
 	var
 		XX: Integer;
 	begin
+		{$IFNDEF USE_LCL}
 		if Item.MnemonicPos > 0 then // underline glyph
 		begin
 			XX := X + ((Item.MnemonicPos-1) * Menubar.Font.GlyphWidth);
 			Buffer.HorzLineS(XX, Y+Menubar.Font.GlyphHeight, XX+Menubar.Font.GlyphWidth-1, colFg);
 		end;
 		Menubar.Font.DrawString(Buffer, X, Y, Item.GetDrawableCaption, colFg, Buffer.Width);
+		{$ENDIF}
 	end;
 
 var
@@ -476,8 +496,10 @@ begin
 		for Item in Items do
 			Item.DrawnState := misUndrawn;
 
+	{$IFNDEF USE_LCL}
 	if not Drawn then
 		Buffer.Clear(colBg);
+	{$ENDIF}
 
 	if Self = Menubar.RootMenu then
 	begin
@@ -492,17 +514,21 @@ begin
 			if State <> Item.DrawnState then
 			begin
 				// undraw selection box
+				{$IFNDEF USE_LCL}
 				if Item.DrawnState = misSelected then
 					Buffer.FillRectS(Item.Rect, colBg);
+				{$ENDIF}
 
 				Item.DrawnState := State;
 
 				Item.Rect := Bounds(X-Metrics.ROOTSPACING, 0, W+(Metrics.ROOTSPACING*2), H);
 
+				{$IFNDEF USE_LCL}
 				if (Menubar.Active) and (Item = ActiveItem) then
 					Buffer.DrawSelection(Item.Rect, Palette[COLOR_MENU_SELECTION]);
 
 				DrawCaption(Item, X, Y);
+				{$ENDIF}
 
 				if Item.SubMenu <> nil then
 					Item.SubMenu.Position := Point(Max(0, Item.Rect.Left-(Metrics.PADDING_X div 2)), Item.Rect.Bottom);
@@ -529,21 +555,26 @@ begin
 			if State <> Item.DrawnState then
 			begin
 				// undraw selection box
+				{$IFNDEF USE_LCL}
 				if Item.DrawnState = misSelected then
 					Buffer.FillRectS(Item.Rect, colBg);
+				{$ENDIF}
 
 				Item.DrawnState := State;
 
 				if Item.Flags.IsSeparator then
 				begin
 					Item.Rect := Bounds(0, Y, Buffer.Width-1, H);
+					{$IFNDEF USE_LCL}
 					Buffer.FillRectS(Bounds(Item.Rect.Left, Y + (H div 2) - 1, Item.Rect.Width, 2),
 						Palette[COLOR_MENU_BORDER]);
+					{$ENDIF}
 				end
 				else
 				begin
 					Item.Rect := Types.Rect(X-W, Y, Buffer.Width-W, Y+H);
 
+					{$IFNDEF USE_LCL}
 					if Item = ActiveItem then
 						Buffer.DrawSelection(Item.Rect, Palette[COLOR_MENU_SELECTION]);
 
@@ -565,14 +596,17 @@ begin
 							Buffer.Width - Metrics.PADDING_X - Menubar.Font.TextWidth(Item.KeyCaption),
 							Y, Item.KeyCaption, Palette[COLOR_MENU_SETTING], Buffer.Width);
 					end;
+					{$ENDIF}
 				end;
 			end;
 
 			Inc(Y, H);
 		end;
 
+		{$IFNDEF USE_LCL}
 		if not Drawn then
 			Buffer.ThickFrameRect(Buffer.BoundsRect, -2, Palette[COLOR_MENU_BORDER]);
+		{$ENDIF}
 	end;
 
 	if Self <> Menubar.RootMenu then
@@ -600,6 +634,7 @@ end;
 
 procedure TSubMenu.DrawTo(const DestBuffer: TBitmap32);
 begin
+	{$IFNDEF USE_LCL}
 	if Visible then
 	begin
 		Draw;
@@ -610,6 +645,7 @@ begin
 			DestBuffer.DropShadow(Bounds(Position.X, Position.Y, Buffer.Width, Buffer.Height),
 				Palette[COLOR_MENU_SHADOW], 5);
 	end;
+	{$ENDIF}
 end;
 
 procedure TSubMenu.Changed;
@@ -625,20 +661,29 @@ begin
 	Result.Data := AData;
 	if (AAction = actShowPage) and (AData.IsEmpty) then
 		Result.Data := Result.Caption.Replace(Dots, '');
+
+	if Assigned(MenuBar.OnAddItem) then
+		MenuBar.OnAddItem(Self, Result);
 end;
 
 function TSubMenu.AddSeparator: TMenuItem;
 begin
 	Result := TMenuItem.Create(Self, '');
+
+	if Assigned(MenuBar.OnAddItem) then
+		MenuBar.OnAddItem(Self, Result);
 end;
 
 function TSubMenu.AddCheckItem(const ACaption: String; const ValuePtr: PBoolean): TMenuItem;
 begin
-	Result := AddItem(ACaption);
+	Result := TMenuItem.Create(Self, ACaption, actNone);
 	Result.Flags.IsCheckbox := True;
 	Result.ValuePtr := ValuePtr;
 	if Result.MnemonicPos > 0 then
 		Inc(Result.MnemonicPos, 2);
+
+	if Assigned(MenuBar.OnAddItem) then
+		MenuBar.OnAddItem(Self, Result);
 end;
 
 procedure TSubMenu.SetScrollPos(i: Integer);
@@ -1076,10 +1121,13 @@ begin
 end;
 
 procedure TMenuBar.OnMouseButton(Button: Basement.Window.TMouseButton; Pressed: Boolean);
+{$IFNDEF USE_LCL}
 var
 	Menu: TSubMenu;
 	Item: TMenuItem;
+{$ENDIF}
 begin
+	{$IFNDEF USE_LCL}
 	if (Pressed) and (Button = mbLeft) then
 	begin
 		Menu := GetMenuAt(MousePos);
@@ -1094,18 +1142,25 @@ begin
 			Active := False;
 		Changed := True;
 	end;
+	{$ENDIF}
 end;
 
 procedure TMenuBar.OnMouseMove(P: TPoint);
 begin
 	// just memorize mouse movement, we don't want to redraw multiple times per frame
+	{$IFNDEF USE_LCL}
 	MousePos := P;
 	MouseMoved := True;
+	{$ENDIF}
 end;
 
 function TMenuBar.RefreshActiveState: Boolean;
 begin
+	{$IFNDEF USE_LCL}
 	Result := (Hovering) or ((RootMenu <> nil) and (RootMenu.ActiveItem <> nil));
+	{$ELSE}
+	Result := False;
+	{$ENDIF}
 	Active := Result;
 end;
 

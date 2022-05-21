@@ -38,6 +38,7 @@ type
 		VSyncMode:      Byte;
 		Framerate:      Double;
 		AspectRatioWidthMultiplier:	Single;
+		WinHandle:      Pointer;
 		VSyncLimits:    TMinMax;
 		FullScreen:     Boolean;
 		Maximized:      Boolean;
@@ -90,7 +91,7 @@ type
 
 		function 	GetMaxScaling(MaxScale: Byte = 0): Byte;
 		function 	SetupVideo: Boolean;
-		procedure	ReinitWindow; virtual;
+		function	ReinitWindow: Boolean; virtual;
 	public
 		Settings:		TBasementInitSettings;
 		Video:			TVideoInfo;
@@ -102,6 +103,8 @@ type
 
 		constructor Create;
 		destructor 	Destroy; override;
+		procedure	Initialize;
+		procedure	Uninitialize;
 		procedure	Close;
 
 		procedure	SetFullScreen(B: Boolean);
@@ -287,12 +290,16 @@ end;
 	begin
 		//SetTitle(Format('Key %d: %d, %d', [Key, Pressed.ToInteger, Repeated.ToInteger]));
 
+
 		if (Pressed) and (not Repeated) then
 		case Key of
 
+			{$IFNDEF USE_LCL}
 			// Exit program
 			SDLK_ESCAPE:
-				Close;
+				if Settings.WinHandle = nil then
+					Close;
+			{$ENDIF}
 
 			// Toggle fullscreen with Alt-Enter
 			SDLK_RETURN:
@@ -401,6 +408,7 @@ begin
 		//SDL_CONTROLLERAXISMOTION:
 			//OnJoyMotion(InputEvent.caxis.which, InputEvent.caxis.value);
 
+
 		SDL_WINDOWEVENT:
 			case InputEvent.window.event of
 		        SDL_WINDOWEVENT_ENTER:      OnMouseEnterLeave(True);
@@ -413,12 +421,14 @@ begin
 				SDL_WINDOWEVENT_HIDDEN:     Visible := False;
 
 				SDL_WINDOWEVENT_MAXIMIZED:
+				if Settings.WinHandle = nil then
 				begin
 					Video.IsMaximized := True;
 					Visible := True;
 				end;
 
 				SDL_WINDOWEVENT_RESTORED:
+				if Settings.WinHandle = nil then
 				begin
 					Video.IsMaximized := False;
 					Visible := True;
@@ -428,6 +438,7 @@ begin
 					OnWindowResized(Types.Point(
 						InputEvent.window.data1, InputEvent.window.data2));
 			end;
+
 
 		SDL_DROPFILE:
 			OnFileDropped(InputEvent.drop._file);
@@ -491,9 +502,10 @@ begin
 	Locked := True;
 	Visible := True;
 
-	if Initialized then Renderers.Clear;
+	if Initialized then
+		Renderers.Clear;
 
-	screenW := Settings.FrameBufferWidth; //Max(Settings.Width, Settings.FrameBufferWidth);
+	screenW := Settings.FrameBufferWidth;  //Max(Settings.Width,  Settings.FrameBufferWidth);
 	screenH := Settings.FrameBufferHeight; //Max(Settings.Height, Settings.FrameBufferHeight);
 	fbx := screenW;
 	fby := screenH;
@@ -522,13 +534,6 @@ begin
 	windowFlags := UInt32(SDL_WINDOW_SHOWN) or UInt32(SDL_WINDOW_RESIZABLE);
 	rendererFlags := UInt32(SDL_RENDERER_ACCELERATED or SDL_RENDERER_TARGETTEXTURE);
 
-	if Video.NewSDL then
-		SetHint(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, True);
-	SetHint(SDL_HINT_TIMER_RESOLUTION, True);
-	SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, True);
-	SetHint(SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4, not Settings.CloseOnAltF4);
-	SetHint(SDL_HINT_RENDER_SCALE_QUALITY, Settings.ScalingQuality);
-
 	if Settings.HighPriority then
 	begin
 		{$IFDEF WINDOWS}
@@ -542,10 +547,19 @@ begin
 //	SetHint('SDL_VIDEO_X11_XVIDMODE', True);
 	{$ENDIF}
 
+	SetHint(SDL_HINT_TIMER_RESOLUTION, True);
+	SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, True);
+	SetHint(SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4, not Settings.CloseOnAltF4);
+	SetHint(SDL_HINT_RENDER_SCALE_QUALITY, Settings.ScalingQuality);
+	if Video.NewSDL then
+		SetHint(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, True);
+
 	if not Initialized then
 	begin
+		Log('[SetupVideo] First init');
+
 		Initflags := SDL_INIT_VIDEO or SDL_INIT_TIMER;
-		if BasementOptions.UseGamepads then
+		if Settings.UseGamepads then
 			Initflags := Initflags or SDL_INIT_GAMECONTROLLER;
 
 		if SDL_Init(Initflags) <> 0 then
@@ -554,14 +568,19 @@ begin
 			Exit;
 		end;
 
-        SDL_StopTextInput;
+		SDL_StopTextInput;
 
 		SetHint(SDL_HINT_RENDER_BATCHING, True);
 		if Settings.Backend <> '' then
+		begin
+			Log('Setting rendering backend to: ' + Settings.Backend);
 			SDL_SetHint(SDL_HINT_RENDER_DRIVER, PChar(Settings.Backend));
+		end;
 	end
 	else
 	begin
+		Log('[SetupVideo] Reinitializing');
+
 		SDL_DestroyRenderer(Video.Renderer);
 		SDL_DestroyTexture(Video.Texture);
 		SDL_DestroyWindow(Video.Window);
@@ -607,9 +626,18 @@ begin
 	sx := Trunc(screenW * Scale * Settings.AspectRatioWidthMultiplier);
 	sy := screenH * Scale;
 
-	Video.Window := SDL_CreateWindow(PAnsiChar(Settings.Caption),
-		GetWindowPosValue(Settings.X), GetWindowPosValue(Settings.Y),
-		sx, sy, windowFlags);
+	if Settings.WinHandle <> nil then
+	begin
+		Log('Create window: embedded');
+		Video.Window := SDL_CreateWindowFrom(Settings.WinHandle);
+	end
+	else
+	begin
+		Log('Create window: standalone');
+		Video.Window := SDL_CreateWindow(PAnsiChar(Settings.Caption),
+			GetWindowPosValue(Settings.X), GetWindowPosValue(Settings.Y),
+			sx, sy, windowFlags);
+	end;
 
 	WindowSize := Types.Point(sx, sy);
 	if Video.Window = nil then
@@ -686,7 +714,7 @@ begin
 		PixelScalingChanged;
 	end;
 
-	if BasementOptions.UseGamepads then
+	if Settings.UseGamepads then
 	if SDL_NumJoysticks > 0 then
 	begin
 		for i := 0 to SDL_NumJoysticks-1 do
@@ -753,6 +781,7 @@ begin
 			end;
 		end;
 	end;
+
 	if Settings.FullScreen then
 		SetFullScreen(True);
 
@@ -813,35 +842,37 @@ begin
 
 	if B then
 	begin
-    	{$IFNDEF DISABLE_FULLSCREEN}
-		DispMode.refresh_rate := 0; // don't switch
-
-		if Settings.AutoswitchResolution then
+		if Settings.WinHandle = nil then
 		begin
-			case Trunc(Settings.Framerate) of
-				48..52: DispMode := CustomRes50;
-				58..62: DispMode := CustomRes60;
+			{$IFNDEF DISABLE_FULLSCREEN}
+			DispMode.refresh_rate := 0; // don't switch
+
+			if Settings.AutoswitchResolution then
+			begin
+				case Trunc(Settings.Framerate) of
+					48..52: DispMode := CustomRes50;
+					58..62: DispMode := CustomRes60;
+				end;
 			end;
-		end;
 
-		if DispMode.refresh_rate < 10 then
-			SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_FULLSCREEN_DESKTOP)
-		else
-		begin
-			Log('Resolution change: %d*%d @ %dHz', [DispMode.w, DispMode.h, DispMode.refresh_rate]);
-			SDL_SetWindowDisplayMode(Video.Window, @DispMode);
-			SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_FULLSCREEN);
-			Video.IsCustomRes := True;
-			Mouse.InWindow := True;
+			if DispMode.refresh_rate < 10 then
+				SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_FULLSCREEN_DESKTOP)
+			else
+			begin
+				Log('Resolution change: %d*%d @ %dHz', [DispMode.w, DispMode.h, DispMode.refresh_rate]);
+				SDL_SetWindowDisplayMode(Video.Window, @DispMode);
+				SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_FULLSCREEN);
+				Video.IsCustomRes := True;
+				Mouse.InWindow := True;
+			end;
+	    	{$ELSE}
+			// Borderless windowed fullscreen
+			SDL_GetDisplayUsableBounds(SDL_GetWindowDisplayIndex(Video.Window), @R);
+	        SDL_SetWindowBordered(Video.Window, SDL_FALSE);
+			SDL_SetWindowSize(Video.Window, R.w, R.h);
+			SDL_SetWindowPosition(Video.Window, R.x, R.y);
+	        {$ENDIF}
 		end;
-
-    	{$ELSE}
-		// Borderless windowed fullscreen
-		SDL_GetDisplayUsableBounds(SDL_GetWindowDisplayIndex(Video.Window), @R);
-        SDL_SetWindowBordered(Video.Window, SDL_FALSE);
-		SDL_SetWindowSize(Video.Window, R.w, R.h);
-		SDL_SetWindowPosition(Video.Window, R.x, R.y);
-        {$ENDIF}
 	end
 	else
 	begin
@@ -852,11 +883,14 @@ begin
 		w := Trunc(OverscanRect.Width * h * Settings.AspectRatioWidthMultiplier);
 		h := OverscanRect.Height * h;
 
-		SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_WINDOWED);
-		SDL_SetWindowGrab(Video.Window, SDL_FALSE);
-		SDL_SetWindowBordered(Video.Window, SDL_TRUE);
-		SDL_SetWindowSize(Video.Window, w, h);
-		SDL_SetWindowPosition(Video.Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		if Settings.WinHandle = nil then
+		begin
+			SDL_SetWindowFullscreen(Video.Window, SDL_WINDOW_WINDOWED);
+			SDL_SetWindowGrab(Video.Window, SDL_FALSE);
+			SDL_SetWindowBordered(Video.Window, SDL_TRUE);
+			SDL_SetWindowSize(Video.Window, w, h);
+			SDL_SetWindowPosition(Video.Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		end;
 	end;
 
 	SDL_RenderGetScale(Video.Renderer, @X, @Y);
@@ -946,16 +980,57 @@ begin
 	inherited Create;
 
 	Initialized := False;
-	QuitFlag := False;
-	Locked := True;
-	SkippedFrames := 0;
-	LastTitle := '';
+
+	BasementMainWindow := Self;
+	Settings := BasementOptions;
 
 	Mouse.CurrentCursor.Cursor := nil;
 	Mouse.CurrentCursor.Kind := 0;
 
-	BasementMainWindow := Self;
-	Settings := BasementOptions;
+	Scale := Settings.Scale;
+	LastTitle := '';
+
+	Initialize;
+
+	if not QuitFlag then
+	begin
+		GamePads := TFPList.Create;
+
+		Logo := TBitmap32.Create(1, 1);
+		Logo.LoadPNGFromResource('LOGO');
+
+		{if Assigned(SDL.Log) then
+			SDL.Log.SDL_LogSetOutputFunction(SDLLogFunc, nil)
+		else
+			Log('Couldn''t set up SDL logging!');}
+
+		if not Video.NewSDL then
+			LogWarning('Using an older version of SDL. (< 2.0.5)');
+
+		if Video.SyncRate = 0 then
+			S := 'unknown'
+		else
+			S := Video.SyncRate.ToString;
+		S := Format('Video: SDL %s, %s renderer at %s Hz', [Video.LibraryVersion, Video.RendererName, S]);
+		if Video.HaveVSync then	S := S + ' VSync';
+		LogInfo(S);
+
+		{$IFDEF LIMIT_KEYBOARD_EVENTS}
+		PrevKeyTimeStamp := 0;
+		{$ENDIF}
+
+		SetFullScreen(Settings.FullScreen);
+		//SDL.Timer.SDL_AddTimer(TimerInterval, TimerTickCallback, nil);
+	end;
+
+	Initialized := True;
+end;
+
+procedure TWindow.Initialize;
+begin
+	QuitFlag := False;
+	Locked := True;
+	SkippedFrames := 0;
 
 	// Init application directories
 	//
@@ -964,13 +1039,6 @@ begin
 		ConfigPath := DataPath;
 	ConfigPath := IncludeTrailingPathDelimiter(ConfigPath);
 	ForceDirectories(ConfigPath);}
-
-	Scale := Settings.Scale;
-
-	GamePads := TFPList.Create;
-
-	Logo := TBitmap32.Create(1, 1);
-	Logo.LoadPNGFromResource('LOGO');
 
 	// Init SDL
 	//
@@ -982,45 +1050,15 @@ begin
 		QuitFlag := True;
 		Exit;
 	end;
-
-	{if Assigned(SDL.Log) then
-		SDL.Log.SDL_LogSetOutputFunction(SDLLogFunc, nil)
-	else
-		Log('Couldn''t set up SDL logging!');}
-
-	if not Video.NewSDL then
-		LogWarning('Using an older version of SDL. (< 2.0.5)');
-
-	if Video.SyncRate = 0 then
-		S := 'unknown'
-	else
-		S := Video.SyncRate.ToString;
-	S := Format('Video: SDL %s, %s renderer at %s Hz', [Video.LibraryVersion, Video.RendererName, S]);
-	if Video.HaveVSync then	S := S + ' VSync';
-	LogInfo(S);
-
-	{$IFDEF LIMIT_KEYBOARD_EVENTS}
-	PrevKeyTimeStamp := 0;
-	{$ENDIF}
-
-	SetFullScreen(Settings.FullScreen);
-	//SDL.Timer.SDL_AddTimer(TimerInterval, TimerTickCallback, nil);
-
-	Initialized := True;
 end;
 
-destructor TWindow.Destroy;
+procedure TWindow.Uninitialize;
 begin
-	if Mouse.CurrentCursor.Cursor <> nil then
-		SDL_FreeCursor(Mouse.CurrentCursor.Cursor);
-
-	Logo.Free;
-
 	if Initialized then
 	begin
 		Initialized := False;
 
-		FrameBuffer.Free;
+		FreeAndNil(FrameBuffer);
 
 		if Video.Renderer <> nil then
 			SDL_DestroyRenderer(Video.Renderer);
@@ -1029,10 +1067,19 @@ begin
 		if Video.Window <> nil then
 			SDL_DestroyWindow(Video.Window);
 
-		GamePads.Free;
-
 		SDL_Quit;
 	end;
+end;
+
+destructor TWindow.Destroy;
+begin
+	if Mouse.CurrentCursor.Cursor <> nil then
+		SDL_FreeCursor(Mouse.CurrentCursor.Cursor);
+
+	GamePads.Free;
+	Logo.Free;
+
+	Uninitialize;
 
 	inherited Destroy;
 end;
@@ -1065,9 +1112,9 @@ begin
 	end;
 end;
 
-procedure TWindow.ReinitWindow;
+function TWindow.ReinitWindow: Boolean;
 begin
-	SetupVideo;
+	Result := SetupVideo;
 end;
 
 
@@ -1079,6 +1126,7 @@ initialization
 
 	with BasementOptions do
 	begin
+		WinHandle := nil;
 		FramebufferWidth  := 320;
 		FramebufferHeight := 200;
 		Scale := 0;

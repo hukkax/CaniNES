@@ -18,7 +18,7 @@ type
 
 	TFPCompactImgBGRA8Bit = class(TFPCompactImgBase)
 	private
-		FDesc: TFPCompactImgDesc;
+		FDesc:      TFPCompactImgDesc;
 	protected
 		FData:      PFPCompactImgBGRA8BitValue;
 		procedure   SetInternalColor(X, Y: Integer; const Value: TFPColor); override;
