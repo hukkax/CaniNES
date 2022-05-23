@@ -110,6 +110,9 @@ end;
 
 procedure TFormMain.RenderLoop(Data: PtrInt);
 begin
+	if Configuration.Application.RestoreROMOnStartup then
+		Window.Perform(actROMLoadPrevious);
+
 	while not QuitFlag do
 	begin
 		case RunMode of
@@ -136,6 +139,7 @@ end;
 procedure TFormMain.FormShow(Sender: TObject);
 begin
 	OnShow := nil;
+
 	PrevWndProc := Windows.WNDPROC(SetWindowLongPtr(Self.Handle, GWL_WNDPROC, PtrInt(@WndCallback)));
 
 	CreateContainer(nil);
@@ -164,6 +168,8 @@ begin
 
 	PrevWindowState.Area := Bounds(Left, Top, Width, Height);
 
+	// hack. not exactly the best way to accomplish this but it works
+	//
 	Application.QueueAsyncCall(RenderLoop, 0);
 end;
 

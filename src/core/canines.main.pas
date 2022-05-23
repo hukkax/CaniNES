@@ -124,6 +124,8 @@ begin
 	NTSCRenderer.FrameBuffer.Clear(Color_Background);
 
 	CreateMainMenu;
+
+	{$IFNDEF USE_LCL}
 	Window.InitMenubar;
 
 	if Configuration.Application.RestoreROMOnStartup then
@@ -133,6 +135,7 @@ begin
 	end
 	else
 		Menu.Visible := True;
+	{$ENDIF}
 end;
 
 procedure CaniNES_ProcessFrame;
