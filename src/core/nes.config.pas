@@ -139,7 +139,8 @@ type
 		Artifacts,
 		Fringing,
 		Bleed:        Double;
-		MergeFields:  Boolean;
+		//MergeFields:  Boolean;
+		FieldsMode:   Byte;
 	end;
 
 	TNTSCPaletteConfig = record
@@ -156,6 +157,7 @@ type
 		AutoswitchResolution: Boolean;
 		ScalingQuality:       Boolean; // nearest/linear
 		Backend:              String;
+		FlipMode:             Byte;
 		Overscan: record
 			L, R, U, D: Byte;
 		end;
@@ -538,6 +540,9 @@ begin
 	Cfg.AddString(Sect, 'Backend', @Display.Renderer.Backend, '');
 	//.SetInfo('Renderer backend');
 
+	Cfg.AddByte(Sect, 'FlipMode', @Display.Renderer.FlipMode, 0)
+	.SetInfo('Mirror image', cfgRenderer, 0, 3, RendererFlipNames);
+
 	// -------------------------------------------------------
 
 	Sect := 'Overscan';
@@ -595,8 +600,10 @@ begin
 	.SetInfo('Color fringing', cfgRendererNTSC, 0.0, 2.0, 0.1);
 	Cfg.AddFloat(Sect,  'Bleed',       @Display.NTSC.Bleed,       0)
 	.SetInfo('Color bleed', cfgRendererNTSC, 0.0, 2.0, 0.1);
-	Cfg.AddBoolean(Sect,'MergeFields', @Display.NTSC.MergeFields, False)
-	.SetInfo('Merge fields', cfgRendererNTSC);
+//	Cfg.AddBoolean(Sect,'MergeFields', @Display.NTSC.MergeFields, True)
+//	.SetInfo('Merge fields', cfgRendererNTSC);
+	Cfg.AddByte(Sect, 'FieldsMode', @Display.NTSC.FieldsMode, Ord(crawlNormal))
+	.SetInfo('Crawl', cfgRendererNTSC, Ord(Low(TNTSCCrawl)), Ord(High(TNTSCCrawl)), NTSCCrawlNames);
 
 	// -------------------------------------------------------
 

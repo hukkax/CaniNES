@@ -25,6 +25,7 @@ const
 type
 	TMenuCreationCallback = procedure (Finished: Boolean) of Object;
 	TMenuUpLevelCallback  = procedure of Object;
+	TShowMenuPageCallback = procedure (Page: TMenuPage) of Object;
 
 	TNESWindow = class(TWindow)
 	private
@@ -51,6 +52,7 @@ type
 		OnMenuUpLevel:   TMenuUpLevelCallback;
 		OnCheckMenuItem: TMenuItemCheckCallback;
 		OnReinitWindow:  TNotifyEvent;
+		OnShowMenuPage:  TShowMenuPageCallback;
 
 		procedure ROMLoaded;
 		procedure UpdateControllers;
@@ -337,10 +339,19 @@ end;
 
 procedure TNESWindow.ShowMenuPage(const Page: String; AsWindow: Boolean);
 begin
+	{$IFNDEF USE_LCL}
 	MenuRenderer.Opacity := 1.0;
 	MenuRenderer.Visible := True;
+
 	Menu.ShowAsWindow := AsWindow;
 	Menu.ShowPage(Page);
+	{$ELSE}
+	Menu.ShowAsWindow := True;
+	Menu.ShowPage(Page);
+	if Assigned(OnShowMenuPage) then
+		OnShowMenuPage(Menu.CurrentPage);
+	Menu.Show(False);
+	{$ENDIF}
 end;
 
 procedure TNESWindow.Perform(Action: TAction; Pressed: Boolean = True);
@@ -557,6 +568,7 @@ begin
 		actBookmarks:
 			if Pressed then ShowMenuPage('Favourites');
 
+{ !!!
 		actToggleFilterNTSC_MergeFields:
 			if Pressed then
 			with Configuration.Display do
@@ -565,6 +577,7 @@ begin
 				NES_PPU.ConfigureNTSCFilter(NTSC);
 				OSD('NTSC merge fields ' + EnabledString[NTSC.MergeFields]);
 			end;
+}
 
 		actToggleFilterNTSC:
 			if Pressed then
@@ -720,6 +733,7 @@ end;
 procedure TNESWindow.RendererChanged;
 begin
 	NTSCRenderer.Enabled := Configuration.Display.NTSC.Enabled;
+	RendererFlipMode := Configuration.Display.Renderer.FlipMode;
 
 	if NTSCRenderer.Enabled then
 	begin
@@ -1059,7 +1073,10 @@ end;
 
 procedure TNESWindow.UpdateCursor;
 begin
-	{$IFNDEF USE_LCL}
+	{$IFDEF USE_LCL}
+	SetSystemCursor(IfThen(ControllerUsesMouse or Menu.Visible,
+		SDL_SYSTEM_CURSOR_ARROW, SDL_SYSTEM_CURSOR_CROSSHAIR));
+	{$ELSE}
 	SetSystemCursor(IfThen((not ControllerUsesMouse) or (Menubar.Active),
 		SDL_SYSTEM_CURSOR_ARROW, SDL_SYSTEM_CURSOR_CROSSHAIR));
 	{$ENDIF}

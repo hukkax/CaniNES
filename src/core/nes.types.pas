@@ -148,6 +148,8 @@ type
 		Ppu2C05A, Ppu2C05B, Ppu2C05C, Ppu2C05D, Ppu2C05E
 	);
 
+	TNTSCCrawl = ( crawlNormal, crawlMerge, crawlPAL );
+
 	// =========
 	// Cartridge
 
@@ -235,6 +237,8 @@ const
 		'Ppu2C04A', 'Ppu2C04B', 'Ppu2C04C', 'Ppu2C04D',
 		'Ppu2C05A', 'Ppu2C05B', 'Ppu2C05C', 'Ppu2C05D', 'Ppu2C05E' );
 
+	NTSCCrawlNames: array[TNTSCCrawl] of String = ( 'Normal', 'Merge fields', 'PAL' );
+
 	APUChannelNames: array[0..MaxChannelCount] of String = (
 	'Square 1', 'Square 2', 'Triangle', 'Noise', 'DMC',
 	'FDS', 'VRC6', 'VRC7', 'MMC5', 'Namco163', 'Sunsoft5B',
@@ -253,6 +257,8 @@ const
 
 	AspectRatioNames: array[TAspectRatio] of String = (
 		'No stretching', 'Auto', 'NTSC', 'PAL', 'Standard (4:3)', 'Widescreen (16:9)' );
+
+	RendererFlipNames: array[0..3] of String = ( 'None', 'Horizontal', 'Vertical', 'Both' );
 
 	function ChoosePrgMemoryType(B: Boolean; IfTrue, IfFalse: TPrgMemoryType): TPrgMemoryType; inline;
 	function ChooseChrMemoryType(B: Boolean; IfTrue, IfFalse: TChrMemoryType): TChrMemoryType; inline;
