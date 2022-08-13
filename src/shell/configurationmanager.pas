@@ -45,6 +45,7 @@ type
 		function		ValueToString: AnsiString; virtual;
 		function 		GetValueName(i: Integer): AnsiString;
 		function		ListValues(const sl: TStrings): Integer; virtual;
+		function		GetIntegerValue: Integer; virtual;
 		procedure 		CallCallback;
 
 		procedure		Load(const Ini: TIniFile); virtual;
@@ -482,6 +483,11 @@ begin
 	else
 	if Assigned(DefaultConfigItemCallback) then
 		DefaultConfigItemCallback(Self);
+end;
+
+function TConfigItem.GetIntegerValue: Integer;
+begin
+	if not TryStrToInt(Self.ValueToString, Result) then Result := 0;
 end;
 
 

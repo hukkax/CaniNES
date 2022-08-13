@@ -69,6 +69,8 @@ type
 		end;
 	end;
 
+	TCursorChangeEvent = procedure (Kind: TSDL_SystemCursor) of Object;
+
 	TWindow = class
 	const
 		TimerInterval = 10;
@@ -100,6 +102,8 @@ type
 		Visible: 		Boolean;
 		FrameBuffer:	TBitmap32;
 		OverscanRect:	Types.TRect;
+
+		OnSetCursor: TCursorChangeEvent;
 
 		constructor Create;
 		destructor 	Destroy; override;
@@ -801,6 +805,7 @@ procedure TWindow.SetSystemCursor(Kind: TSDL_SystemCursor);
 var
 	Cursor: PSDL_Cursor;
 begin
+	{$IFNDEF USE_LCL}
 	Cursor := SDL_CreateSystemCursor(Kind);
 	if Cursor <> nil then
 	begin
@@ -810,6 +815,8 @@ begin
 		Mouse.CurrentCursor.Cursor := Cursor;
 		SDL_SetCursor(Cursor);
 	end;
+	{$ENDIF}
+	if Assigned(OnSetCursor) then OnSetCursor(Kind);
 end;
 
 procedure TWindow.SetFullScreen(B: Boolean);

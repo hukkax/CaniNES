@@ -6,7 +6,7 @@ interface
 
 uses
 	Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus,
-	Menubar, ConfigurationManager;
+	SDL2, Menubar, MenuHandler, ConfigurationManager;
 
 type
 	TFormMain = class(TForm)
@@ -17,11 +17,6 @@ type
 		procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 	private
 		pb: TPanel;
-
-		PrevWindowState: record
-			WasMaximized: Boolean;
-			Area: TRect;
-		end;
 
 		MenuInfo: record
 			LastAddedMenuItem,
@@ -38,6 +33,8 @@ type
 		procedure MenuItemClickHandler(Sender: TObject);
 
 		procedure OnSettingChange(Item: TConfigItem);
+		procedure OnShowMenuPage(Page: TMenuPage);
+		procedure OnSetCursor(Kind: TSDL_SystemCursor);
 
 		procedure RenderLoop(Data: PtrInt);
 	public
@@ -55,7 +52,8 @@ uses
 	MainWindow,
 	Canines.Main,
 	Basement.Window,
-	InputBindings, MenuHandler,
+	Form.DynamicPage,
+	InputBindings,
 	NES.Config, NES.Console;
 
 const
@@ -66,6 +64,7 @@ var
 	PrevWndProc: WNDPROC;
 	Closing: Boolean = False;
 	RunMode: Integer = MODE_RUN;
+	CurrentCursor: TCursor;
 
 // ================================================================================================
 // Engine
@@ -82,7 +81,7 @@ begin
 		pb := TPanel.Create(FormMain);
 		pb.Parent := Self;
 		pb.Align := alClient;
-		pb.Cursor := crCross;
+		pb.Cursor := CurrentCursor;
 		pb.Show;
 		ActiveControl := pb;
 
@@ -140,8 +139,7 @@ procedure TFormMain.FormShow(Sender: TObject);
 begin
 	OnShow := nil;
 
-	PrevWndProc := Windows.WNDPROC(SetWindowLongPtr(Self.Handle, GWL_WNDPROC, PtrInt(@WndCallback)));
-
+	CurrentCursor := crCross;
 	CreateContainer(nil);
 
 	CaniNES_Init;
@@ -157,8 +155,9 @@ begin
 	Window.OnAddMenuItem   := OnAddMenuItem;
 	Window.OnMenuUpLevel   := OnMenuUpLevel;
 	Window.OnCheckMenuItem := OnCheckMenuItem;
+	Window.OnSetCursor     := OnSetCursor;
+	Window.OnShowMenuPage  := OnShowMenuPage;
 	Window.OnReinitWindow  := CreateContainer;
-
 	DefaultConfigItemCallback := OnSettingChange;
 
 	ClientWidth  := 256 * 3;
@@ -166,7 +165,7 @@ begin
 
 	Window.InitMenubar;
 
-	PrevWindowState.Area := Bounds(Left, Top, Width, Height);
+	PrevWndProc := Windows.WNDPROC(SetWindowLongPtr(Self.Handle, GWL_WNDPROC, PtrInt(@WndCallback)));
 
 	// hack. not exactly the best way to accomplish this but it works
 	//
@@ -198,6 +197,20 @@ begin
 			RunMode := MODE_INIT_FULLSCREEN;
 
 	end;
+end;
+
+procedure TFormMain.OnSetCursor(Kind: TSDL_SystemCursor);
+begin
+	case Kind of
+		SDL_SYSTEM_CURSOR_ARROW:     CurrentCursor := crArrow;
+		SDL_SYSTEM_CURSOR_CROSSHAIR: CurrentCursor := crCross;
+	end;
+	pb.Cursor := CurrentCursor;
+end;
+
+procedure TFormMain.OnShowMenuPage(Page: TMenuPage);
+begin
+	ShowPageAsForm(Page);
 end;
 
 // ================================================================================================

@@ -210,12 +210,15 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="GR32_Lazarus"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
     </RequiredPackages>
-    <Units Count="181">
+    <Units Count="182">
       <Unit0>
         <Filename Value="CaniNES-GUI.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1119,6 +1122,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Form.Main"/>
       </Unit180>
+      <Unit181>
+        <Filename Value="forms/form.dynamicpage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormPage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Form.DynamicPage"/>
+      </Unit181>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

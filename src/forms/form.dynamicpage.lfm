@@ -1,0 +1,11 @@
+object FormPage: TFormPage
+  Left = 510
+  Height = 328
+  Top = 30
+  Width = 369
+  BorderIcons = [biSystemMenu]
+  Caption = 'FormPage'
+  FormStyle = fsStayOnTop
+  OnClose = FormClose
+  Position = poOwnerFormCenter
+end
