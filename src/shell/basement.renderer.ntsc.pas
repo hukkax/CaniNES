@@ -59,7 +59,7 @@ begin
 	SrcRect.h := Window.OverscanRect.Height;
 
 	SDL_UpdateTexture(Texture, nil, @FrameBuffer.Bits[0], FrameBuffer.Width*4);
-	SDL_RenderCopy(Renderer, Texture, @SrcRect, nil);
+	SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil, 0, nil, RendererFlipMode);
 
 	RenderedTexture := Texture;
 end;

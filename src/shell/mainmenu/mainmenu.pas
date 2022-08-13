@@ -164,6 +164,7 @@ begin
 				Page.AddSetting('Renderer', 'AutoswitchResolution');
 				Page.AddSetting('Window', 'AspectRatio');
 				Page.AddSetting('Renderer', 'ScalingMethod');
+				Page.AddSetting('Renderer', 'FlipMode');
 				Page.AddSetting('GUI', 'BoxArtUpscale');
 
 				S := 'Overscan';

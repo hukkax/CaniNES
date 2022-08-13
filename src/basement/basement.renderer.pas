@@ -49,6 +49,7 @@ type
 
 var
 	Renderers: TFPGObjectList<TRenderer>;
+	RendererFlipMode: Integer = SDL_FLIP_NONE;
 
 
 implementation
@@ -225,7 +226,7 @@ begin
 		FrameBuffer.Dirty := False;
 	end;
 
-	SDL_RenderCopy(Renderer, Texture, @SrcRect, nil);
+	SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil, 0, nil, RendererFlipMode);
 
 	RenderedTexture := Texture;
 end;

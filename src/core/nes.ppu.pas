@@ -1730,7 +1730,7 @@ begin
 		fringing   := NTSCConfig.Fringing;
 		bleed      := NTSCConfig.Bleed;
 
-		merge_fields   := NTSCConfig.MergeFields;
+		merge_fields   := NTSCConfig.FieldsMode = Ord(crawlMerge);
 		decoder_matrix := nil;
 		palette        := nil;
 		base_palette   := @Self.Palette.RawColors[0,0];
@@ -1742,7 +1742,9 @@ end;
 procedure TPPU.FillNTSCbuffer(NTSCbuffer: TBitmap32);
 begin
 	if (not Console.Rewind) and (not Console.FastForward) and (not Console.IsRunAheadFrame) then
-		burstphase := 1 - burstphase;
+		if Configuration.Display.NTSC.FieldsMode <> Ord(crawlPAL) then
+			burstphase := 1 - burstphase;
+
 	NtscFilter.Blit(
 		@currentOutputBuffer[0],   // buf_in
 		@NTSCbuffer.Bits[0],       // buf_out
