@@ -295,7 +295,6 @@ begin
 	SDL_RenderClear(Renderer);
 	{$ENDIF}
 
-	//SDL_RenderCopy(Renderer, Texture, @SrcRect, nil);
 	SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil, 0, nil, RendererFlipMode);
 
 	// Setup SDL renderer for 1:1 pixel mapping
@@ -317,19 +316,16 @@ begin
 			DR.y := 0;
 			DR.x := -1;
 			SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
-//			SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
 			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
 			if V >= 2 then
 			begin
 				DR.x := V - 1;
 				SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
-//				SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
 				SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
 				if V >= 3 then
 				begin
 					DR.x := -2;
 					SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD div 2);
-//					SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
 					SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
 				end;
 			end;
@@ -346,11 +342,9 @@ begin
 		DR.x := 0;
 		DR.y := 1;
 		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 190 * Options.ScanlineBloom)));
-//		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
 		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
 		DR.y := -1;
 		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 70 * Options.ScanlineBloom)));
-//		SDL_RenderCopy(Renderer, Texture, @SrcRect, @DR);
 		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
 	end;
 
@@ -385,7 +379,6 @@ begin
 	begin
 		SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_ADD);
 		SDL_SetTextureAlphaMod(Texture, Options.ExtraContrast);
-//		SDL_RenderCopy(Renderer, Texture, @SrcRect, nil);
 		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil,
 			0, nil, RendererFlipMode);
 	end;
