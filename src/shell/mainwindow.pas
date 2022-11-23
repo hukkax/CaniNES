@@ -315,7 +315,7 @@ begin
 
 	UpdateOSD;
 
-	Inc(Framecounter);
+	{$Q-}Inc(Framecounter);
 
 	if Menu.Visible then
 		MenuRenderer.Opacity := 1.0;
@@ -453,7 +453,7 @@ begin
 		actROMLoadFromMenu:
 			if Pressed then // this was called via the Menubar
 			begin
-				if Menubar.ActiveMenu.ActiveItem = nil then Exit;
+				if (Menubar.ActiveMenu = nil) or (Menubar.ActiveMenu.ActiveItem = nil) then Exit;
 				Console.LoadROM(Menubar.ActiveMenu.ActiveItem.Data);
 				EmulationMode := NORMAL;
 				Menubar.Active := False;
@@ -732,8 +732,8 @@ end;
 
 procedure TNESWindow.RendererChanged;
 begin
-	NTSCRenderer.Enabled := Configuration.Display.NTSC.Enabled;
 	RendererFlipMode := Configuration.Display.Renderer.FlipMode;
+	NTSCRenderer.Enabled := Configuration.Display.NTSC.Enabled;
 
 	if NTSCRenderer.Enabled then
 	begin

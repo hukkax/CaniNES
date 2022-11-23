@@ -997,12 +997,11 @@ begin
 	Scale := Settings.Scale;
 	LastTitle := '';
 
+	GamePads := TFPList.Create;
 	Initialize;
 
 	if not QuitFlag then
 	begin
-		GamePads := TFPList.Create;
-
 		Logo := TBitmap32.Create(1, 1);
 		Logo.LoadPNGFromResource('LOGO');
 
