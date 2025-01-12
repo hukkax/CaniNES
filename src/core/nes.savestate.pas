@@ -21,9 +21,6 @@ type
 		DataSize: Cardinal;
 		IsArray:  Boolean;
 		Data:     Pointer;
-
-		constructor Create;
-		destructor  Destroy; override;
 	end;
 
 	TStateFileInfo = record
@@ -91,20 +88,6 @@ uses
 	Basement.Util, Math,
 	Graphics32, TextOutput,	{$IFDEF RENDER_FONT_FREETYPE}Graphics32.FreeType,{$ENDIF}
 	NES.Config, NES.Types, NES.Console, NES.Cartridge;
-
-{ TSnapshotProperty }
-
-constructor TSnapshotProperty.Create;
-begin
-	inherited;
-	Data := nil;
-end;
-
-destructor TSnapshotProperty.Destroy;
-begin
-	Data := nil;
-	inherited Destroy;
-end;
 
 // ========================================================================
 // TSnapshotable

@@ -65,3 +65,5 @@ lib
 *.tar\.gz
 *.sh
 *.0
+
+bin/i386/canines-gui.exe
