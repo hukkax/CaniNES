@@ -39,8 +39,6 @@ var
 
 procedure CaniNES_Init;
 begin
-	{$I basement-startup.inc}
-
 	DebugLn('================================================');
 	DebugLn(Format('%s v%s starting.', [APPNAME, APPVERSION]));
 	DebugLn('================================================');

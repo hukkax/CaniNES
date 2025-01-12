@@ -7,9 +7,12 @@ program CaniNES;
 
 uses
 	{$I basement-prestart1.inc}
+	Math,
 	Canines.Main,
 	Basement.Window;
 
+var
+	OldMask: TFPUExceptionMask;
 begin
 	{$I basement-startup.inc}
 
@@ -20,6 +23,10 @@ begin
 		WriteLn('HeapTrace enabled but inactive');
 	{$ENDIF}
 
+	OldMask := GetExceptionMask;
+	SetExceptionMask(OldMask +
+		[exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
+
 	CaniNES_Init;
 
 	while not QuitFlag do
@@ -28,5 +35,6 @@ begin
 	end;
 
 	CaniNES_Shutdown;
+	SetExceptionMask(OldMask);
 end.
 
