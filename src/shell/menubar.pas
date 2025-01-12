@@ -1,6 +1,6 @@
 unit Menubar;
 
-{$mode Delphi}
+{$MODE DELPHI}
 
 interface
 

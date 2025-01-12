@@ -1,6 +1,6 @@
 unit MenuPage.FileBrowser;
 
-{$mode delphi}
+{$MODE DELPHI}
 
 interface
 
@@ -24,7 +24,7 @@ type
 		procedure CmdBrowseToDrive(Entry: TMenuEntry);
 		{$ENDIF}
 	public
-		procedure BrowseTo(const Dir: String; ShowMappers: Boolean = False; AllowLoadRom: Boolean = False);
+		procedure   BrowseTo(const Dir: String; ShowMappers: Boolean = False; AllowLoadRom: Boolean = False);
 
 		constructor Create(BrowserPage: TMenuPage; const Dir: String); overload;
 	end;
@@ -277,10 +277,9 @@ begin
 			Rescan := False;
 
 			Files := TStringList.Create;
-			Dirs  := TStringList.Create;
+			Files.Assign(FilelistCache);
 
-			Files.AddStrings(FilelistCache);
-
+			Dirs := TStringList.Create;
 			for ID := 1 to DirlistCache.Count-1 do
 				Dirs.Add(DirlistCache[ID]);
 		end;
@@ -352,8 +351,7 @@ begin
 				Files[Y] := IncludeTrailingPathDelimiter(Directory) + Files[Y];
 		end;
 
-		FilelistCache.Clear;
-		FilelistCache.AddStrings(Files);
+		FilelistCache.Assign(Files);
 	end;
 
 	try
@@ -476,7 +474,7 @@ end;
 initialization
 
 	FilelistCache := TStringList.Create;
-	DirlistCache := TStringList.Create;
+	DirlistCache  := TStringList.Create;
 
 finalization
 

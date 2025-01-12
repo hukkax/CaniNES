@@ -67,32 +67,32 @@ type
 	public
 		// === Devices on Main Bus ===
 
-		CPU: TCPU;  // The 6502 derived processor
-		PPU: TPPU; // The 2C02 Picture Processing Unit
-		APU: TAPU;  // The Audio Processing Unit
+		CPU: 	TCPU;	// The 6502 derived processor
+		PPU: 	TPPU;	// The 2C02 Picture Processing Unit
+		APU: 	TAPU;	// The Audio Processing Unit
 
-		Model:  TNESModel;
-		System: TGameSystem;
+		Model:  	TNESModel;
+		System: 	TGameSystem;
 
-		Database: TGameDatabase;
-		MemoryManager: TMemoryManager;
-		ControlManager: TControlManager;
-		SaveStateManager: TSaveStateManager;
-		RewindManager: TRewindManager;
-		CheatManager: TCheatManager;
-		MovieManager: TMovieManager;
+		Database: 	TGameDatabase;
+		MemoryManager: 	TMemoryManager;
+		ControlManager: 	TControlManager;
+		SaveStateManager: 	TSaveStateManager;
+		RewindManager: 	TRewindManager;
+		CheatManager: 	TCheatManager;
+		MovieManager: 	TMovieManager;
 
-		Controller: array[0..3] of TStandardController;
-		CurrentControllerType: TGameInputType;
+		Controller:	array[0..3] of TStandardController;
+		CurrentControllerType:	TGameInputType;
 
-		RunAheadState: TMemoryStream;
+		RunAheadState:	TMemoryStream;
 
-		MRU: TStringList;
+		MRU:	TStringList;
 
 		Rewind,
 		FastForward, Want_FastForward_User, Want_FastForward_Code,
 		GotCartridge,
-		IsRunAheadFrame: Boolean;
+		IsRunAheadFrame: 	Boolean;
 
 		LoadedFile: String;
 
@@ -152,11 +152,11 @@ var
 		: Single;
 	end;
 
-	Console: TConsole;
-	Cartridge: TCartridge;
-	NES_CPU: TCPU;
-	NES_PPU: TPPU;
-	NES_APU: TAPU;
+	Console: 	TConsole;
+	Cartridge: 	TCartridge;
+	NES_CPU: 	TCPU;
+	NES_PPU: 	TPPU;
+	NES_APU: 	TAPU;
 
 
 implementation
@@ -261,7 +261,10 @@ end;
 destructor TConsole.Destroy;
 begin
 	if Assigned(Mapper) then
+	begin
 		Mapper.SaveBattery;
+		Mapper.Free;
+	end;
 
 	MRU.Free;
 	RomDirs.Free;

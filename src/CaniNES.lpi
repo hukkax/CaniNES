@@ -61,10 +61,14 @@
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -75,14 +79,9 @@
             </Options>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx6060="True" idx6058="True" idx5062="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True" idx3124="True" idx3123="True"/>
-            </CompilerMessages>
-            <CustomOptions Value="-vm6060
--OoFASTMATH
+            <CustomOptions Value="-OoFASTMATH
 -OoLOOPUNROLL
 -OoREMOVEEMPTYPROCS
--OoUNUSEDPARA
 -OoREGVAR
 -OoSTACKFRAME
 -OoTAILREC
@@ -95,9 +94,6 @@
 -Si
 -Sv
 -dAUDIO"/>
-            <OtherDefines Count="1">
-              <Define0 Value="AUDIO"/>
-            </OtherDefines>
           </Other>
         </CompilerOptions>
       </Item2>
@@ -171,6 +167,9 @@
           </Parsing>
           <CodeGeneration>
             <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
             <VerifyObjMethodCallValidity Value="True"/>
@@ -182,16 +181,12 @@
             <Debugging>
               <DebugInfoType Value="dsDwarf2Set"/>
               <UseHeaptrc Value="True"/>
-              <TrashVariables Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG
 -dAUDIO"/>
-            <OtherDefines Count="1">
-              <Define0 Value="AUDIO"/>
-            </OtherDefines>
           </Other>
         </CompilerOptions>
       </Item4>
@@ -1143,6 +1138,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2Set"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
@@ -1156,8 +1152,7 @@
       <CompilerMessages>
         <IgnoredMessages idx5062="True" idx5024="True" idx4081="True" idx4080="True" idx4079="True" idx3124="True" idx3123="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-vm6060
--OoFASTMATH
+      <CustomOptions Value="-OoFASTMATH
 -OoLOOPUNROLL
 -OoREMOVEEMPTYPROCS
 -OoUNUSEDPARA

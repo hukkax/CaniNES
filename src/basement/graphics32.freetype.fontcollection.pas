@@ -13,7 +13,7 @@ unit Graphics32.Freetype.FontCollection;
 interface
 
 uses
-  Classes, SysUtils, Laz_AVL_Tree,
+  Classes, SysUtils, AVL_Tree,
   LazStringUtils, LazUTF8,
   Graphics32.FreeType, LazFreeType, TTTypes;
 

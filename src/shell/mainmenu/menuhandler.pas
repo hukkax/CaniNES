@@ -100,7 +100,7 @@ type
 	protected
 		Page: TMenuPage;
 	public
-		constructor Create; virtual;
+		constructor Create;  virtual;
 		destructor  Destroy; override;
 	end;
 

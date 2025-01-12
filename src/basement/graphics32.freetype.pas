@@ -13,7 +13,7 @@ unit Graphics32.FreeType;
 interface
 
 uses
-	Classes, SysUtils, Laz_AVL_Tree,
+	Classes, SysUtils, AVL_Tree,
 	LazUTF8, LazFreeType, TTRASTER, TTTypes, TTObjs, Types,
 	Graphics32, Graphics32.LowLevel;
 

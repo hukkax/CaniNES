@@ -13,6 +13,13 @@ uses
 begin
 	{$I basement-startup.inc}
 
+	{$IF DECLARED(UseHeapTrace)}
+	if UseHeapTrace then
+		WriteLn('HeapTrace enabled and active')
+	else
+		WriteLn('HeapTrace enabled but inactive');
+	{$ENDIF}
+
 	CaniNES_Init;
 
 	while not QuitFlag do

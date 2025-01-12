@@ -1455,7 +1455,7 @@ begin
 			SetLength(data, length);
 		end;
 		try
-			Stream.Read(data, length);
+			Stream.Read(data[0], length);
 		finally
 			Stream.Free;
 		end;
@@ -1472,7 +1472,7 @@ begin
 	Log('Saving battery: ' + Filename);
 	Stream := TFileStream.Create(Filename, fmOpenWrite or fmCreate);
 	try
-		Stream.Write(data, length);
+		Stream.Write(data[0], length);
 	finally
 		Stream.Free;
 	end;
@@ -1481,9 +1481,15 @@ end;
 procedure TMapper.LoadBattery;
 begin
 	if (HasBattery) and (saveRamSize > 0) then
+	begin
+		//Log('DoLoadBattery(battNormal, saveRam, %d);', [saveRamSize]);
 		DoLoadBattery(battNormal, saveRam, saveRamSize);
+	end;
 	if (hasChrBattery) and (chrRamSize > 0) then
+	begin
+		//Log('DoLoadBattery(battChr, chrRam, %d);', [chrRamSize]);
 		DoLoadBattery(battChr, chrRam, chrRamSize);
+	end;
 end;
 
 procedure TMapper.SaveBattery;

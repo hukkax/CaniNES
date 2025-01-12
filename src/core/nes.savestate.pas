@@ -21,6 +21,9 @@ type
 		DataSize: Cardinal;
 		IsArray:  Boolean;
 		Data:     Pointer;
+
+		constructor Create;
+		destructor  Destroy; override;
 	end;
 
 	TStateFileInfo = record
@@ -89,6 +92,20 @@ uses
 	Graphics32, TextOutput,	{$IFDEF RENDER_FONT_FREETYPE}Graphics32.FreeType,{$ENDIF}
 	NES.Config, NES.Types, NES.Console, NES.Cartridge;
 
+{ TSnapshotProperty }
+
+constructor TSnapshotProperty.Create;
+begin
+	inherited;
+	Data := nil;
+end;
+
+destructor TSnapshotProperty.Destroy;
+begin
+	Data := nil;
+	inherited Destroy;
+end;
+
 // ========================================================================
 // TSnapshotable
 // ========================================================================
@@ -98,7 +115,7 @@ begin
 	inherited Create;
 
 	RegisteredName := RegisterName;
-	RegisteredProperties := TObjectList<TSnapshotProperty>.Create;
+	RegisteredProperties := TObjectList<TSnapshotProperty>.Create(True);
 end;
 
 destructor TSnapshotable.Destroy;
