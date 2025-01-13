@@ -41,6 +41,7 @@ end;
 procedure PageEnter_Bookmarks(Page: TMenuPage);
 var
 	S: String;
+	C: TGUIColor;
 begin
 	Page.FullScreen := True;
 	Page.Width := MenuRenderer.FrameBuffer.Width;
@@ -56,8 +57,14 @@ begin
 		Page.AddText('No ROMs favourited')
 	else
 	for S in Bookmarks.Items do
-		if not S.IsEmpty then
-			Page.AddFile(S, True, Palette[COLOR_MENU_NORMAL], Page.CmdOpenFile);
+	begin
+		if S.IsEmpty then Continue;
+		if FileExists(S) then
+			C := COLOR_MENU_NORMAL
+		else
+			C := COLOR_FILE_BAD;
+		Page.AddFile(S, True, Palette[C], Page.CmdOpenFile);
+	end;
 
 	Menu.UpdateFilelisting;
 end;
