@@ -255,6 +255,12 @@ type
 			HidePointer:     Boolean;
 			DetectionRadius: Byte;
 		end;
+		UI: record
+			PadRepeat: record
+				Initial,
+				Interval:    Byte;
+			end;
+		end;
 	end;
 
 	// -----------------------------------------------
@@ -504,6 +510,11 @@ begin
 	.SetInfo('Hide mouse cursor when using Zapper', cfgInputZapper);
 	Cfg.AddByte(Sect, 'Zapper.DetectionRadius', @Input.Zapper.DetectionRadius, 0)
 	.SetInfo('Zapper detection radius', cfgInputZapper);
+
+	Cfg.AddByte(Sect, 'UI.Repeat.Initial', @Input.UI.PadRepeat.Initial, 20)
+	.SetInfo('Pad Repeat Delay', cfgGUI, 1, 60, [], nil, '%d frames');
+	Cfg.AddByte(Sect, 'UI.Repeat.Interval', @Input.UI.PadRepeat.Interval, 8)
+	.SetInfo('Pad Repeat Speed', cfgGUI, 1, 60, [], nil, '%d frames');
 
 	// -------------------------------------------------------
 

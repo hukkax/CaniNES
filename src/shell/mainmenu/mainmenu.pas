@@ -156,16 +156,19 @@ begin
 					Page.AddSetting(S, 'Zapper.Enabled');
 					Page.AddSetting(S, 'Zapper.HidePointer');
 					Page.AddSetting(S, 'Zapper.DetectionRadius');
+			Page.AddHeader('User Interface');
+				Page.AddSetting(S, 'UI.Repeat.Initial');
+				Page.AddSetting(S, 'UI.Repeat.Interval');
 
 		S := 'Display';
 		Page := AddPage(S, 'Display Settings', MainPage);
 			Page.AddSettings(S);
 				Page.AddSetting('Renderer', 'Vsync');
 				Page.AddSetting('Renderer', 'AutoswitchResolution');
-				Page.AddSetting('Window', 'AspectRatio');
+				Page.AddSetting('Window',   'AspectRatio');
 				Page.AddSetting('Renderer', 'ScalingMethod');
 				Page.AddSetting('Renderer', 'FlipMode');
-				Page.AddSetting('GUI', 'BoxArtUpscale');
+				Page.AddSetting('GUI',      'BoxArtUpscale');
 
 				S := 'Overscan';
 				Page.AddPageEntry(S);

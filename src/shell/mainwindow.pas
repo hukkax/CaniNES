@@ -320,6 +320,19 @@ begin
 	if Menu.Visible then
 		MenuRenderer.Opacity := 1.0;
 
+	if RepeatedPadButtonInfo.Action <> actNone then
+	begin
+		if RepeatedPadButtonInfo.Action in RepeatedPadButtons then
+		begin
+			RepeatedPadButtonInfo.Counter -= 1;
+			if RepeatedPadButtonInfo.Counter <= 0 then
+			begin
+				RepeatedPadButtonInfo.Counter := Configuration.Input.UI.PadRepeat.Interval;
+				Perform(RepeatedPadButtonInfo.Action, True);
+			end;
+		end;
+	end;
+
 	if (Mouse.Timer > 0) and (Mouse.InWindow) then
 	begin
 		if (Menubar.Hovering) or (Menu.Visible) then Exit;
@@ -359,8 +372,12 @@ var
 	Ctrl: Byte = 0;
 begin
 	if Menu.Visible then
+	begin
 		if Menu.ProcessAction(Action, Pressed) then
 			Exit;
+	end
+	else
+		RepeatedPadButtonInfo.Action := actNone;
 
 {	if Action in ContinuousActions then
 		ActionActive[Action] := Pressed;}
@@ -918,11 +935,28 @@ begin
 		if Menu.ProcessJoy(Pressed, PadNum, Button) then
 			Exit;
 
+	if Pressed then
+	begin
+		RepeatedPadButtonInfo.Button := Button;
+		RepeatedPadButtonInfo.Action := actNone;
+		RepeatedPadButtonInfo.Counter := Configuration.Input.UI.PadRepeat.Initial;
+	end
+	else
+	begin
+		RepeatedPadButtonInfo.Button := 0;
+		RepeatedPadButtonInfo.Action := actNone;
+		RepeatedPadButtonInfo.Counter := 0;
+	end;
+
 	for Action in TAction do
 	begin
 		Binding := @Bindings[Action];
 		if (Binding.PadNum = PadNum) and (Binding.PadButton = Button) then
+		begin
+			if Pressed then
+				RepeatedPadButtonInfo.Action := Action;
 			Perform(Action, Pressed);
+		end;
 	end;
 
 	//writeln('Joy ', PadNum, '=', Button);
@@ -1239,8 +1273,12 @@ begin
 		Item := AddItem('&Recent Files');
 		with Item.AddSubMenu(0) do
 			for i := 0 to MRUcount-1 do
-				AddItem(ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
-					actROMLoadFromMenu, Configuration.Application.MRU[i]);
+			begin
+				S := Configuration.Application.MRU[i];
+				if not S.IsEmpty then AddItem(
+					ChangeFileExt(ExtractFileName(Configuration.Application.MRU[i]), ''),
+						actROMLoadFromMenu, S);
+			end;
 
 		MenuUpLevel;
 		Item := AddItem('&Favourites');

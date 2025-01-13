@@ -58,8 +58,19 @@ type
 	end;
 	PInputBinding = ^TInputBinding;
 
+	TRepeatedPadButtonInfo = record
+		Button:    Byte;
+		Action:    TAction;
+		Counter:   Integer;
+	end;
+
 
 const
+	// joypad button repeat in menus
+	RepeatedPadButtons: set of TAction = [
+		actPadUp, actPadDown, actPadLeft, actPadRight
+	];
+
 	ContinuousActions: set of TAction = [
 		// Controller 1
 		actPadUp, actPadDown, actPadLeft, actPadRight,
@@ -75,11 +86,11 @@ const
 		actFastForward, actRewind
 	];
 
-
 var
 //	ActionActive: array[TAction] of Boolean;
 	Bindings:     array[TAction] of TInputBinding;
 	BindingNames: array[TAction] of AnsiString;
+	RepeatedPadButtonInfo: TRepeatedPadButtonInfo;
 
 	function  IsBindingShift(Binding: TInputBinding): Boolean;
 	procedure FixBindingShift(Binding: PInputBinding);
