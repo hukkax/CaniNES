@@ -11,7 +11,7 @@ uses
 
 const
 	APPNAME    = 'CaniNES';
-	APPVERSION = '0.9.1';
+	APPVERSION = '0.9.2';
 
 	NES_RESOLUTION_X = 256;
 	NES_RESOLUTION_Y = 240;
