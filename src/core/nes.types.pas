@@ -95,6 +95,9 @@ type
 	// =========
 	// Console
 
+	{$PUSH}
+	{$PACKENUM 1}
+
 	TNESModel   = ( nesAuto, nesNTSC, nesPAL, nesDendy );
 
 	TGameSystem = ( NES_NTSC, NES_PAL, Famicom, Dendy, VsSystem, Playchoice, FDS, Unknown );
@@ -150,6 +153,8 @@ type
 
 	TNTSCCrawl = ( crawlNormal, crawlMerge, crawlPAL );
 
+	{$POP}
+
 	// =========
 	// Cartridge
 
@@ -176,8 +181,10 @@ type
 		memopExecOpcode,
 		memopExecOperand,
 		memopPPURenderingRead,
-		memopDummyRead,
+		memopDMARead,
+		memopDMAWrite,
 		memopDMCRead,
+		memopDummyRead,
 		memopDummyWrite
 	);
 

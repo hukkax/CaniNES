@@ -15,7 +15,9 @@ type
 	protected
 		PreviousCycle: Cardinal;
 		Timer, Period: Word;
-		nesModel: TNesModel;
+		nesModel:      TNesModel;
+	private
+		function DoRun(targetCycle: Cardinal): Boolean;
 	public
 		Output:  ShortInt;
 		Channel: Byte;
@@ -43,7 +45,7 @@ type
 	private
 		NewHaltValue: Boolean;
 	protected
-		Enabled: Boolean;
+		Enabled:           Boolean;
 		LengthCounterHalt: Boolean;
 		LengthCounter,
 		LengthCounterReloadValue,
@@ -202,6 +204,8 @@ type
 		procedure InitSample;
 	public
 		NeedToRun: Boolean;
+		DisableDelay,
+		TransferStartDelay: Byte;
 
 		constructor Create; overload;
 
@@ -211,6 +215,7 @@ type
 		procedure Reset(softReset: Boolean); override;
 		procedure WriteRAM(addr: Word; value: Byte); override;
 		procedure Clock; override;
+		procedure ProcessClock;
 
 		function  GetStatus: Boolean; override;
 		function  IRQPending(cyclesToRun: Cardinal): Boolean;
@@ -251,7 +256,7 @@ begin
 	RegisterProperty(8,  @Output);
 	RegisterProperty(16, @Timer);
 	RegisterProperty(16, @Period);
-	RegisterProperty(8,  @nesModel);
+	RegisterProperty(SizeOf(TNesModel)*8, @nesModel);
 end;
 
 procedure TBaseApuChannel.SetNesModel(model: TNESModel);
@@ -275,21 +280,27 @@ begin
 	Output := 0;
 end;
 
-procedure TBaseApuChannel.Run(targetCycle: Cardinal);
+function TBaseApuChannel.DoRun(targetCycle: Cardinal): Boolean;
 var
 	cyclesToRun: Int32;
 begin
 	cyclesToRun := targetCycle - PreviousCycle;
-	while cyclesToRun > Timer do
+	if cyclesToRun > Timer then
 	begin
-		Dec(cyclesToRun, Timer + 1);
 		Inc(PreviousCycle, Timer + 1);
-		Clock;
 		Timer := Period;
+		Exit(True);
 	end;
 
 	Dec(Timer, cyclesToRun);
 	PreviousCycle := targetCycle;
+	Result := False;
+end;
+
+procedure TBaseApuChannel.Run(targetCycle: Cardinal);
+begin
+	while DoRun(targetCycle) do
+		Clock;
 end;
 
 procedure TBaseApuChannel.AddOutput(value: ShortInt);
@@ -698,7 +709,6 @@ begin
 	begin
 		SequencePosition := (SequencePosition + 1) and $1F;
 
-		// ! Configuration->CheckFlag(SilenceTriangleHighFreq))
 		if (Period >= 2) or (not NES_APU.Settings.SilenceTriangleHighFreq) then
 		begin
 			// Disabling the triangle channel when period is < 2 removes "pops" in
@@ -716,23 +726,21 @@ begin
 
 		0: // $4008
 		begin
-			LinearControlFlag   := (value and $80) <> 0;
+			LinearControlFlag   := (value and $80) = $80;
 			LinearCounterReload :=  value and $7F;
 			InitializeLengthCounter(LinearControlFlag);
 		end;
 
 		2: // $400A
 		begin
-			Period := Period and (not $00FF);
-			Period := Period or value;
+			Period := (Period and $FF00) or value;
 		end;
 
 		3: // $400B
 		begin
 			LoadLengthCounter(value shr 3);
-			Period := Period and (not $FF00);
-			Period := Period or ((value and 7) shl 8);
-			//Side effect: sets the linear counter reload flag
+			Period := (Period and $FF) or ((value and 7) shl 8);
+			// Side effect: sets the linear counter reload flag
 			LinearReloadFlag := True;
 		end;
 
@@ -893,6 +901,8 @@ begin
 	RegisterProperty(8,  @BitsRemaining);
 	RegisterProperty(1,  @SilenceFlag);
 	RegisterProperty(1,  @NeedToRun);
+	RegisterProperty(8,  @TransferStartDelay);
+	RegisterProperty(8,  @DisableDelay);
 
 	Channel := channel_DMC;
 
@@ -940,10 +950,13 @@ begin
 	BitsRemaining  := 8;
 	SilenceFlag    := True;
 	NeedToRun      := False;
-	BufferEmpty := True;
+	BufferEmpty    := True;
 
 	NeedInit       := 0;
 	LastValue4011  := 0;
+
+	DisableDelay       := 0;
+	TransferStartDelay := 0;
 
 	// Not sure if this is accurate, but it seems to make things better rather than worse (for dpcmletterbox)
 	// On the real thing, I think the power-on value is 428 (or the equivalent at least -
@@ -975,11 +988,19 @@ end;
 
 procedure TDMCChannel.SetEnabled(Enable: Boolean);
 begin
-	Enabled := Enable;
 	if not Enable then
 	begin
-		BytesRemaining := 0;
-		NeedToRun := False;
+		if DisableDelay = 0 then
+		begin
+			// Disabling takes effect with a 1 apu cycle delay
+			// If a DMA starts during this time, it gets cancelled
+			// but this will still cause the CPU to be halted for 1 cycle
+			if (NES_CPU.GetCycleCount and 1) = 0 then
+				DisableDelay := 2
+			else
+				DisableDelay := 3;
+		end;
+		NeedToRun := True;
 	end
 	else
 	if BytesRemaining = 0 then
@@ -988,9 +1009,10 @@ begin
 		// Delay a number of cycles based on odd/even cycles
 		// Allows behavior to match dmc_dma_start_test
 		if (NES_CPU.GetCycleCount and 1) = 0 then
-			NeedInit := 2
+			TransferStartDelay := 2
 		else
-			NeedInit := 3;
+			TransferStartDelay := 3;
+		NeedToRun := True;
 	end;
 end;
 
@@ -998,17 +1020,12 @@ procedure TDMCChannel.InitSample;
 begin
 	CurrentAddr    := SampleAddr;
 	BytesRemaining := SampleLength;
-	NeedToRun      := BytesRemaining > 0;
+	NeedToRun      := NeedToRun or (BytesRemaining > 0);
 end;
 
 function TDMCChannel.NeedsToRun: Boolean;
 begin
-	if NeedInit > 0 then
-	begin
-		Dec(NeedInit);
-		if NeedInit = 0 then
-			StartDmcTransfer;
-	end;
+	if NeedToRun then ProcessClock;
 	Result := NeedToRun;
 end;
 
@@ -1028,14 +1045,14 @@ begin
 
 		0: // $4010
 		begin
-			IRQEnabled := (value and $80) <> 0;
-			LoopFlag   := (value and $40) <> 0;
+			IRQEnabled := (value and $80) = $80;
+			LoopFlag   := (value and $40) = $40;
 
 			// "The rate determines for how many CPU cycles happen between changes
 			// in the output level during automatic delta-encoded sample playback."
 			// Because BaseApuChannel does not decrement when setting Timer, we need
 			// to actually set the value to 1 less than the lookup table
-			Period := PeriodLookupTable[value and $F] - 1;
+			Period := PeriodLookupTable[value and $0F] - 1;
 
 			if not IRQEnabled then
 				CPUClearIRQSource(irqDMC);
@@ -1105,11 +1122,35 @@ begin
 			SilenceFlag   := False;
 			ShiftRegister := ReadBuffer;
 			BufferEmpty   := True;
-			StartDMCTransfer;
+			NeedToRun     := True;
+			StartDmcTransfer;
 		end;
 	end;
 
 	AddOutput(OutputLevel);
+end;
+
+procedure TDMCChannel.ProcessClock;
+begin
+	if DisableDelay > 0 then
+	begin
+		Dec(DisableDelay);
+		if DisableDelay = 0 then
+		begin
+			BytesRemaining := 0;
+			// Abort any on-going transfer that hasn't fully started
+			NES_CPU.StopDMCTransfer;
+		end;
+	end;
+
+	if TransferStartDelay > 0 then
+	begin
+		Dec(TransferStartDelay);
+		if TransferStartDelay = 0 then
+			StartDmcTransfer;
+	end;
+
+	NeedToRun := (DisableDelay > 0) or (TransferStartDelay > 0) or (BytesRemaining > 0);
 end;
 
 procedure TDMCChannel.Debug;
@@ -1126,9 +1167,9 @@ begin
 	if BytesRemaining > 0 then
 	begin
 		ReadBuffer := value;
-		BufferEmpty := false;
+		BufferEmpty := False;
 
-		//"The address is incremented; if it exceeds $FFFF, it is wrapped around to $8000."
+		// "The address is incremented; if it exceeds $FFFF, it is wrapped around to $8000."
 		Inc(CurrentAddr);
 		if CurrentAddr = 0 then
 			CurrentAddr := $8000;
@@ -1136,12 +1177,39 @@ begin
 		Dec(BytesRemaining);
 		if BytesRemaining = 0 then
 		begin
-			NeedToRun := False;
-			if LoopFlag then //Looped sample should never set IRQ flag
+			if LoopFlag then // Looped sample should never set IRQ flag
 				InitSample
 			else
 			if IRQEnabled then
 				CPUSetIrqSource(irqDMC);
+		end;
+	end;
+
+	if (LoopFlag = False) and (SampleLength = 1) then
+	begin
+		// When DMA ends around the time the bit counter resets, a CPU glitch sometimes causes another DMA to be requested immediately.
+		if (BitsRemaining = 8) and (Timer = Period) then //and (console->GetNesConfig().EnableDmcSampleDuplicationGlitch)
+		begin
+			// When the DMA ends on the same cycle as the bit counter resets
+			// This glitch exists on all H CPUs and some G CPUs (those from around 1990 and later)
+			// In this case, a full DMA is performed on the same address, and the same sample byte
+			// is played twice in a row by the DMC
+			ShiftRegister := ReadBuffer;
+			SilenceFlag := False;
+			BufferEmpty := True;
+			InitSample;
+			StartDmcTransfer;
+		end
+		else
+		if (BitsRemaining = 1) and (Timer < 2) then
+		begin
+			// When the DMA ends on the APU cycle before the bit counter resets
+			// If it this happens right before the bit counter resets,
+			// a DMA is triggered and aborted 1 cycle later (causing one halted CPU cycle)
+			ShiftRegister := ReadBuffer;
+			BufferEmpty := False;
+			InitSample;
+			DisableDelay := 3;
 		end;
 	end;
 end;

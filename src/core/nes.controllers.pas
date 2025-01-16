@@ -79,7 +79,6 @@ type
 
 	TControlManager = class(TIMemoryHandler)
 	private
-		function  GetOpenBusMask(port: Byte): Byte;
 	public
 		ControlDevices: TObjectList<TBaseControlDevice>;
 
@@ -94,6 +93,7 @@ type
 		procedure WriteRAM(address: Word; value: Byte); override;
 		procedure Reset;
 		procedure GetInvOE1; // inline;
+		function  GetOpenBusMask(port: Byte): Byte;
 
 		procedure PadVisualizationChanged;
 

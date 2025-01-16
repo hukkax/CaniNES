@@ -41,6 +41,7 @@ type
 
 		procedure GetMemoryRanges(var ranges: TMemoryRanges); virtual;
 		function  GetOpenBus: Byte; virtual;
+		function  GetInternalOpenBus: Byte; virtual;
 
 		procedure WriteDebug(Stream: TFileStreamEx);
 	end;
@@ -61,7 +62,8 @@ type
 
 	TOpenBusHandler = class(TIMemoryHandler)
 	private
-		lastReadValue: Byte;
+		externalOpenBus,
+		internalOpenBus: Byte;
 	public
 		constructor Create(const RegisterName: AnsiString); override;
 
@@ -71,7 +73,8 @@ type
 
 		procedure GetMemoryRanges(var ranges: TMemoryRanges); override;
 		function  GetOpenBus: Byte; override;
-		procedure SetOpenBus(value: Byte); inline;
+		function  GetInternalOpenBus: Byte; override;
+		procedure SetOpenBus(value: Byte; setInternalOnly: Boolean); inline;
 	end;
 
 	TMemoryHandlers = array of TIMemoryHandler;
@@ -165,6 +168,11 @@ begin
 	Result := 0;
 end;
 
+function TIMemoryHandler.GetInternalOpenBus: Byte;
+begin
+	Result := 0;
+end;
+
 procedure TIMemoryHandler.WriteDebug(Stream: TFileStreamEx);
 //var
 //	ranges: TMemoryRanges;
@@ -218,7 +226,9 @@ end;
 constructor TOpenBusHandler.Create(const RegisterName: AnsiString);
 begin
 	inherited Create(RegisterName);
-	lastReadValue := 0;
+
+	externalOpenBus := 0;
+	internalOpenBus := 0;
 end;
 
 function TOpenBusHandler.PeekRAM(addr: Word): Byte;
@@ -228,7 +238,7 @@ end;
 
 function TOpenBusHandler.ReadRAM(addr: Word): Byte;
 begin
-	Result := lastReadValue;
+	Result := externalOpenBus;
 end;
 
 procedure TOpenBusHandler.WriteRAM(addr: Word; value: Byte);
@@ -241,12 +251,19 @@ end;
 
 function TOpenBusHandler.GetOpenBus: Byte;
 begin
-	Result := lastReadValue;
+	Result := externalOpenBus;
 end;
 
-procedure TOpenBusHandler.SetOpenBus(value: Byte);
+function TOpenBusHandler.GetInternalOpenBus: Byte;
 begin
-	lastReadValue := value;
+	Result := externalOpenBus;
+end;
+
+procedure TOpenBusHandler.SetOpenBus(value: Byte; setInternalOnly: Boolean);
+begin
+	if not setInternalOnly then
+		externalOpenBus := value;
+	internalOpenBus := value;
 end;
 
 end.

@@ -58,7 +58,8 @@ type
 		amAcc,  amImp,   amImm,   amRel,
 		amZero, amAbs,   amZeroX, amZeroY,
 		amInd,  amIndX,  amIndY,  amIndYW,
-		amAbsX, amAbsXW, amAbsY,  amAbsYW
+		amAbsX, amAbsXW, amAbsY,  amAbsYW,
+		amOther
 	);
 
 type
@@ -81,9 +82,12 @@ type
 		_BRK,_RTI,
 		_NOP,
 		// Invalid opcodes
-		_SLO,_SRE,_RLA,_RRA,_SAX,_LAX,_DCP,_ISB,_AAC,_ASR,_ARR,_ATX,_AXS,_SYA,_SXA,
+//		_SLO,_SRE,_RLA,_RRA,_SAX,_LAX,_DCP,_ISB,_AAC,_ASR,_ARR,_ATX,_AXS,_SYA,_SXA,
+		_SLO,_SRE,_RLA,_RRA,_SAX,_LAX,_DCP,_ISB,_AAC,_ASR,_ARR,_ATX,_AXS,_SHY,_SHX,
+		_SHAA,_SHAZ,
 		// Unimplemented/incorrect opcodes
-		_HLT,_UNK,_AXA,_TAS,_LAS
+//		_HLT,_UNK,_AXA,_TAS,_LAS
+		_HLT,_UNK,_TAS,_LAS
 	);
 
 	TCPU = class(TSnapshotable)
@@ -97,61 +101,62 @@ type
 		ClockRateDendy = 1773448;
 
 		_opTable: array [Byte] of TFuncType = (
-			// 0     1     2     3     4     5         6     7     8     9     A         B     C         D     E         F
-			_BRK, _ORA, _HLT, _SLO, _NOP, _ORA, _ASL_Mem, _SLO, _PHP, _ORA, _ASL_Acc, _AAC, _NOP,     _ORA, _ASL_Mem, _SLO, // 0
-			_BPL, _ORA, _HLT, _SLO, _NOP, _ORA, _ASL_Mem, _SLO, _CLC, _ORA, _NOP,     _SLO, _NOP,     _ORA, _ASL_Mem, _SLO, // 1
-			_JSR, _AND, _HLT, _RLA, _BIT, _AND, _ROL_Mem, _RLA, _PLP, _AND, _ROL_Acc, _AAC, _BIT,     _AND, _ROL_Mem, _RLA, // 2
-			_BMI, _AND, _HLT, _RLA, _NOP, _AND, _ROL_Mem, _RLA, _SEC, _AND, _NOP,     _RLA, _NOP,     _AND, _ROL_Mem, _RLA, // 3
-			_RTI, _EOR, _HLT, _SRE, _NOP, _EOR, _LSR_Mem, _SRE, _PHA, _EOR, _LSR_Acc, _ASR, _JMP_Abs, _EOR, _LSR_Mem, _SRE, // 4
-			_BVC, _EOR, _HLT, _SRE, _NOP, _EOR, _LSR_Mem, _SRE, _CLI, _EOR, _NOP,     _SRE, _NOP,     _EOR, _LSR_Mem, _SRE, // 5
-			_RTS, _ADC, _HLT, _RRA, _NOP, _ADC, _ROR_Mem, _RRA, _PLA, _ADC, _ROR_Acc, _ARR, _JMP_Ind, _ADC, _ROR_Mem, _RRA, // 6
-			_BVS, _ADC, _HLT, _RRA, _NOP, _ADC, _ROR_Mem, _RRA, _SEI, _ADC, _NOP,     _RRA, _NOP,     _ADC, _ROR_Mem, _RRA, // 7
-			_NOP, _STA, _NOP, _SAX, _STY, _STA, _STX,     _SAX, _DEY, _NOP, _TXA,     _UNK, _STY,     _STA, _STX,     _SAX, // 8
-			_BCC, _STA, _HLT, _AXA, _STY, _STA, _STX,     _SAX, _TYA, _STA, _TXS,     _TAS, _SYA,     _STA, _SXA,     _AXA, // 9
-			_LDY, _LDA, _LDX, _LAX, _LDY, _LDA, _LDX,     _LAX, _TAY, _LDA, _TAX,     _ATX, _LDY,     _LDA, _LDX,     _LAX, // A
-			_BCS, _LDA, _HLT, _LAX, _LDY, _LDA, _LDX,     _LAX, _CLV, _LDA, _TSX,     _LAS, _LDY,     _LDA, _LDX,     _LAX, // B
-			_CPY, _CPA, _NOP, _DCP, _CPY, _CPA, _DEC,     _DCP, _INY, _CPA, _DEX,     _AXS, _CPY,     _CPA, _DEC,     _DCP, // C
-			_BNE, _CPA, _HLT, _DCP, _NOP, _CPA, _DEC,     _DCP, _CLD, _CPA, _NOP,     _DCP, _NOP,     _CPA, _DEC,     _DCP, // D
-			_CPX, _SBC, _NOP, _ISB, _CPX, _SBC, _INC,     _ISB, _INX, _SBC, _NOP,     _SBC, _CPX,     _SBC, _INC,     _ISB, // E
-			_BEQ, _SBC, _HLT, _ISB, _NOP, _SBC, _INC,     _ISB, _SED, _SBC, _NOP,     _ISB, _NOP,     _SBC, _INC,     _ISB  // F
+		//  0     1     2     3     4     5     6         7     8     9     A        B     C        D     E         F
+			_BRK, _ORA, _HLT, _SLO, _NOP, _ORA, _ASL_Mem, _SLO, _PHP, _ORA, _ASL_Acc,_AAC, _NOP,    _ORA, _ASL_Mem, _SLO, //0
+			_BPL, _ORA, _HLT, _SLO, _NOP, _ORA, _ASL_Mem, _SLO, _CLC, _ORA, _NOP,    _SLO, _NOP,    _ORA, _ASL_Mem, _SLO, //1
+			_JSR, _AND, _HLT, _RLA, _BIT, _AND, _ROL_Mem, _RLA, _PLP, _AND, _ROL_Acc,_AAC, _BIT,    _AND, _ROL_Mem, _RLA, //2
+			_BMI, _AND, _HLT, _RLA, _NOP, _AND, _ROL_Mem, _RLA, _SEC, _AND, _NOP,    _RLA, _NOP,    _AND, _ROL_Mem, _RLA, //3
+			_RTI, _EOR, _HLT, _SRE, _NOP, _EOR, _LSR_Mem, _SRE, _PHA, _EOR, _LSR_Acc,_ASR, _JMP_Abs,_EOR, _LSR_Mem, _SRE, //4
+			_BVC, _EOR, _HLT, _SRE, _NOP, _EOR, _LSR_Mem, _SRE, _CLI, _EOR, _NOP,    _SRE, _NOP,    _EOR, _LSR_Mem, _SRE, //5
+			_RTS, _ADC, _HLT, _RRA, _NOP, _ADC, _ROR_Mem, _RRA, _PLA, _ADC, _ROR_Acc,_ARR, _JMP_Ind,_ADC, _ROR_Mem, _RRA, //6
+			_BVS, _ADC, _HLT, _RRA, _NOP, _ADC, _ROR_Mem, _RRA, _SEI, _ADC, _NOP,    _RRA, _NOP,    _ADC, _ROR_Mem, _RRA, //7
+			_NOP, _STA, _NOP, _SAX, _STY, _STA, _STX,     _SAX, _DEY, _NOP, _TXA,    _UNK, _STY,    _STA, _STX,	    _SAX, //8
+			_BCC, _STA, _HLT, _SHAZ,_STY, _STA, _STX,     _SAX, _TYA, _STA, _TXS,    _TAS, _SHY,    _STA, _SHX,	    _SHAA,//9
+			_LDY, _LDA, _LDX, _LAX, _LDY, _LDA, _LDX,     _LAX, _TAY, _LDA, _TAX,    _ATX, _LDY,    _LDA, _LDX,	    _LAX, //A
+			_BCS, _LDA, _HLT, _LAX, _LDY, _LDA, _LDX,     _LAX, _CLV, _LDA, _TSX,    _LAS, _LDY,    _LDA, _LDX,	    _LAX, //B
+			_CPY, _CPA, _NOP, _DCP, _CPY, _CPA, _DEC,     _DCP, _INY, _CPA, _DEX,    _AXS, _CPY,    _CPA, _DEC,	    _DCP, //C
+			_BNE, _CPA, _HLT, _DCP, _NOP, _CPA, _DEC,     _DCP, _CLD, _CPA, _NOP,    _DCP, _NOP,    _CPA, _DEC,	    _DCP, //D
+			_CPX, _SBC, _NOP, _ISB, _CPX, _SBC, _INC,     _ISB, _INX, _SBC, _NOP,    _SBC, _CPX,    _SBC, _INC,	    _ISB, //E
+			_BEQ, _SBC, _HLT, _ISB, _NOP, _SBC, _INC,     _ISB, _SED, _SBC, _NOP,    _ISB, _NOP,    _SBC, _INC,	    _ISB  //F
 		);
 
 		AddrMode: array [Byte] of TAddrMode = (
-			//  0      1       2      3       4       5       6       7      8     9       A     B       C       D       E       F
-			amImp,amIndX, amNone,amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amAcc,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 0
-			amRel,amIndY, amNone,amIndYW,amZeroX,amZeroX,amZeroX,amZeroX,amImp,amAbsY, amImp,amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 1
-			amAbs,amIndX, amNone,amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amAcc,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 2
-			amRel,amIndY, amNone,amIndYW,amZeroX,amZeroX,amZeroX,amZeroX,amImp,amAbsY, amImp,amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 3
-			amImp,amIndX, amNone,amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amAcc,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 4
-			amRel,amIndY, amNone,amIndYW,amZeroX,amZeroX,amZeroX,amZeroX,amImp,amAbsY, amImp,amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 5
-			amImp,amIndX, amNone,amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amAcc,amImm,  amInd,  amAbs,  amAbs,  amAbs,   // 6
-			amRel,amIndY, amNone,amIndYW,amZeroX,amZeroX,amZeroX,amZeroX,amImp,amAbsY, amImp,amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 7
-			amImm,amIndX, amImm, amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amImp,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 8
-			amRel,amIndYW,amNone,amIndYW,amZeroX,amZeroX,amZeroY,amZeroY,amImp,amAbsYW,amImp,amAbsYW,amAbsXW,amAbsXW,amAbsYW,amAbsYW, // 9
-			amImm,amIndX, amImm, amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amImp,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // A
-			amRel,amIndY, amNone,amIndY, amZeroX,amZeroX,amZeroY,amZeroY,amImp,amAbsY, amImp,amAbsY, amAbsX, amAbsX, amAbsY, amAbsY,  // B
-			amImm,amIndX, amImm, amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amImp,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // C
-			amRel,amIndY, amNone,amIndYW,amZeroX,amZeroX,amZeroX,amZeroX,amImp,amAbsY, amImp,amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // D
-			amImm,amIndX, amImm, amIndX, amZero, amZero, amZero, amZero, amImp,amImm,  amImp,amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // E
-			amRel,amIndY, amNone,amIndYW,amZeroX,amZeroX,amZeroX,amZeroX,amImp,amAbsY, amImp,amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW  // F
+		//  0      1       2       3        4       5       6       7       8      9       A      B       C       D       E       F
+			amImp, amIndX, amNone, amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amAcc, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 0
+			amRel, amIndY, amNone, amIndYW, amZeroX,amZeroX,amZeroX,amZeroX,amImp, amAbsY, amImp, amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 1
+			amAbs, amIndX, amNone, amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amAcc, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 2
+			amRel, amIndY, amNone, amIndYW, amZeroX,amZeroX,amZeroX,amZeroX,amImp, amAbsY, amImp, amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 3
+			amImp, amIndX, amNone, amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amAcc, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 4
+			amRel, amIndY, amNone, amIndYW, amZeroX,amZeroX,amZeroX,amZeroX,amImp, amAbsY, amImp, amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 5
+			amImp, amIndX, amNone, amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amAcc, amImm,  amInd,  amAbs,  amAbs,  amAbs,   // 6
+			amRel, amIndY, amNone, amIndYW, amZeroX,amZeroX,amZeroX,amZeroX,amImp, amAbsY, amImp, amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // 7
+			amImm, amIndX, amImm,  amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amImp, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // 8
+			amRel, amIndYW,amNone, amOther, amZeroX,amZeroX,amZeroY,amZeroY,amImp, amAbsYW,amImp, amOther,amOther,amAbsXW,amOther,amOther, // 9
+			amImm, amIndX, amImm,  amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amImp, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // A
+			amRel, amIndY, amNone, amIndY,  amZeroX,amZeroX,amZeroY,amZeroY,amImp, amAbsY, amImp, amAbsY, amAbsX, amAbsX, amAbsY, amAbsY,  // B
+			amImm, amIndX, amImm,  amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amImp, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // C
+			amRel, amIndY, amNone, amIndYW, amZeroX,amZeroX,amZeroX,amZeroX,amImp, amAbsY, amImp, amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW, // D
+			amImm, amIndX, amImm,  amIndX,  amZero, amZero, amZero, amZero, amImp, amImm,  amImp, amImm,  amAbs,  amAbs,  amAbs,  amAbs,   // E
+			amRel, amIndY, amNone, amIndYW, amZeroX,amZeroX,amZeroX,amZeroX,amImp, amAbsY, amImp, amAbsYW,amAbsX, amAbsX, amAbsXW,amAbsXW  // F
 		);
 
 	private
-		OpTable: array [Byte] of TFunc;
-		Operand: Word;
-		InstAddrMode: TAddrMode;
+		OpTable:           array [Byte] of TFunc;
+		Operand:           Word;
+		InstAddrMode:      TAddrMode;
 
 		spriteDmaOffset:   Byte;
 		SpriteDmaTransfer: Boolean;
 
-		dmcDmaRunning: Boolean;
-		needDummyRead: Boolean;
-		cpuWrite:      Boolean;
-		WriteAddr:     Word;
+		dmcDmaRunning:  Boolean;
+		abortDmcDma:    Boolean;
+		needDummyRead:  Boolean;
+		cpuWrite:       Boolean;
+		WriteAddr:      Word;
 
 		ppuOffset,
 		startClockCount,
-		endClockCount: Byte;
+		endClockCount:  Byte;
 
 		NeedHalt,
 		NeedNMI,
@@ -159,7 +164,7 @@ type
 		PrevRunNMI,
 		prevNeedNMI,
 		prevNmiFlag,
-		RunIrq:        Boolean;
+		RunIrq:         Boolean;
 
 	public
 		A, X, Y: Byte;
@@ -269,11 +274,14 @@ type
 		//
 		procedure OpSLO; procedure OpSRE; procedure OpRLA; procedure OpRRA; procedure OpSAX;
 		procedure OpLAX; procedure OpDCP; procedure OpISB; procedure OpAAC; procedure OpASR;
-		procedure OpARR; procedure OpATX; procedure OpAXS; procedure OpSYA; procedure OpSXA;
+		procedure OpARR; procedure OpATX; procedure OpAXS; { procedure OpSYA; procedure OpSXA; }
+		procedure OpSHX; procedure OpSHY; procedure OpSHAA; procedure OpSHAZ;
 
 		// Unimplemented/incorrect opcodes
 		//
-		procedure OpHLT; procedure OpUNK; procedure OpAXA; procedure OpTAS; procedure OpLAS;
+		procedure OpHLT; procedure OpUNK; {procedure OpAXA} procedure OpTAS; procedure OpLAS;
+
+		procedure SyaSxaAxa(baseAddr: Word; indexReg, valueReg: Byte);
 
 		// --------------------------------------------------------------------------------------------
 
@@ -302,6 +310,7 @@ type
 		//procedure ProcessCPUClock;
 		procedure StartCpuCycle(forRead: Boolean); inline;
 		procedure EndCpuCycle(forRead: Boolean); inline;
+		function  ProcessDMARead(addr: Word; var prevReadAddress: Word; enableInternalRegReads, isNesBehavior: Boolean): Byte;
 		procedure ProcessPendingDMA(readAddress: Word);
 
 		procedure DummyRead; inline;
@@ -324,6 +333,7 @@ type
 
 		procedure RunDMATransfer(offsetValue: Byte);
 		procedure StartDMCTransfer;
+		procedure StopDMCTransfer;
 
 		procedure Exec; inline;
 		procedure ExecFrame;
@@ -337,8 +347,8 @@ type
 	end;
 
 
-	function NTH_BIT(const aValue: Cardinal; const Bit: Byte): Byte; inline;
-	function Flipbyte(b: Byte): Byte;
+	function  NTH_BIT(const aValue: Cardinal; const Bit: Byte): Byte; inline;
+	function  Flipbyte(b: Byte): Byte;
 
 	function  CPUGetCycleCount: QWord;
 	procedure CPUSetNMIFlag;
@@ -419,6 +429,7 @@ begin
 	RegisterProperty(1,  @NMIFlag);
 	RegisterProperty(8,  @IRQFlag);
 	RegisterProperty(1,  @dmcDmaRunning);
+	RegisterProperty(1,  @abortDmcDma);
 	RegisterProperty(1,  @SpriteDmaTransfer);
 	RegisterProperty(1,  @needDummyRead);
 	RegisterProperty(1,  @needHalt);
@@ -430,24 +441,33 @@ begin
 	RegisterProperty(1,  @prevNmiFlag);
 	RegisterProperty(1,  @needNmi);
 
+	{RegisterProperty(16, @Operand);
+	RegisterProperty(SizeOf(TAddrMode)*8, @InstAddrMode);
+	RegisterProperty(8,  @spriteDmaOffset);
+	RegisterProperty(1,  @cpuWrite);
+	RegisterProperty(16, @WriteAddr);
+	RegisterProperty(1,  @PrevRunIRQ);
+	RegisterProperty(1,  @PrevRunNMI);
+	RegisterProperty(1,  @RunIrq);}
+
 	InstAddrMode := amNone;
 	CycleCount := 0;
 	Operand := 0;
 	SpriteDmaTransfer := False;
 	SpriteDmaOffset := 0;
-	dmcDmaRunning := False;
-	cpuWrite := False;
-	WriteAddr := 0;
-	//irqMask := 0;
-	RunIrq := False;
-	PrevRunIRQ := False;
-	PrevRunNMI := False;
 	NeedHalt := False;
 	ppuOffset := 0;
 	startClockCount := 6;
 	endClockCount := 6;
 	MasterClock := 0;
-	ppuOffset := 0;
+	dmcDmaRunning := False;
+	abortDmcDma := False;
+	cpuWrite := False;
+	//irqMask := 0;
+	WriteAddr := 0;
+	PrevRunNMI := False;
+	PrevRunIRQ := False;
+	RunIrq := False;
 
 	for i := 0 to 255 do
 	begin
@@ -558,14 +578,19 @@ begin
 		_ARR: OpTable[i] := OpARR;
 		_ATX: OpTable[i] := OpATX;
 		_AXS: OpTable[i] := OpAXS;
-		_SYA: OpTable[i] := OpSYA;
-		_SXA: OpTable[i] := OpSXA;
+		//_SYA: OpTable[i] := OpSYA;
+		//_SXA: OpTable[i] := OpSXA;
+
+		_SHX: OpTable[i] := OpSHX;
+		_SHY: OpTable[i] := OpSHY;
+		_SHAA:OpTable[i] := OpSHAA;
+		_SHAZ:OpTable[i] := OpSHAZ;
 
 		// Unimplemented/incorrect opcodes
 
 		_HLT: OpTable[i] := OpHLT;
 		_UNK: OpTable[i] := OpUNK;
-		_AXA: OpTable[i] := OpAXA;
+//		_AXA: OpTable[i] := OpAXA;
 		_TAS: OpTable[i] := OpTAS;
 		_LAS: OpTable[i] := OpLAS;
 
@@ -620,7 +645,7 @@ begin
 	// "it's really the status of the interrupt lines at the end of the second-to-last cycle that matters."
 	// Keep the irq lines values from the previous cycle.  The before-to-last cycle's values will be used
 	prevRunIrq := runIrq;
-	RunIrq := ((IRQFlag <> 0) and (not CheckFlag(psfInterrupt)));
+	RunIrq := (IRQFlag {and irqMask} > 0) and (not CheckFlag(psfInterrupt));
 end;
 
 procedure TCPU.MemoryWrite(addr: Word; value: Byte; operationType: TMemoryOperationType);
@@ -729,7 +754,7 @@ end;
 
 function TCPU.GetClockRate(model: TNESModel): Cardinal;
 begin
-	case Model of
+	case model of
 		nesPAL:   Result := ClockRatePAL;
 		nesDendy: Result := ClockRateDendy;
 		else      Result := ClockRateNTSC;
@@ -774,6 +799,7 @@ begin
 	SpriteDmaOffset := 0;
 	NeedHalt := False;
 	dmcDmaRunning := False;
+	cpuWrite := False;
 
 	// Use MemoryManager.Read directly to prevent clocking the PPU/APU when setting PC at reset
 	PC := MemoryManager.Read(ResetVector) or MemoryManager.Read(ResetVector+1) << 8;
@@ -787,6 +813,7 @@ begin
 	end
 	else
 	begin
+		//irqMask := $FF;
 		A := 0;
 		SP := $FD;
 		X := 0;
@@ -795,7 +822,7 @@ begin
 		runIrq := False;
 	end;
 
-	case Model of
+	case model of
 		nesAuto, nesNTSC:
 		begin
 			ppuDivider := 4;
@@ -863,6 +890,26 @@ begin
 	NeedHalt := True;
 end;
 
+procedure TCPU.StopDMCTransfer;
+begin
+	if dmcDmaRunning then
+	begin
+		if NeedHalt then
+		begin
+			// If interrupted before the halt cycle starts, cancel DMA completely
+			// This can happen when a write prevents the DMA from starting after being queued
+			dmcDmaRunning := False;
+			needDummyRead := False;
+			NeedHalt := False;
+		end
+		else
+		begin
+			// Abort DMA if possible (this only appears to be possible if done within the first cycle of DMA)
+			abortDmcDma := True;
+		end;
+	end;
+end;
+
 procedure TCPU.IRQ;
 begin
 	DummyRead;  // fetch opcode (and discard it - $00 (BRK) is forced into the opcode register instead)
@@ -926,56 +973,197 @@ begin
 		SetFlags(psfNegative);
 end;
 
+function TCPU.ProcessDMARead(addr: Word; var prevReadAddress: Word; enableInternalRegReads, isNesBehavior: Boolean): Byte;
+var
+	internalAddr:  Word;
+	isSameAddress: Boolean;
+	val, obMask, externalValue: Byte;
+begin
+	// This is to reproduce a CPU bug that can occur during DMA which can cause the 2A03 to read from
+	// its internal registers (4015, 4016, 4017) at the same time as the DMA unit reads a byte from
+	// the bus. This bug occurs if the CPU is halted while it's reading a value in the $4000-$401F range.
+	//
+	// This has a number of side effects:
+	// -It can cause a read of $4015 to occur without the program's knowledge, which would clear the frame counter's IRQ flag
+	// -It can cause additional bit deletions while reading the input (e.g more than the DMC glitch usually causes)
+	// -It can also *prevent* bit deletions from occurring at all in another scenario
+	// -It can replace/corrupt the byte that the DMA is reading, causing DMC to play the wrong sample
+
+	if not enableInternalRegReads then
+	begin
+		if (addr >= $4000) and (addr <= $401F) then
+			// Nothing will respond on $4000-$401F on the external bus - return open bus value
+			Result := MemoryManager.GetOpenBus
+		else
+			Result := MemoryManager.Read(addr, memopDMARead);
+		prevReadAddress := addr;
+		Exit;
+	end
+	else
+	begin
+		// This glitch causes the CPU to read from the internal APU/Input registers
+		// regardless of the address the DMA unit is trying to read
+		internalAddr  := $4000 or (addr and $1F);
+		isSameAddress := internalAddr = addr;
+
+		case internalAddr of
+
+			$4015:
+			begin
+				Result := MemoryManager.Read(internalAddr, memopDMARead);
+				// Also trigger a read from the actual address the CPU was supposed to read from (external bus)
+				if not isSameAddress then
+					MemoryManager.Read(addr, memopDMARead);
+			end;
+
+			$4016, $4017:
+			begin
+				// Reading from the same input register twice in a row, skip the read entirely to avoid
+				// triggering a bit loss from the read, since the controller won't react to this read
+				// Return the same value as the last read, instead
+				// On PAL, the behavior is unknown - for now, don't cause any bit deletions
+				if (Console.Model = nesPAL) or (isNesBehavior and (prevReadAddress = internalAddr)) then
+					Result := MemoryManager.GetOpenBus
+				else
+					Result := MemoryManager.Read(internalAddr, memopDMARead);
+
+				if not isSameAddress then
+				begin
+					// The DMA unit is reading from a different address, read from it too (external bus)
+					obMask := Console.ControlManager.GetOpenBusMask(internalAddr - $4016);
+					externalValue := MemoryManager.Read(addr, memopDMARead);
+
+					// Merge values, keep the external value for all open bus pins on the 4016/4017 port
+					// AND all other bits together (bus conflict)
+					val := externalValue and obMask;
+					obMask := not obMask;
+					Result := val or ((Result and obMask) and (externalValue and obMask));
+				end;
+			end;
+
+			else
+				Result := MemoryManager.Read(addr, memopDMARead);
+		end;
+
+		prevReadAddress := internalAddr;
+	end;
+end;
+
 procedure TCPU.ProcessPendingDMA(readAddress: Word);
 
 	procedure ProcessCycle; inline;
 	begin
-		//Sprite DMA cycles count as halt/dummy cycles for the DMC DMA when both run at the same time
+		// Sprite DMA cycles count as halt/dummy cycles for the DMC DMA when both run at the same time
+		if abortDmcDma then
+		begin
+			dmcDmaRunning := False;
+			abortDmcDma := False;
+			NeedDummyRead := False;
+			NeedHalt := False;
+		end
+		else
 		if NeedHalt then
 			NeedHalt := False
 		else
 		if NeedDummyRead then
 			NeedDummyRead := False;
+
 		StartCpuCycle(True);
 	end;
 
 var
-	spriteDmaCounter: Word = 0;
-	spriteReadAddr: Byte = 0;
-	readValue: Byte = 0;
-	skipDummyReads, getCycle: Boolean;
+	spriteReadAddr, readValue: Byte;
+	spriteDmaCounter, prevReadAddress, dmcAddress: Word;
+	isNtscInputBehavior, isNesBehavior, enableInternalRegReads,
+	skipFirstInputClock, skipDummyReads, getCycle: Boolean;
 begin
 	if not NeedHalt then Exit;
+
+	prevReadAddress := readAddress;
+	enableInternalRegReads := (readAddress and $FFE0) = $4000;
+	skipFirstInputClock := False;
+
+	if (enableInternalRegReads) and (dmcDmaRunning) and ((readAddress = $4016) or (readAddress = $4017)) then
+	begin
+		dmcAddress := NES_APU.GetDmcReadAddress;
+		if (dmcAddress and $1F) = (readAddress and $1F) then
+		begin
+			// DMC will cause a read on the same address as the CPU was reading from
+			// This will hide the reads from the controllers because /OE will be active the whole time
+			skipFirstInputClock := True;
+		end;
+	end;
+
+	// On PAL, the dummy/idle reads done by the DMA don't appear to be done on the
+	// address that the CPU was about to read. This prevents the 2+x reads on registers issues.
+	// The exact specifics of where the CPU reads instead aren't known yet - so just disable read side-effects entirely on PAL
+	isNtscInputBehavior := Console.Model <> nesPAL;
+
+	// On Famicom, each dummy/idle read to 4016/4017 is interpreted as a read of the joypad registers
+	// On NES (or AV Famicom), only the first dummy/idle read causes side effects (e.g only a single bit is lost)
+	isNesBehavior := True; // !!! console->GetNesConfig.ConsoleType != NesConsoleType::Hvc001;
+	skipDummyReads := (not isNtscInputBehavior) or
+		(isNesBehavior and ((readAddress = $4016) or (readAddress = $4017)));
+	NeedHalt := False;
 
 	// "If this cycle is a read, hijack the read, discard the value, and prevent all other
 	// actions that occur on this cycle (PC not incremented, etc)"
 	StartCpuCycle(True);
-	MemoryManager.Read(readAddress, memopDummyRead);
+	if (abortDmcDma) and (isNesBehavior) and ((readAddress = $4016) or (readAddress = $4017)) then
+	begin
+		// Skip halt cycle dummy read on 4016/4017
+		// The DMA was aborted, and the CPU will read 4016/4017 next
+		// If 4016/4017 is read here, the controllers will see 2 separate reads
+		// even though they would only see a single read on hardware (except the original Famicom)
+	end
+	else
+	if (isNtscInputBehavior) and (not skipFirstInputClock) then
+		MemoryManager.Read(readAddress, memopDMARead);
 	EndCpuCycle(True);
-	NeedHalt := False;
 
-	skipDummyReads := (readAddress = $4016) or (readAddress = $4017);
+	if abortDmcDma then
+	begin
+		dmcDmaRunning := False;
+		abortDmcDma := False;
+		if not spriteDmaTransfer then
+		begin
+			// If DMC DMA was cancelled and OAM DMA isn't about to start,
+			// stop processing DMA entirely. Otherwise, OAM DMA needs to run,
+			// so the DMA process has to continue.
+			needDummyRead := False;
+			Exit;
+		end;
+	end;
+
+	spriteDmaCounter := 0;
+	spriteReadAddr := 0;
+	readValue := 0;
 
 	while (dmcDmaRunning) or (spriteDmaTransfer) do
 	begin
-		getCycle := (CycleCount and 1) = 0; //not Odd(CycleCount);
+		getCycle := (CycleCount and 1) = 0;
 		if getCycle then
 		begin
 			if (dmcDmaRunning) and (not NeedHalt) and (not needDummyRead) then
 			begin
 				//DMC DMA is ready to read a byte (both halt and dummy read cycles were performed before this)
 				ProcessCycle;
-				readValue := MemoryManager.Read(NES_APU.GetDmcReadAddress, memopDMCRead);
+				//readValue := MemoryManager.Read(NES_APU.GetDmcReadAddress, memopDMCRead);
+				readValue := ProcessDMARead(NES_APU.GetDmcReadAddress,
+					prevReadAddress, enableInternalRegReads, isNesBehavior);
 				EndCpuCycle(True);
-				NES_APU.SetDmcReadBuffer(readValue);
 				dmcDmaRunning := False;
+				abortDmcDma := False;
+				NES_APU.SetDmcReadBuffer(readValue);
 			end
 			else
 			if spriteDmaTransfer then
 			begin
 				//DMC DMA is not running, or not ready, run sprite DMA
 				ProcessCycle;
-				readValue := MemoryManager.Read(Word(spriteDmaOffset) * $100 + spriteReadAddr);
+				//readValue := MemoryManager.Read(Word(spriteDmaOffset) * $100 + spriteReadAddr);
+				readValue := ProcessDMARead(spriteDmaOffset * $100 + spriteReadAddr,
+					prevReadAddress, enableInternalRegReads, isNesBehavior);
 				EndCpuCycle(True);
 				Inc(spriteReadAddr);
 				Inc(spriteDmaCounter);
@@ -992,19 +1180,19 @@ begin
 		end
 		else
 		begin
-			if (spriteDmaTransfer) and (Odd(spriteDmaCounter)) then
+			if (spriteDmaTransfer) and ((spriteDmaCounter and 1) = 1) then
 			begin
-				//Sprite DMA write cycle (only do this if a sprite dma read was performed last cycle)
+				// Sprite DMA write cycle (only do this if a sprite dma read was performed last cycle)
 				ProcessCycle;
-				MemoryManager.Write($2004, readValue, memopWrite);
+				MemoryManager.Write($2004, readValue, memopDMAWrite);
 				EndCpuCycle(True);
 				Inc(spriteDmaCounter);
-				if spriteDmaCounter >= $200 then
+				if spriteDmaCounter = $200 then
 					spriteDmaTransfer := False;
 			end
 			else
 			begin
-				//Align to read cycle before starting sprite DMA (or align to perform DMC read)
+				// Align to read cycle before starting sprite DMA (or align to perform DMC read)
 				ProcessCycle;
 				if not skipDummyReads then
 					MemoryManager.Read(readAddress, memopDummyRead);
@@ -1581,6 +1769,7 @@ begin
 	SetX(value);
 end;
 
+(*
 procedure TCPU.OpSYA;
 var
 	value, addrHi, addrLo: Byte;
@@ -1604,6 +1793,69 @@ begin
 	value := X and (addrHi + 1);
 	MemoryWrite(((X and (addrHi + 1)) shl 8) or addrLo, value);
 end;
+*)
+
+// See thread/test rom: https://forums.nesdev.org/viewtopic.php?p=297765
+//
+procedure TCPU.SyaSxaAxa(baseAddr: Word; indexReg, valueReg: Byte);
+var
+	pageCrossed, hadDMA: Boolean;
+	cyc: QWord;
+	operand: Word;
+	addrHi, addrLo: Byte;
+begin
+	pageCrossed := CheckPageCrossedU(baseAddr, indexReg);
+
+	cyc := CycleCount; // dummy read
+	MemoryRead(baseAddr + indexReg - IfThen(pageCrossed, $100, 0), memopDummyRead);
+
+	// if dummy read took more than 1 cycle, it was interrupted by a DMA
+	hadDma := (CycleCount - cyc) > 1;
+	operand := baseAddr + indexReg;
+	addrHi := operand shr 8;
+	addrLo  := operand and $FF;
+	// when a page is crossed, the address written to is ANDed with the register
+	if pageCrossed then
+		addrHi := addrHi and valueReg;
+
+	// when a DMA interrupts the instruction right before the dummy read cycle,
+	// the value written is not ANDed with the MSB of the address
+	MemoryWrite((addrHi shl 8) or addrLo,
+		IfThen(hadDMA, valueReg, valueReg and ((baseAddr shr 8) + 1)));
+end;
+
+procedure TCPU.OpSHY;
+begin
+	SyaSxaAxa(ReadWord, X, Y);
+end;
+
+procedure TCPU.OpSHX;
+begin
+	SyaSxaAxa(ReadWord, Y, X);
+end;
+
+procedure TCPU.OpSHAA;
+begin
+	SyaSxaAxa(ReadWord, Y, X and A);
+end;
+
+procedure TCPU.OpSHAZ;
+var
+	baseAddr: Word;
+	zero, lo, hi: Byte;
+begin
+	zero := ReadByte;
+	if zero = 0 then
+	begin
+		lo := MemoryRead($FF);
+		hi := MemoryRead($00);
+		baseAddr := (hi shl 8) or lo;
+	end
+	else
+		baseAddr := MemoryReadWord(zero);
+
+	SyaSxaAxa(baseAddr, Y, X and A);
+end;
 
 //
 //Unimplemented/Incorrect Unofficial OP codes
@@ -1611,36 +1863,41 @@ end;
 
 procedure TCPU.OpHLT;
 begin
-	//normally freezes the cpu, we can probably assume nothing will ever call this
+	// normally freezes the cpu, we can probably assume nothing will ever call this
 	GetOperandValue;
 end;
 
 procedure TCPU.OpUNK;
 begin
-	//Make sure we take the right amount of cycles (not reliable for operations that write to memory, etc.)
+	// make sure we take the right amount of cycles (not reliable for operations that write to memory, etc.)
 	GetOperandValue;
 end;
 
-procedure TCPU.OpAXA;
+(*procedure TCPU.OpAXA;
 var
 	addr: Word;
 begin
 	addr := Operand;
-	//"This opcode stores the result of A AND X AND the high Byte of the target address of the Operand +1 in memory."
-	//This may not be the actual behavior, but the read/write operations are needed for proper cycle counting
+	// "This opcode stores the result of A AND X AND the high Byte of the target address of the Operand +1 in memory."
+	// This may not be the actual behavior, but the read/write operations are needed for proper cycle counting
 	MemoryWrite(Operand, ((addr shr 8) + 1) and A and X);
-end;
+end;*)
 
 procedure TCPU.OpTAS;
-var
-	addr: Word;
+(*var
+	addr: Word;*)
 begin
+	(*
 	//"AND X register with accumulator and store result in stack
 	//pointer, then AND stack pointer with the high Byte of the
 	//target address of the argument + 1. Store result in memory."
 	addr := Operand;
 	SetSP(X and A);
 	MemoryWrite(addr, SP and ((addr shr 8) + 1));
+	*)
+		//Same as "SHA abs, y", but also sets SP = A & X
+	opSHAA;
+	SetSP(X and A);
 end;
 
 procedure TCPU.OpLAS;

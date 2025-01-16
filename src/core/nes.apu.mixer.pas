@@ -98,7 +98,7 @@ begin
 
 	RegisterProperty(32, @clockRate);
 	RegisterProperty(32, @sampleRate);
-	RegisterProperty(8,  @NesModel);
+	RegisterProperty(SizeOf(TNesModel)*8, @nesModel);
 
 	RegisterProperty(16, @previousOutputLeft);
 	RegisterProperty(16, @previousOutputRight);

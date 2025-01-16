@@ -316,7 +316,7 @@ function TSaveStateManager.SaveState(SlotIndex: Integer): Boolean;
 var
 	Fn: String;
 begin
-	SlotIndex := IfThen(SlotIndex<0, Index, SlotIndex);
+	SlotIndex := IfThen(SlotIndex < 0, Index, SlotIndex);
 	Fn := GetStateFileName(SlotIndex);
 	Result := SaveState(Fn);
 	StateFileInfo[SlotIndex].Filename := Fn;

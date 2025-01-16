@@ -16,23 +16,20 @@ const
 type
 	TCartridge = class //(TSnapshotable)
 	public
-		RomData: TRomData;
-
+		RomData:     TRomData;
 		bImageValid: Boolean;
 		nMapperID:   Word;
 		prgSize,
 		chrSize:     Cardinal;
-
 		ROM, VMEM:   TBytes;
+		Filename:    String;
 
-		Filename: String;
-
-		procedure   Init(const Data, IPSData: TBytes);
 		constructor Create(const sFileName: String; var Data, IPSData: TBytes); overload;
 
-		function  ImageValid: Boolean;
+		procedure   Init(const Data, IPSData: TBytes);
+		procedure   Reset;
 
-		procedure Reset;
+		function    ImageValid: Boolean;
 	end;
 
 	function GetMapperID(const Filename: String): Integer;

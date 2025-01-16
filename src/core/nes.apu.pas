@@ -40,9 +40,11 @@ type
 		nesModel:   TNesModel;
 		StepCycles: TStepCycles;
 	public
+		constructor Create(const RegisterName: AnsiString); override;
+
 		procedure SetNesModel(model: TNESModel);
 		procedure Reset(softReset: Boolean);
-		function  Run(var cyclesToRun: Cardinal): Cardinal;
+		function  Run(var cyclesToRun: Int32): Cardinal;
 		function  NeedToRun(cyclesToRun: Cardinal): Boolean;
 		procedure GetMemoryRanges(var ranges: TMemoryRanges); override;
 		function  ReadRAM(addr: Word): Byte; override;
@@ -129,6 +131,19 @@ uses
 //
 // =================================================================================================
 
+constructor TApuFrameCounter.Create(const RegisterName: AnsiString);
+begin
+	inherited Create('APU_FCNT');
+
+	RegisterProperty(32, @PreviousCycle);
+	RegisterProperty(32, @CurrentStep);
+	RegisterProperty(32, @StepMode);
+	RegisterProperty(1,  @InhibitIRQ);
+	RegisterProperty(16, @NewValue);
+	RegisterProperty(8,  @BlockFrameCounterTick);
+	RegisterProperty(8,  @WriteDelayCounter);
+end;
+
 procedure TApuFrameCounter.Reset(softReset: Boolean);
 begin
 	PreviousCycle := 0;
@@ -162,16 +177,16 @@ begin
 		StepCycles := stepCyclesNtsc;
 end;
 
-function TApuFrameCounter.Run(var cyclesToRun: Cardinal): Cardinal;
+function TApuFrameCounter.Run(var cyclesToRun: Int32): Cardinal;
 var
 	cyclesRan: Cardinal;
 	ftype: TFrameType;
 begin
-	if Cardinal(PreviousCycle + cyclesToRun) >= StepCycles[StepMode, CurrentStep] then
+	if (PreviousCycle + cyclesToRun) >= StepCycles[StepMode, CurrentStep] then
 	begin
 		if (not InhibitIRQ) and (StepMode = 0) and (CurrentStep >= 3) then
 		begin
-			//Set IRQ on the last 3 cycles for 4-step mode
+			// Set IRQ on the last 3 cycles for 4-step mode
 			CPUSetIRQSource(irqFrameCounter);
 		end;
 
@@ -185,7 +200,7 @@ begin
 		end;
 
 		if StepCycles[StepMode, CurrentStep] < PreviousCycle then
-			//This can happen when switching from PAL to NTSC, which can cause a freeze (endless loop in APU)
+			// This can happen when switching from PAL to NTSC, which can cause a freeze (endless loop in APU)
 			cyclesRan := 0
 		else
 			cyclesRan := StepCycles[StepMode, CurrentStep] - PreviousCycle;
@@ -213,7 +228,7 @@ begin
 		Dec(WriteDelayCounter);
 		if WriteDelayCounter = 0 then
 		begin
-			//Apply new value after the appropriate number of cycles has elapsed
+			// Apply new value after the appropriate number of cycles has elapsed
 			StepMode := IfThen((NewValue and $80) = $80, 1, 0);
 
 			WriteDelayCounter := -1;
@@ -402,7 +417,12 @@ end;
 function TAPU.ReadRAM(addr: Word): Byte; // $4015 read
 begin
 	Run;
-	Result := GetStatus;
+
+	if addr >= $4018 then
+		Exit(Console.MemoryManager.GetOpenBus);
+
+	Result := GetStatus or (Console.MemoryManager.GetInternalOpenBus and $20);
+
 	//Reading $4015 clears the Frame Counter interrupt flag.
 	CPUClearIRQSource(irqFrameCounter);
 end;
@@ -497,14 +517,15 @@ end;
 
 procedure TAPU.Run(additionalCycles: Int32 = 0);
 var
-	cyclesToRun: Cardinal;
+	cyclesToRun: Int32;
 begin
 	// Update framecounter and all channels
 	// This is called:
 	// - At the end of a frame
 	// - Before APU registers are read/written to
 	// - When a DMC or FrameCounter interrupt needs to be fired
-	cyclesToRun := Max(0, CurrentCycle - PreviousCycle + additionalCycles);
+	cyclesToRun := CurrentCycle - PreviousCycle;
+		//Max(0, CurrentCycle - PreviousCycle + additionalCycles);
 
 	while cyclesToRun > 0 do
 	begin
@@ -515,19 +536,20 @@ begin
 		// This fixes the test "len_reload_timing" (tests 4 & 5)
 		SquareChannel[0].ReloadCounter;
 		SquareChannel[1].ReloadCounter;
-		TriangleChannel.ReloadCounter;
 		NoiseChannel.ReloadCounter;
+		TriangleChannel.ReloadCounter;
 
 		SquareChannel[0].Run(PreviousCycle);
 		SquareChannel[1].Run(PreviousCycle);
-		TriangleChannel.Run(PreviousCycle);
 		NoiseChannel.Run(PreviousCycle);
+		TriangleChannel.Run(PreviousCycle);
 		DMCChannel.Run(PreviousCycle);
 	end;
 end;
 
 procedure TAPU.EndFrame;
 begin
+	DMCChannel.ProcessClock;
 	Run;
 
 	SquareChannel[0].EndFrame;
@@ -585,6 +607,8 @@ procedure TAPU.LoadSnapshot;
 begin
 	inherited LoadSnapshot;
 
+	EndFrame;
+
 	SquareChannel[0].LoadSnapshot;
 	SquareChannel[1].LoadSnapshot;
 	TriangleChannel.LoadSnapshot;
@@ -592,14 +616,13 @@ begin
 	DMCChannel.LoadSnapshot;
 	FrameCounter.LoadSnapshot;
 	Mixer.LoadSnapshot;
-
-	PreviousCycle := 0;
-	CurrentCycle  := 0;
 end;
 
 procedure TAPU.SaveSnapshot;
 begin
 	inherited SaveSnapshot;
+
+	EndFrame;
 
 	SquareChannel[0].SaveSnapshot;
 	SquareChannel[1].SaveSnapshot;

@@ -1536,23 +1536,27 @@ begin
 	StartSection('CHRR');
 	chrRamSize := Stream.ReadDWord;
 	SetLength(chrRam, chrRamSize);
-	Stream.Read(chrRam[0], chrRamSize);
+	if chrRamSize > 0 then
+		Stream.Read(chrRam[0], chrRamSize);
 
 	StartSection('WORK');
 	workRamSize := Stream.ReadDWord;
 	SetLength(workRam, workRamSize);
-	Stream.Read(workRam[0], workRamSize);
+	if workRamSize > 0 then
+		Stream.Read(workRam[0], workRamSize);
 
 	StartSection('SAVE');
 	saveRamSize := Stream.ReadDWord;
 	SetLength(saveRam, saveRamSize);
-	Stream.Read(saveRam[0], saveRamSize);
+	if saveRamSize > 0 then
+		Stream.Read(saveRam[0], saveRamSize);
 
 	StartSection('NTAB');
 	L := Stream.ReadDWord; //
 	nametableCount := L div _NametableSize;
 	SetLength(nametableRam, L);
-	Stream.Read(nametableRam[0], L);
+	if L > 0 then
+		Stream.Read(nametableRam[0], L);
 
 //	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess);
 

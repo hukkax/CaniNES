@@ -166,6 +166,7 @@ uses
 	Math, SysUtils, FileUtil, hkaFileUtils,
 	Basement.Util, Basement.UnZip, TextOutput,
 	{$IFDEF MEASURETIMING} Basement.Timing, {$ENDIF}
+	Basement.Renderer.NTSC,
 	NES.Config, NES.Mapper, NES.AudioManager,
 	MainWindow;
 
@@ -709,20 +710,20 @@ end;
 
 procedure TConsole.RunFrameWithRunAhead;
 var
-	RunAheadFrames: Integer;
+	FrameCount: Integer;
 begin
-	RunAheadFrames := Configuration.Emulator.RunAheadFrames;
+	FrameCount := Configuration.Emulator.RunAheadFrames;
 
 	// Run a single frame and save the state (no audio/video)
 	IsRunAheadFrame := True;
-	RunFrame;
 	RunAheadState.Clear;
+	RunFrame;
 	SaveStateManager.SaveState(RunAheadState);
 
-	while RunAheadFrames > 1 do
+	while FrameCount > 1 do
 	begin
 		// Run extra frames if the requested run ahead frame count is higher than 1
-		Dec(RunAheadFrames);
+		Dec(FrameCount);
 		RunFrame;
 	end;
 
@@ -730,6 +731,7 @@ begin
 	IsRunAheadFrame := False;
 	RunFrame;
 
+	// Load the state we saved earlier
 	IsRunAheadFrame := True;
 	RunAheadState.Position := 0;
 	SaveStateManager.LoadState(RunAheadState);
@@ -855,7 +857,7 @@ begin
 	ControlManager.LoadSnapshot;
 	Mapper.LoadSnapshot;
 
-//	UpdateNESModel(False);
+	//UpdateNESModel(False);
 
 	if (not RewindManager.Snapshoting) and (not IsRunAheadFrame) then
 		RewindManager.Initialize;
@@ -867,7 +869,6 @@ begin
 
 	if (not RewindManager.Snapshoting) and (not IsRunAheadFrame) then
 	begin
-		// APU.EndFrame;
 		Stream.WriteDWord(Cartridge.RomData.Info.Hash.Crc32);
 		StreamWriteString(Stream, Cartridge.Filename);
 	end;

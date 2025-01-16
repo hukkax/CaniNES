@@ -144,7 +144,7 @@ type
 		spriteInRange,
 		sprite0Added: Boolean;
 
-		needStateUpdate,
+		needStateUpdate, needVideoRamIncrement,
 		RenderingEnabled, prevRenderingEnabled,
 		preventVblFlag: Boolean;
 
@@ -294,36 +294,68 @@ constructor TPPU.Create(const Buffer: TBitmap32);
 begin
 	inherited Create('PPU');
 
+	RegisterProperty(16, @SpriteRamAddr);
+	RegisterProperty(16, @VideoRamAddr);
+	RegisterProperty(8,  @XScroll);
+	RegisterProperty(16, @TmpVideoRamAddr);
+	RegisterProperty(1,  @WriteToggle);
+	RegisterProperty(16, @HighBitShift);
+	RegisterProperty(16, @LowBitShift);
+	RegisterProperty(1,  @flags.VerticalWrite);
+	RegisterProperty(16, @flags.SpritePatternAddr);
+	RegisterProperty(16, @flags.BackgroundPatternAddr);
+	RegisterProperty(1,  @flags.LargeSprites);
+	RegisterProperty(1,  @flags.VBlank);
+	RegisterProperty(1,  @flags.Grayscale);
+	RegisterProperty(1,  @flags.BackgroundMask);
+	RegisterProperty(1,  @flags.SpriteMask);
+	RegisterProperty(1,  @flags.BackgroundEnabled);
+	RegisterProperty(1,  @flags.SpritesEnabled);
+	RegisterProperty(1,  @flags.IntensifyRed);
+	RegisterProperty(1,  @flags.IntensifyGreen);
+	RegisterProperty(1,  @flags.IntensifyBlue);
 	RegisterProperty(8,  @paletteRamMask);
 	RegisterProperty(16, @intensifyColorBits);
-
+	RegisterProperty(1,  @statusFlags.SpriteOverflow);
+	RegisterProperty(1,  @statusFlags.Sprite0Hit);
+	RegisterProperty(1,  @statusFlags.VerticalBlank);
 	RegisterProperty(32, @scanline);
 	RegisterProperty(32, @cycle);
 	RegisterProperty(32, @frameCount);
 	RegisterProperty(8,  @memoryReadBuffer);
+	RegisterProperty(SizeOf(TNesModel)*8, @nesModel);
+	RegisterProperty(16, @ppuBusAddress);
+	RegisterProperty(64, @masterClock);
+
+	//SV(8, @currentTilePalette); !!! ???
+	RegisterProperty(8,  @currentTile.LowByte);
+	RegisterProperty(8,  @currentTile.HighByte);
+	RegisterProperty(8,  @currentTile.PaletteOffset);
+	RegisterProperty(16, @currentTile.TileAddr);
+	//SV(8, @previousTilePalette); !!! ???
 
 	RegisterProperty(32, @spriteIndex);
 	RegisterProperty(32, @spriteCount);
-	RegisterProperty(32, @secondaryOAMAddr);
-	RegisterProperty(1,  @sprite0Visible);
-	RegisterProperty(8,  @oamCopybuffer);
-	RegisterProperty(1,  @spriteInRange);
-	RegisterProperty(1,  @sprite0Added);
 	RegisterProperty(8,  @spriteAddrH);
 	RegisterProperty(8,  @spriteAddrL);
-	RegisterProperty(1,  @oamCopyDone);
-	RegisterProperty(8,  @nesModel);
+	RegisterProperty(1,  @sprite0Added);
+	RegisterProperty(1,  @sprite0Visible);
+	RegisterProperty(8,  @oamCopybuffer);
+	RegisterProperty(32, @secondaryOAMAddr);
+	RegisterProperty(1,  @spriteInRange);
 	RegisterProperty(1,  @prevRenderingEnabled);
 	RegisterProperty(1,  @renderingEnabled);
 	RegisterProperty(8,  @openBus);
 	RegisterProperty(32, @ignoreVramRead);
+
+	RegisterProperty(1,  @oamCopyDone);
+	RegisterProperty(1,  @needStateUpdate);
+	RegisterProperty(1,  @preventVblFlag);
+	RegisterProperty(1,  @needVideoRamIncrement); // !!!! TODO implement
 	RegisterProperty(8,  @overflowBugCounter);
 	RegisterProperty(16, @updateVramAddr);
 	RegisterProperty(8,  @updateVramAddrDelay);
-	RegisterProperty(1,  @needStateUpdate);
-	RegisterProperty(16, @ppuBusAddress);
-	RegisterProperty(1,  @preventVblFlag);
-	RegisterProperty(64, @masterClock);
+	// SV(allowFullPpuAccess);
 
 	Framebuffer := Buffer;
 
@@ -438,38 +470,42 @@ end;
 
 procedure TPPU.SetNesModel(model: TNesModel);
 begin
+	// https://www.nesdev.org/wiki/Cycle_reference_chart
 	nesModel := model;
 
 	case nesModel of
 
 		nesNTSC:
 		begin
-			nmiScanline := 241;
-			vblankEnd := 260;
-			standardNmiScanline := 241;
-			standardVblankEnd := 260;
 			masterClockDivider := 4;
+			// picture height + postrender blanking lines
+			nmiScanline := 240 + 1;
+			// picture height + (postrender blanking lines - 1) + vblank length
+			vblankEnd   := 240 + 20;
 		end;
 
 		nesPAL:
 		begin
-			nmiScanline := 241;
-			vblankEnd := 310;
-			standardNmiScanline := 241;
-			standardVblankEnd := 310;
 			masterClockDivider := 5;
+			// (picture height + border line) + postrender blanking lines
+			nmiScanline := 240 + 1;
+			// (picture height + border line) + (postrender blanking lines - 1) + vblank length + 50
+			vblankEnd   := 240 + 20 + 50;
 		end;
 
 		nesDendy:
 		begin
-			nmiScanline := 291;
-			vblankEnd := 310;
-			standardNmiScanline := 291;
-			standardVblankEnd := 310;
 			masterClockDivider := 5;
+			// (picture height + border line) + postrender blanking lines + 50
+			nmiScanline := 240 + 1 + 50;
+			// (picture height + border line) + (postrender blanking lines - 1) + 50 + vblank length
+			vblankEnd := 240 + 50 + 20;
 		end;
 
 	end;
+
+	standardNmiScanline := nmiScanline;
+	standardVblankEnd := vblankEnd;
 
 	Inc(nmiScanline, Settings.ExtraScanlinesBeforeNmi);
 	palSpriteEvalScanline := nmiScanline + 24;
@@ -679,7 +715,7 @@ begin
 				openBusDecayStamp[i] := frameCount;
 			end
 			else
-			if (frameCount - openBusDecayStamp[i]) > 30 then
+			if (frameCount - openBusDecayStamp[i]) > 3 then
 				ob := ob and $FF7F;
 			value := value >> 1;
 			mask  := mask  >> 1;
@@ -1039,7 +1075,7 @@ begin
 	end;
 end;
 
-// Taken from http://wiki.nesdev.com/w/index.php/TheskinnyonNESscrolling#Wrappingaround
+// from http://wiki.nesdev.com/w/index.php/TheskinnyonNESscrolling#Wrappingaround
 //
 procedure TPPU.IncVerticalScrolling;
 var
@@ -1074,8 +1110,6 @@ begin
 	VideoRamAddr := addr;
 end;
 
-//Taken from http://wiki.nesdev.com/w/index.php/TheskinnyonNESscrolling#Wrappingaround
-//
 procedure TPPU.IncHorizontalScrolling;
 var
 	addr: Word;
@@ -1092,13 +1126,13 @@ begin
 	VideoRamAddr := addr;
 end;
 
-//Taken from http://wiki.nesdev.com/w/index.php/TheskinnyonNESscrolling#Tileandattributefetching
+// http://wiki.nesdev.com/w/index.php/TheskinnyonNESscrolling#Tileandattributefetching
+//
 function TPPU.GetNameTableAddr: Word;
 begin
 	Result := $2000 or (VideoRamAddr and $0FFF);
 end;
 
-//Taken from http://wiki.nesdev.com/w/index.php/TheskinnyonNESscrolling#Tileandattributefetching
 function TPPU.GetAttributeAddr: Word;
 begin
 	Result := $23C0 or
@@ -1643,6 +1677,9 @@ begin
 				//copy vertical scrolling value from t
 				VideoRamAddr := (VideoRamAddr and (not $7BE0)) or (TmpVideoRamAddr and $7BE0);
 			end;
+
+			if cycle = 320 then
+				LoadExtraSprites;
 		end;
 	end
 	else
@@ -1908,7 +1945,8 @@ begin
 		end;
 	end;
 
-	if needStateUpdate then UpdateState;
+	if needStateUpdate then
+		UpdateState;
 
 	// pull level high when PPU/VRAM addr bit 13 is low
 	if (ppuBusAddress and $2000) <> 0 then
@@ -2029,11 +2067,10 @@ begin
 	PPUTiming.Start;
 	{$ENDIF}
 
-	while (MasterClock + MasterClockDivider) <= RunTo do
-	begin
+	repeat
 		Exec;
 		Inc(MasterClock, MasterClockDivider);
-	end;
+	until (MasterClock + MasterClockDivider) > runTo;
 
 	{$IFDEF MEASURETIMING_PPU}
 	PPUTimeTaken := PPUTimeTaken + PPUTiming.Stop;

@@ -50,6 +50,7 @@ type
 
 		//function  ToAbsolutePrgAddress(ramAddr: Word): Cardinal;
 		function  GetOpenBus(mask: Byte = $FF): Byte;
+		function  GetInternalOpenBus(mask: Byte = $FF): Byte;
 
 		procedure LoadSnapshot; override;
 		procedure SaveSnapshot; override;
@@ -225,13 +226,15 @@ begin
 	Result := ramReadHandlers[addr].ReadRAM(addr);
 	Console.CheatManager.ApplyCodes(addr, Result);
 	//console.DebugProcessRamOperation(operationType, addr, Result);
-	openBusHandler.SetOpenBus(Result);
+	openBusHandler.SetOpenBus(Result, addr = $4015);
 end;
 
 procedure TMemoryManager.Write(addr: Word; value: Byte; operationType: TMemoryOperationType);
 begin	
 //	if console.DebugProcessRamOperation(operationType, addr, value) then
-		ramWriteHandlers[addr].WriteRAM(addr, value);
+//	if (emu.ProcessMemoryWrite(addr, value, operationType)) then
+	ramWriteHandlers[addr].WriteRAM(addr, value);
+	openBusHandler.SetOpenBus(value, False);
 end;
 
 {function TMemoryManager.ToAbsolutePrgAddress(ramAddr: Word): Cardinal;
@@ -281,6 +284,11 @@ end;
 function TMemoryManager.GetOpenBus(mask: Byte = $FF): Byte;
 begin
 	Result := openBusHandler.GetOpenBus and mask;
+end;
+
+function TMemoryManager.GetInternalOpenBus(mask: Byte = $FF): Byte;
+begin
+	Result := openBusHandler.GetInternalOpenBus and mask;
 end;
 
 procedure TMemoryManager.LoadSnapshot;
