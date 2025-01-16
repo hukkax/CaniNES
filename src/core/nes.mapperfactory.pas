@@ -34,7 +34,7 @@ uses
 	NES.Mapper_071, NES.Mapper_072, NES.Mapper_073, NES.Mapper_075,
 					NES.Mapper_078, NES.Mapper_079,
 	NES.Mapper_080, NES.Mapper_082, NES.Mapper_083, NES.Mapper_086, NES.Mapper_087,
-	NES.Mapper_093, NES.Mapper_096,
+	NES.Mapper_093, NES.Mapper_094, NES.Mapper_096,
 	NES.Mapper_105,
 	NES.Mapper_111, NES.Mapper_112, NES.Mapper_117, NES.Mapper_118,
 	NES.Mapper_140,
@@ -48,7 +48,7 @@ uses
 	NES.Mapper_222, NES.Mapper_225,
 					NES.Mapper_226, NES.Mapper_227, NES.Mapper_228, NES.Mapper_229,
 	NES.Mapper_230, NES.Mapper_231, NES.Mapper_232, NES.Mapper_234, NES.Mapper_235,
-	NES.Mapper_246, NES.Mapper_268, NES.Mapper_290,
+	NES.Mapper_240, NES.Mapper_244, NES.Mapper_246, NES.Mapper_268, NES.Mapper_290,
 	NES.Mapper_521;
 
 
@@ -142,6 +142,7 @@ begin
 		91:  Result := TMapper_091; 		// MMC3 variant
 		92:  Result := TMapper_092; 		// Jaleco JF-19
 		93:  Result := TMapper_093; 		// Sunsoft
+		94:  Result := TMapper_094; 		// Nintendo
 		95:  Result := TMapper_095; 		// Namcot 118 variant
 		96:  Result := TMapper_096; 		// Oeka Kids
 		101: Result := TMapper_101;			// Jaleco JF-xx
@@ -212,8 +213,10 @@ begin
 		233: Result := TMapper_233; 		// multicart: Super 42-in-1 (alt)
 		234: Result := TMapper_234; 		// multicart: Maxi 15
 		235: Result := TMapper_235; 		// multicart: Bmc235
+		240: Result := TMapper_240; 		//
 		241: Result := TMapper_241; 		// BxROM-like
 		243: Result := TMapper_243; 		// Sachen SA-015
+		244: Result := TMapper_244; 		//
 		245: Result := TMapper_245; 		// MMC3 variant
 		246: Result := TMapper_246; 		// Fong Shen Bang - Zhu Lu Zhi Zhan
 		250: Result := TMapper_250; 		// MMC3 variant

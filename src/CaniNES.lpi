@@ -207,7 +207,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="181">
+    <Units Count="184">
       <Unit0>
         <Filename Value="CaniNES.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1108,6 +1108,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Canines.Main"/>
       </Unit180>
+      <Unit181>
+        <Filename Value="core/mappers/nes.mapper_094.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_094"/>
+      </Unit181>
+      <Unit182>
+        <Filename Value="core/mappers/nes.mapper_244.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_244"/>
+      </Unit182>
+      <Unit183>
+        <Filename Value="core/mappers/nes.mapper_240.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NES.Mapper_240"/>
+      </Unit183>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
