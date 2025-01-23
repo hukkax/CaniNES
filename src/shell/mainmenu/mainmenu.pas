@@ -184,6 +184,8 @@ begin
 					end;
 
 				Page.AddHeader('Palette');
+				Page.AddText(' Settings below only affect the Default');
+				Page.AddText(' palette and are ignored by NTSC filter');
 				Page.AddSettings('Palette.NTSC');
 				S := 'Palette presets';
 				TPalettePage.Create(AddPage(S, '', Page));

@@ -74,6 +74,7 @@ type
 		procedure ShowMenuPage(const Page: String; AsWindow: Boolean = True);
 		procedure Perform(Action: TAction; Pressed: Boolean = True);
 
+		procedure UpdateDisplay; inline;
 		procedure RunFrame; // called each emulated frame
 		procedure DoFrame;  // called each actual display frame
 		procedure ToggleFastForward(Enable: Boolean);
@@ -210,6 +211,18 @@ begin
 	inherited Destroy;
 end;
 
+procedure TNESWindow.UpdateDisplay;
+begin
+	{if Configuration.Display.NTSC.Enabled then}
+	if Assigned(Console) and Assigned(NES_PPU) then
+	begin
+		if NTSCRenderer.Enabled then
+			NES_PPU.FillNTSCbuffer(NTSCRenderer.FrameBuffer)
+		else
+			NES_PPU.FillFrameBuffer;
+	end;
+end;
+
 procedure TNESWindow.RunFrame;
 label
 	Done;
@@ -234,7 +247,7 @@ begin
 			Pause := True;
 
 		NORMAL: // Normal emulation
-			if not ((Menu.Visible) and (Configuration.Emulator.PauseInMenu)) then
+			if not (Menu.Visible and Configuration.Emulator.PauseInMenu) then
 			begin
 				Pause := False;
 
@@ -252,10 +265,7 @@ begin
 				//Timing.Start;
 				{$ENDIF}
 
-				if Configuration.Display.NTSC.Enabled then
-					NES_PPU.FillNTSCbuffer(NTSCRenderer.FrameBuffer)
-				else
-					NES_PPU.FillFrameBuffer;
+				UpdateDisplay;
 
 				{$IFDEF MEASURETIMING}
 				//TimingInfo.BlitBuffer := Timing.Stop;
@@ -273,6 +283,9 @@ begin
 		end;
 
 Done:
+	if (Menu.Visible) and (Configuration.Emulator.PauseInMenu) and (NTSCRenderer.Enabled) then
+		UpdateDisplay;
+
 	IconOverlay.Visible := not Menu.Visible;
 
 	if (not Menu.Visible) and (MenuBar <> nil) then
@@ -726,6 +739,7 @@ begin
 	// default and NTSC filter palette generators use different scaling,
 	// attempt to match them (eyeballed, good enough)
 	//
+{
 	with NES.Config.Configuration.Display do
 	begin
 		NTSC.Hue := (-Palette.HueShift / 20) + 0.08;
@@ -734,17 +748,12 @@ begin
 		NTSC.Brightness := Palette.Brightness - 1.0;
 		NTSC.Gamma := Palette.Gamma / 10;
 	end;
-
+}
 	NES_PPU.Palette.Editor.Changed;
 	NES_PPU.ConfigureNTSCFilter(Configuration.Display.NTSC);
 
-	if (Assigned(Console)) and (Assigned(NES_PPU)) then
-	begin
-		if NTSCRenderer.Enabled then
-			NES_PPU.FillNTSCbuffer(NTSCRenderer.FrameBuffer)
-		else
-			NES_PPU.FillFrameBuffer;
-	end;
+	if not (NTSCRenderer.Enabled) then
+		UpdateDisplay;
 end;
 
 procedure TNESWindow.RendererChanged;
@@ -756,15 +765,12 @@ begin
 	begin
 		CRTRenderer.FrameBuffer := NTSCRenderer.FrameBuffer;
 		CRTRenderer.Texture := NTSCRenderer.Texture;
-		if (Assigned(Console)) and (Assigned(NES_PPU)) then
-			NES_PPU.FillNTSCbuffer(NTSCRenderer.FrameBuffer)
 	end
 	else
 	begin
 		CRTRenderer.FrameBuffer := Self.FrameBuffer;
 		CRTRenderer.Texture := Self.Video.Texture;
-		if (Assigned(Console)) and (Assigned(NES_PPU)) then
-			NES_PPU.FillFrameBuffer;
+		UpdateDisplay;
 	end;
 end;
 

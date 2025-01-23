@@ -10,7 +10,7 @@ uses
 	SDL2, Graphics32;
 
 const
-	HORIZBLURMOD = 30;
+	HORIZBLURMOD = 120;
 
 type
 	TCRTRenderer = class(TRenderer)
@@ -19,6 +19,8 @@ type
 		Overlay1:       PSDL_Texture;   // The overlay texture for Scanlines
 		Overlay2:       PSDL_Texture;   // The overlay texture for CRT Pixel Mask
 		Overlay3:       PSDL_Texture;   // The overlay texture for CRT Noise
+		TempTarget:     PSDL_Texture;   // Temporary texture for blurring
+
 		ScanlineBitmap: TBitmap32;      // Source bitmaps used for generating the
 		MaskBitmap:     TBitmap32;      // overlay textures as pixel scaling changes
 		NoiseBitmap:    TBitmap32;      //
@@ -47,7 +49,7 @@ type
 			// Amount of horizontal "blurring". It's not a real blur but
 			// just blits additional semitransparent copies of the framebuffer
 			// on top of itself. As such, larger values increase brightness.
-			HorizontalBlur: Byte; // 0..3
+			HorizontalBlur: Byte;
 
 			// Values >0 enable an animated "dot crawl" noise effect.
 			// The subtleness depends on MaskBrightness and other values.
@@ -124,7 +126,7 @@ begin
 		EnlargeMaskAtZoomLevel := 3;
 		ScanlineBloom := 0.0;
 		DotCrawlSpeed := 0.0;
-		HorizontalBlur := 2;
+		HorizontalBlur := 0;
 		ScanlineOpacity := 0.5;
 		MaskOpacity := 0.1;
 		ExtraContrast := 0;
@@ -142,6 +144,8 @@ begin
 		SDL_DestroyTexture(Overlay2);
 	if Overlay3 <> nil then
 		SDL_DestroyTexture(Overlay3);
+	if TempTarget <> nil then
+		SDL_DestroyTexture(TempTarget);
 
 	ScanlineBitmap.Free;
 	MaskBitmap.Free;
@@ -191,7 +195,7 @@ const
 	NoiseSize = 3;
 var
 	DR: TSDL_Rect;
-	Y, Scale: Integer;
+	Y, Scale, i: Integer;
 	Tmp: TBitmap32;
 	P: PColor32;
 begin
@@ -243,25 +247,29 @@ begin
 			DR.h := Window.Settings.FramebufferHeight;
 
 			NoiseBitmap.Free;
-			NoiseBitmap := TBitmap32.Create(DR.w*NoiseSize, DR.h*NoiseSize);
+			NoiseBitmap := TBitmap32.Create(DR.w * NoiseSize, DR.h * NoiseSize);
 
 			for Y := 0 to NoiseBitmap.Height-1 do
 			begin
 				P := NoiseBitmap.PixelPtr[0, Y];
-				for Scale := 0 to NoiseBitmap.Width-1 do
+				for i := 0 to NoiseBitmap.Width-1 do
 				begin
 					P^ := Gray32(Random(256));
 					Inc(P);
 				end;
 			end;
 
-			Overlay3 := SDL_CreateTexture(Renderer, UInt32(SDL_PIXELFORMAT_ARGB8888),
-				SInt32(SDL_TEXTUREACCESS_STATIC), NoiseBitmap.Width, NoiseBitmap.Height);
-
+			Overlay3 := SDL_CreateTexture(Renderer,
+				SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC,
+				NoiseBitmap.Width, NoiseBitmap.Height);
 			SDL_UpdateTexture(Overlay3, nil, @NoiseBitmap.Bits[0], NoiseBitmap.Width*4);
 			SDL_SetTextureBlendMode(Overlay3, SDL_BLENDMODE_BLEND);
 			SDL_SetTextureColorMod(Overlay3, 128, 128, 128);
 		end;
+
+		TempTarget := SDL_CreateTexture(Renderer,
+			SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET,
+			Window.Settings.FramebufferWidth * Scale, Window.Settings.FrameBufferHeight * Scale);
 	end;
 
 	OptionsChanged;
@@ -279,6 +287,7 @@ begin
 	SetBlending(Overlay1, SDL_BLENDMODE_BLEND, Options.ScanlineOpacity);
 	SetBlending(Overlay2, SDL_BLENDMODE_MUL, Options.MaskOpacity);
 	SDL_SetTextureAlphaMod(Overlay3, Options.NoiseOpacity);
+	SetBlending(TempTarget, SDL_BLENDMODE_BLEND, 1.0);
 end;
 
 procedure TCRTRenderer.Render;
@@ -307,45 +316,47 @@ begin
 	// "Blurring"
 	if Scale > 1 then
 	begin
-		SDL_RenderGetViewport(Renderer, @DR);
-
 		// Crappy but cheap "horizontal blurring"
 		V := Options.HorizontalBlur;
 		if V > 0 then
 		begin
-			DR.y := 0;
-			DR.x := -1;
-			SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
+			// render original image to temp texture
+			SDL_SetRenderTarget(Renderer, TempTarget);
+			SDL_RenderSetScale(Renderer, 1.0, 1.0);
+			SDL_RenderGetViewport(Renderer, @DR);
+			SDL_SetTextureAlphaMod(Texture, 255);
+			//SDL_RenderClear(Renderer);
+			//SDL_RenderCopy(Renderer, Texture, nil, nil);
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil, 0, nil, RendererFlipMode);
+
+			SDL_SetTextureAlphaMod(Texture, V * 2);
+			DR.x := +1;
 			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
-			if V >= 2 then
-			begin
-				DR.x := V - 1;
-				SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD*2);
-				SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
-				if V >= 3 then
-				begin
-					DR.x := -2;
-					SDL_SetTextureAlphaMod(Texture, HORIZBLURMOD div 2);
-					SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
-				end;
-			end;
+			DR.x := -1;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+
+			SDL_SetTextureAlphaMod(Texture, V);
+			DR.x := -2;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+			DR.x := +2;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+
+			SDL_SetTextureAlphaMod(Texture, V div 2);
+			DR.x := -3;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+			DR.x := +3;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+
+			// temp texture back to main
+			SDL_SetRenderTarget(Renderer, nil);
+			SDL_RenderCopy(Renderer, TempTarget, nil, nil);
 		end;
-	end;
 
-	// Render scanlines
-	if (Scale > 1) and (Options.ScanlinesEnabled) then
-		SDL_RenderCopy(Renderer, Overlay1, nil, nil);
-
-	// Simple vertical blur for larger zoom levels
-	if (Scale >= 3) and (Options.ScanlineBloom >= 0.01) then
-	begin
-		DR.x := 0;
-		DR.y := 1;
-		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 190 * Options.ScanlineBloom)));
-		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
-		DR.y := -1;
-		SDL_SetTextureAlphaMod(Texture, Trunc(Min(255, 70 * Options.ScanlineBloom)));
-		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+		// Render scanlines
+		if Options.ScanlinesEnabled then
+		begin
+			SDL_RenderCopy(Renderer, Overlay1, nil, nil);
+		end;
 	end;
 
 	// Fake CRT mask
@@ -355,8 +366,8 @@ begin
 		begin
 			SDL_RenderGetViewport(Renderer, @DR);
 			DR.x := 0;
-			DR.y := Trunc(MaskCounter) - MaskBitmap.Height;
-			Inc(DR.h, MaskBitmap.Height);
+			DR.y := (Trunc(MaskCounter) - MaskBitmap.Height) * 2;
+			Inc(DR.h, {MaskBitmap.Height}16);
 			MaskCounter += Options.DotCrawlSpeed;
 			if MaskCounter > MaskBitmap.Height then MaskCounter := 0;
 			SDL_RenderCopy(Renderer, Overlay2, nil, @DR);
@@ -365,7 +376,7 @@ begin
 			SDL_RenderCopy(Renderer, Overlay2, nil, nil);
 	end;
 
-
+	// Snow
 	if Options.NoiseOpacity > 0 then
 	begin
 		DR.w := Window.Settings.FrameBufferWidth;
@@ -375,12 +386,13 @@ begin
 		SDL_RenderCopy(Renderer, Overlay3, @DR, nil);
 	end;
 
+	// Extra contrast
 	if Options.ExtraContrast > 0 then
 	begin
 		SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_ADD);
 		SDL_SetTextureAlphaMod(Texture, Options.ExtraContrast);
-		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil,
-			0, nil, RendererFlipMode);
+		SDL_RenderCopyEx(Renderer, Texture,
+			@SrcRect, nil, 0, nil, RendererFlipMode);
 	end;
 
 	// Reset SDL renderer setup

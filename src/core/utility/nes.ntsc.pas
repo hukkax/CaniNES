@@ -57,10 +57,12 @@ type
 	Float = Single;
 	PFloat = PSingle;
 
+	TPixelInfoKernelArray = array[0..3] of Float;
+
 	TPixelInfo = record // pixel_info_t
 		offset: Integer;
 		negate: Float;
-		kernel: array [0..3] of Float;
+		kernel: TPixelInfoKernelArray;
 	end;
 	PPixelInfo = ^TPixelInfo;
 
@@ -165,6 +167,7 @@ type
 
 		procedure DoInit;
 		procedure InitFilters;
+		procedure Init_nes_ntsc_pixels;
 		procedure GenerateKernel(y, i, q: Float; outpixel: PRGB);
 		procedure MergeKernelFields(io: PRGB);
 		procedure CorrectErrors(color: TRGB; outpixel: PRGB);
@@ -208,8 +211,8 @@ const
 
 	// crisp image
 	nes_ntsc_rgb: TNTSCSetup = (
-		hue: 0; saturation: 0; contrast: 0; brightness: 0; sharpness: 0.2;
-		gamma: 0; resolution: 0.7; artifacts: -1; fringing: -1; bleed: -1;
+		hue: 0; saturation: 0; contrast: 0; brightness: 0; sharpness: 1.0;
+		gamma: 0; resolution: 1.0; artifacts: -1; fringing: -1; bleed: -1;
 		merge_fields: True; decoder_matrix:nil; palette:nil; base_palette:nil);
 
 
@@ -224,12 +227,8 @@ uses
 const
 	default_decoder: array[0..5] of Float = ( 0.956, 0.621, -0.272, -0.647, -1.105, 1.702 );
 
-	// 3 input pixels -> 8 composite samples
-	nes_ntsc_pixels: array [0..alignment_count-1] of TPixelInfo = (
-		( offset: 353; negate: +1.0; kernel: (1,      1,      0.6667, 0     ) ),
-		( offset:  22; negate: -1.0; kernel: (0.3333, 1,      1,      0.3333) ),
-		( offset: 154; negate: +1.0; kernel: (0,      0.6667, 1,      1     ) )
-	);
+var
+	nes_ntsc_pixels: array [0..alignment_count-1] of TPixelInfo;
 
 // ================================================================================================
 // TNtscFilter
@@ -370,6 +369,40 @@ begin
 			{$ENDIF}
 		end;
 		Inc(outpixel, alignment_count * rgb_kernel_size);
+	end;
+end;
+
+// 3 input pixels -> 8 composite samples
+//
+procedure TNtscFilter.Init_nes_ntsc_pixels;
+
+	function PIXEL_OFFSET(ntsc, scaled: Integer): Integer;
+	begin
+		Result := (kernel_size div 2) + ntsc + (IfThen(scaled <> 0, 1, 0)) + (rescale_out - scaled)
+			mod rescale_out + (kernel_size * 2 * scaled);
+	end;
+
+const
+	arr_ntsc:   array[0..alignment_count-1] of Integer = ( -4, -2, 0 );
+	arr_scaled: array[0..alignment_count-1] of Integer = ( -9, -7, -5 );
+	arr_kernel: array[0..alignment_count-1] of TPixelInfoKernelArray = (
+	  ( 1, 1, 0.6667, 0 ),
+	  ( 0.3333, 1, 1, 0.3333 ),
+	  ( 0, 0.6667, 1, 1 )
+	);
+var
+	i: Integer;
+begin
+	for i := 0 to alignment_count-1 do
+	with nes_ntsc_pixels[i] do
+	begin
+		if rescale_in > 1 then
+			{%H-}offset := PIXEL_OFFSET( (arr_ntsc[i] - arr_scaled[i] div rescale_out * rescale_in),
+				((arr_scaled[i] + rescale_out * 10) mod rescale_out) )
+		else
+			{%H-}offset := kernel_size div 2 + arr_ntsc[i] - arr_scaled[i];
+		negate := 1.0 - ((arr_ntsc[i] + 100) mod 2);
+		kernel := arr_kernel[i];
 	end;
 end;
 
@@ -736,6 +769,7 @@ begin
 		impl.fringing := impl.fringing * (fringing_max - fringing_mid);
 	impl.fringing := impl.fringing * fringing_mid + fringing_mid;
 
+	Init_nes_ntsc_pixels;
 	InitFilters;
 
 	// generate gamma table
@@ -877,6 +911,7 @@ begin
 	end;
 
 end;
+
 
 end.
 

@@ -566,25 +566,25 @@ begin
 
 	Sect := 'Filter.CRT';
 
-	Cfg.AddBoolean(Sect, 'Enabled',            @Display.CRT.Enabled,            False)
+	Cfg.AddBoolean(Sect, 'Enabled',            @Display.CRT.Enabled,         False)
 	.SetInfo('Enable filter', cfgRendererCRT);
 
-	Cfg.AddFloat(Sect,   'ScanlineOpacity', @Display.CRT.ScanlineOpacity,  0.7)
+	Cfg.AddFloat(Sect,   'ScanlineOpacity',    @Display.CRT.ScanlineOpacity, 0.7)
 	.SetInfo('Scanline opacity', cfgRendererCRT, 0.0, 1.0, 0.05);
-	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom, 0.25)
-	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 1.0, 0.05);
-	Cfg.AddFloat(Sect,   'MaskOpacity',     @Display.CRT.MaskOpacity,      0.4)
+//	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom,   0.25)
+//	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 1.0, 0.05);
+	Cfg.AddFloat(Sect,   'MaskOpacity',        @Display.CRT.MaskOpacity,     0.4)
 	.SetInfo('Mask opacity', cfgRendererCRT,     0.0, 1.0, 0.05);
 	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 5);
 //	.SetInfo('Enlarge mask at zoom level', cfgRendererCRTReinit);
-	Cfg.AddFloat(Sect,   'DotCrawlSpeed',      @Display.CRT.DotCrawlSpeed,  0.50)
+	Cfg.AddFloat(Sect,   'DotCrawlSpeed',      @Display.CRT.DotCrawlSpeed,   0.50)
 	.SetInfo('Dot crawl speed', cfgRendererCRT,  0.0, 5.0, 0.1);
-	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,  80)
+	Cfg.AddByte(Sect,   'ExtraContrast',       @Display.CRT.ExtraContrast,   80)
 	.SetInfo('Extra contrast', cfgRendererCRT);
-	Cfg.AddByte(Sect,    'NoiseAmount',        @Display.CRT.NoiseAmount,    8)
+	Cfg.AddByte(Sect,    'NoiseAmount',        @Display.CRT.NoiseAmount,     8)
 	.SetInfo('Noise amount', cfgRendererCRT, 0, 99, [], nil, '%d%%');
-	Cfg.AddByte(Sect,    'HorizontalBlur',     @Display.CRT.HorizontalBlur, 1)
-	.SetInfo('Horizontal blurring', cfgRendererCRT, 0, 3, []);
+	Cfg.AddByte(Sect,    'HorizontalBlur',     @Display.CRT.HorizontalBlur,  0)
+	.SetInfo('Horizontal blurring', cfgRendererCRT, 0, 100, [], nil, '%d%%', 2);
 
 	// -------------------------------------------------------
 
@@ -593,26 +593,18 @@ begin
 	Cfg.AddBoolean(Sect,'Enabled',     @Display.NTSC.Enabled, False)
 	.SetInfo('Enable filter', cfgRendererNTSC);
 
-{
-	Cfg.AddFloat(Sect,  'Hue',         @Display.NTSC.Hue,         0).SetInfo('', -1, 2, 0.02);
-	Cfg.AddFloat(Sect,  'Saturation',  @Display.NTSC.Saturation,  0).SetInfo('', -1, 2, 0.02);
-	Cfg.AddFloat(Sect,  'Contrast',    @Display.NTSC.Contrast,    0).SetInfo('', -1, 2, 0.02);
-	Cfg.AddFloat(Sect,  'Brightness',  @Display.NTSC.Brightness,  0).SetInfo('', -1, 2, 0.02);
-	Cfg.AddFloat(Sect,  'Gamma',       @Display.NTSC.Gamma,       0).SetInfo('', -1, 2, 0.02);
-}
+	Cfg.AddFloat(Sect, 'Hue',        @Display.NTSC.Hue,        0).SetInfo('', cfgRendererNTSC, -1, +1, 0.01);
+	Cfg.AddFloat(Sect, 'Saturation', @Display.NTSC.Saturation, 0).SetInfo('', cfgRendererNTSC, -1, +1, 0.01);
+	Cfg.AddFloat(Sect, 'Brightness', @Display.NTSC.Brightness, 0).SetInfo('', cfgRendererNTSC, -1, +1, 0.01);
+	Cfg.AddFloat(Sect, 'Contrast',   @Display.NTSC.Contrast,   0).SetInfo('', cfgRendererNTSC, -1, +1, 0.01);
+	Cfg.AddFloat(Sect, 'Gamma',      @Display.NTSC.Gamma,      0).SetInfo('', cfgRendererNTSC, -1, +1, 0.01);
 
-	Cfg.AddFloat(Sect,  'Sharpness',   @Display.NTSC.Sharpness,   0)
-	.SetInfo('', cfgRendererNTSC, 0.0, 2.0, 0.1);
-	Cfg.AddFloat(Sect,  'Resolution',  @Display.NTSC.Resolution,  0)
-	.SetInfo('', cfgRendererNTSC, 0.0, 2.0, 0.1);
-	Cfg.AddFloat(Sect,  'Artifacts',   @Display.NTSC.Artifacts,   0)
-	.SetInfo('', cfgRendererNTSC, 0.0, 2.0, 0.1);
-	Cfg.AddFloat(Sect,  'Fringing',    @Display.NTSC.Fringing,    0)
-	.SetInfo('Color fringing', cfgRendererNTSC, 0.0, 2.0, 0.1);
-	Cfg.AddFloat(Sect,  'Bleed',       @Display.NTSC.Bleed,       0)
-	.SetInfo('Color bleed', cfgRendererNTSC, 0.0, 2.0, 0.1);
-//	Cfg.AddBoolean(Sect,'MergeFields', @Display.NTSC.MergeFields, True)
-//	.SetInfo('Merge fields', cfgRendererNTSC);
+	Cfg.AddFloat(Sect, 'Sharpness',  @Display.NTSC.Sharpness,  0).SetInfo('', cfgRendererNTSC, -1, +1, 0.1);
+	Cfg.AddFloat(Sect, 'Resolution', @Display.NTSC.Resolution, 0).SetInfo('', cfgRendererNTSC, -1, +1, 0.1);
+	Cfg.AddFloat(Sect, 'Artifacts',  @Display.NTSC.Artifacts,  0).SetInfo('', cfgRendererNTSC, -1, +1, 0.1);
+	Cfg.AddFloat(Sect, 'Fringing',   @Display.NTSC.Fringing,   0).SetInfo('', cfgRendererNTSC, -1, +2, 0.1);
+	Cfg.AddFloat(Sect, 'Bleed',      @Display.NTSC.Bleed,      0).SetInfo('', cfgRendererNTSC, -1, +2, 0.1);
+
 	Cfg.AddByte(Sect, 'FieldsMode', @Display.NTSC.FieldsMode, Ord(crawlNormal))
 	.SetInfo('Crawl', cfgRendererNTSC, Ord(Low(TNTSCCrawl)), Ord(High(TNTSCCrawl)), NTSCCrawlNames);
 
