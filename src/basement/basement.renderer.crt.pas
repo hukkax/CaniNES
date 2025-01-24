@@ -316,19 +316,17 @@ begin
 	// "Blurring"
 	if Scale > 1 then
 	begin
+		// Render original image to temp texture
+		SDL_SetRenderTarget(Renderer, TempTarget);
+		SDL_RenderSetScale(Renderer, 1.0, 1.0);
+		SDL_RenderGetViewport(Renderer, @DR);
+		SDL_SetTextureAlphaMod(Texture, 255);
+		SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil, 0, nil, RendererFlipMode);
+
 		// Crappy but cheap "horizontal blurring"
 		V := Options.HorizontalBlur;
 		if V > 0 then
 		begin
-			// render original image to temp texture
-			SDL_SetRenderTarget(Renderer, TempTarget);
-			SDL_RenderSetScale(Renderer, 1.0, 1.0);
-			SDL_RenderGetViewport(Renderer, @DR);
-			SDL_SetTextureAlphaMod(Texture, 255);
-			//SDL_RenderClear(Renderer);
-			//SDL_RenderCopy(Renderer, Texture, nil, nil);
-			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, nil, 0, nil, RendererFlipMode);
-
 			SDL_SetTextureAlphaMod(Texture, V * 2);
 			DR.x := +1;
 			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
@@ -346,10 +344,6 @@ begin
 			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
 			DR.x := +3;
 			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
-
-			// temp texture back to main
-			SDL_SetRenderTarget(Renderer, nil);
-			SDL_RenderCopy(Renderer, TempTarget, nil, nil);
 		end;
 
 		// Render scanlines
@@ -357,14 +351,32 @@ begin
 		begin
 			SDL_RenderCopy(Renderer, Overlay1, nil, nil);
 		end;
+
+		// temp texture back to main
+		SDL_SetRenderTarget(Renderer, nil);
+		SDL_RenderCopy(Renderer, TempTarget, nil, nil);
+
+		// Crappy but cheap "scanline bloom" by vertical blurring
+		V := Trunc(Options.ScanlineBloom / 2 * 255);
+		if V > 0 then
+		begin
+			SDL_RenderGetViewport(Renderer, @DR);
+			SDL_SetTextureAlphaMod(Texture, Min(255, V));
+			DR.x :=  0;
+			DR.y := -1;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+			DR.y := +1;
+			SDL_RenderCopyEx(Renderer, Texture, @SrcRect, @DR, 0, nil, RendererFlipMode);
+		end;
 	end;
+
+	SDL_RenderGetViewport(Renderer, @DR);
 
 	// Fake CRT mask
 	if Options.MaskEnabled then
 	begin
 		if Options.DotCrawlSpeed >= 0.01 then // Animate it
 		begin
-			SDL_RenderGetViewport(Renderer, @DR);
 			DR.x := 0;
 			DR.y := (Trunc(MaskCounter) - MaskBitmap.Height) * 2;
 			Inc(DR.h, {MaskBitmap.Height}16);

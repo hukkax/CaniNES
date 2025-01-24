@@ -571,8 +571,8 @@ begin
 
 	Cfg.AddFloat(Sect,   'ScanlineOpacity',    @Display.CRT.ScanlineOpacity, 0.7)
 	.SetInfo('Scanline opacity', cfgRendererCRT, 0.0, 1.0, 0.05);
-//	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom,   0.25)
-//	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 1.0, 0.05);
+	Cfg.AddFloat(Sect,   'ScanlineBloom',      @Display.CRT.ScanlineBloom,   0.25)
+	.SetInfo('Scanline bloom', cfgRendererCRT,   0.0, 1.0, 0.05);
 	Cfg.AddFloat(Sect,   'MaskOpacity',        @Display.CRT.MaskOpacity,     0.4)
 	.SetInfo('Mask opacity', cfgRendererCRT,     0.0, 1.0, 0.05);
 	Cfg.AddByte(Sect, 'EnlargeMaskAtZoomLevel',@Display.CRT.EnlargeMaskAtZoomLevel, 5);
