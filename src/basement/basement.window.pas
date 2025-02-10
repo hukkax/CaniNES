@@ -284,7 +284,6 @@ end;
 
 	procedure TWindow.OnJoyButton(Pressed: Boolean; PadNum: Integer; Button: Byte);
 	begin
-	//
 	end;
 
 	// ============================================================================================
@@ -535,8 +534,8 @@ begin
 
 	Video.DesiredFramerate := Settings.Framerate;
 
-	windowFlags := UInt32(SDL_WINDOW_SHOWN) or UInt32(SDL_WINDOW_RESIZABLE);
-	rendererFlags := UInt32(SDL_RENDERER_ACCELERATED or SDL_RENDERER_TARGETTEXTURE);
+	windowFlags   := SDL_WINDOW_SHOWN or SDL_WINDOW_RESIZABLE;
+	rendererFlags := SDL_RENDERER_ACCELERATED or SDL_RENDERER_TARGETTEXTURE;
 
 	if Settings.HighPriority then
 	begin
@@ -578,7 +577,7 @@ begin
 		if Settings.Backend <> '' then
 		begin
 			Log('Setting rendering backend to: ' + Settings.Backend);
-			SDL_SetHint(SDL_HINT_RENDER_DRIVER, PChar(Settings.Backend));
+			SDL_SetHint(SDL_HINT_RENDER_DRIVER, PAnsiChar(Settings.Backend));
 		end;
 	end
 	else
@@ -610,7 +609,7 @@ begin
 			(Video.SyncRate >= Settings.VSyncLimits.Min) and (Video.SyncRate <= Settings.VSyncLimits.Max)
 			) then
 		begin
-			rendererFlags := rendererFlags or UInt32(SDL_RENDERER_PRESENTVSYNC);
+			rendererFlags := rendererFlags or SDL_RENDERER_PRESENTVSYNC;
 			//if (not Initialized) or (not Video.HaveVSync) then
 			//	Log('[Video] VSync');
 			Video.HaveVSync := True;
@@ -655,7 +654,7 @@ begin
 	begin
 		// try again without vsync flag
         Video.HaveVSync := False;
-		rendererFlags := rendererFlags and not UInt32(SDL_RENDERER_PRESENTVSYNC);
+		rendererFlags := rendererFlags and not SDL_RENDERER_PRESENTVSYNC;
 		Video.Renderer := SDL_CreateRenderer(Video.Window, -1, rendererFlags);
 	end;
 
@@ -694,7 +693,7 @@ begin
 		screenH * Settings.MinScale);
 
 	Video.Texture := SDL_CreateTexture(Video.Renderer,
-		UInt32(SDL_PIXELFORMAT_ARGB8888), SInt32(SDL_TEXTUREACCESS_STREAMING), fbx, fby);
+		SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, fbx, fby);
 	if Video.Texture = nil then
 	begin
 		FatalError('Error initializing streaming texture');
@@ -719,16 +718,23 @@ begin
 	end;
 
 	if Settings.UseGamepads then
-	if SDL_NumJoysticks > 0 then
 	begin
-		for i := 0 to SDL_NumJoysticks-1 do
-			if SDL_IsGameController(i) = SDL_TRUE then
+		SDL_GameControllerAddMappingsFromFile(PAnsiChar(GetDataFile('gamecontrollerdb.txt')));
+
+		if SDL_NumJoysticks > 0 then
+		begin
+			for i := 0 to SDL_NumJoysticks-1 do
 			begin
-				pad := SDL_GameControllerOpen(i);
-				if SDL_GameControllerGetAttached(pad) = SDL_TRUE then
-					GamePads.add(pad);
+				if SDL_IsGameController(i) = SDL_TRUE then
+				begin
+					pad := SDL_GameControllerOpen(i);
+					if SDL_GameControllerGetAttached(pad) = SDL_TRUE then
+						GamePads.Add(pad);
+				end
+				else
 			end;
-		SDL_GameControllerEventState(SDL_ENABLE);
+			SDL_GameControllerEventState(SDL_ENABLE);
+		end;
 	end;
 
 	if Initialized then
@@ -737,7 +743,7 @@ begin
 	SetTitle(LastTitle);
 
 	PerfFreq := SDL_GetPerformanceFrequency;
-	Video.NextFrameTime := Trunc(SDL_GetPerformanceCounter + ((PerfFreq / Video.DesiredFramerate) + 0.5));
+	Video.NextFrameTime := 0; //Trunc(SDL_GetPerformanceCounter + ((PerfFreq / Video.DesiredFramerate) + 0.5));
 
 	Result := True;
 	Locked := False;
@@ -926,13 +932,20 @@ procedure TWindow.SyncFramerate;
 var
 	delayMs, timeNow_64bit: UInt64;
 begin
-	if (Visible) and (Video.HaveVSync or Locked) or (PerfFreq = 0) then Exit;
+	if ((Visible) and (Video.HaveVSync or Locked)) or (PerfFreq = 0) then
+		Exit;
+
 	timeNow_64bit := SDL_GetPerformanceCounter;
+
 	if Video.NextFrameTime > timeNow_64bit then
 	begin
 		delayMs := Trunc((Video.NextFrameTime - timeNow_64bit) * (1000.0 / PerfFreq) + 0.5);
 		SDL_Delay(delayMs);
 	end;
+
+	if Video.NextFrameTime = 0 then
+		Video.NextFrameTime := Trunc(SDL_GetPerformanceCounter + (PerfFreq / Video.DesiredFramerate + 0.5));
+
 	Inc(Video.NextFrameTime, Trunc(PerfFreq / Video.DesiredFramerate + 0.5));
 end;
 
@@ -940,7 +953,9 @@ procedure TWindow.FlipFrame;
 var
 	i: Integer;
 begin
-	if Locked then Exit;
+	// don't present if window minimized or updating
+	if (Locked) or (not Visible) then
+		Exit;
 
 	for i := 0 to Renderers.Count-1 do
 	    if Renderers[i] <> nil then
@@ -953,10 +968,12 @@ function TWindow.ProcessFrame(Tick: UInt32 = 0): UInt32;
 begin
 	if not Locked then
 	begin
-		if Tick = 0 then Tick := SDL_GetTicks;
+		if Tick = 0 then
+			Tick := SDL_GetTicks;
+
 		Result := SDL_GetTicks - Tick;
 
-		if (Result < 16) or (SkippedFrames >= 5) then // 5
+		if (Result < 16) or (SkippedFrames >= 5) then
 		begin
 			SyncFramerate;
 			FlipFrame;
@@ -964,7 +981,6 @@ begin
 		end
 		else
 			Inc(SkippedFrames);
-
 	end
 	else
 		Result := 0;
